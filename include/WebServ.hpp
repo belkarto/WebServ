@@ -1,4 +1,3 @@
-
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
@@ -16,20 +15,10 @@
 # include <fcntl.h>
 # include <fstream>
 # include <sstream>
-
-# define CHUNK 1024
-
-class Client;
-
-typedef struct Socket
-{
-	int					fd;
-	struct sockaddr_in	addr;
-	socklen_t			addrlen;    
-}Socket;
-
+# include <utility>
 # include "Client.hpp"
 # include "Server.hpp"
+# include "WebServer.hpp"
 
 void	sig_handler(int signum);
 #endif
