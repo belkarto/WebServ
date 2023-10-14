@@ -1,32 +1,35 @@
 #include "WebServer.hpp"
 
-
 void    WebServer::readConfig(void)
 {
 	const char	*arr[] = {
-		"server",
 		"listen",
-		"client",
+		"server_name",
 		"root",
 		"index",
-		"error_page",
+		"client_max_body_size",
+		"error_page"
 		"location"
 	};
-	std::vector<std::string>	directives(arr, arr + sizeof(arr));
+	std::vector<std::string>	directives(arr, arr +(sizeof(arr) / sizeof(char *)));
+	void (Server::*setdirectives[])(std::stringstream&) = {
+		&Server::setListen,
+		&Server::setServerName,
+		&Server::setClientBodyMaxSize,
+		&Server::setRoot,
+		&Server::setIndex,
+		&Server::setErrorPages,
+		&Server::setLocations
+	};
 	std::string line;
 	std::ifstream   config(config_file);
 	if (!config.is_open())
-	    throw std::ifstream::failure("failed to open config file");
-	while (true)
+	   std::cerr << "failed to open config file" << std::endl;
+	/* find server context */
+	std::stringstream	ss;
+	std::string			directive, del, blank;			
+	while (std::getline(config, line))
 	{
-	    while (std::getline(config, line) && line.empty());
-		
+
 	}
 }
-
-/*
-	two types of blocks => server and location
-	each block is delimited by curly braces
-	in a block :
-		each directive is definded in a signle line and ends with ;
-*/

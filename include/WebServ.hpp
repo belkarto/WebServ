@@ -16,6 +16,9 @@
 # include <fstream>
 # include <sstream>
 # include <utility>
+# include <algorithm>
+# include <map>
+# include <exception>
 # include "Client.hpp"
 # include "Server.hpp"
 # include "WebServer.hpp"

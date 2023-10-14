@@ -1,4 +1,4 @@
-#include "WebServ.hpp"
+#include "webserv.hpp"
 
 void	sig_handler(int signum)
 {

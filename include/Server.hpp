@@ -24,5 +24,13 @@ class Server
 		std::vector<std::pair<int, std::string> >	error_pages;
 		std::vector<struct location>				locations;
 
+		void	setListen(std::stringstream& ss);
+		void	setServerName(std::stringstream& ss);
+		void	setClientBodyMaxSize(std::stringstream& ss);
+		void	setRoot(std::stringstream& ss);
+		void	setIndex(std::stringstream& ss);
+		void	setErrorPages(std::stringstream& ss);
+		void	setLocations(std::stringstream& ss);
+
 };
 #endif
