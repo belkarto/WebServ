@@ -4,6 +4,7 @@
 # include <iostream>
 # include <sys/socket.h>
 # include <sys/types.h>
+# include <netdb.h>
 # include <netinet/in.h>
 # include <netinet/ip.h>
 # include <unistd.h>
@@ -22,6 +23,5 @@
 # include "Client.hpp"
 # include "Server.hpp"
 # include "WebServer.hpp"
-
 void	sig_handler(int signum);
 #endif

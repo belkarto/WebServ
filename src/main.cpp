@@ -7,6 +7,15 @@ int	main(int ac, char **av)
 		webserv.config_file = "ressources/config/server.conf";
 	else
 		webserv.config_file = av[1];
-	webserv.readConfig();
+	signal(SIGINT, sig_handler);
+	try
+	{
+		webserv.readConfig();
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+	
 	return 0;
 }

@@ -32,5 +32,16 @@ class Server
 		void	setErrorPages(std::stringstream& ss);
 		void	setLocations(std::stringstream& ss);
 
+		class ConfigFileParsingException : public  std::exception
+		{
+			private:
+				const char	*errorMessage;
+			public:
+				ConfigFileParsingException(const char* errorMessage)
+				{
+					this->errorMessage = errorMessage;
+				}
+				virtual const char* what() const throw();
+		};
 };
 #endif
