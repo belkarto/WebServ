@@ -7,7 +7,7 @@ void    WebServer::readConfig(void)
 		"server_name",
 		"root",
 		"index",
-		"client_max_body_size",
+		"client_body_max_size",
 		"error_page",
 		"location"
 	};
@@ -15,9 +15,9 @@ void    WebServer::readConfig(void)
 	void (Server::*setdirectives[])(std::stringstream&) = {
 		&Server::setListen,
 		&Server::setServerName,
-		&Server::setClientBodyMaxSize,
 		&Server::setRoot,
 		&Server::setIndex,
+		&Server::setClientBodyMaxSize,
 		&Server::setErrorPages,
 		&Server::setLocations
 	};

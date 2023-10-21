@@ -16,12 +16,12 @@ class Server
 {
 	public:
 		Server(void);
-		std::pair<std::string, int>					listen;
-		std::string									server_name;
+		struct addrinfo								*server_addr;
+		std::vector<std::string>					server_name;
 		size_t										client_body_max_size;
 		std::string									root;
-		std::string									index;
-		std::vector<std::pair<int, std::string> >	error_pages;
+		std::vector<std::string>					index;
+		std::map<std::vector<int>, std::string >	error_pages;
 		std::vector<struct location>				locations;
 
 		void	setListen(std::stringstream& ss);
