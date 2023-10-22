@@ -26,7 +26,7 @@ class Server
 		int					sockfd;
 
 		Server(const char* node, const char* service);
-		void	SetupServer(void);
+		void	setupServer(void);
 };
 void		send_response(int sockfd);
 std::string	get_headers(int sockfd);

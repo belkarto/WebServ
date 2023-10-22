@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-void	Server::SetupServer(void)
+void	Server::setupServer(void)
 {
 	struct addrinfo		hints;
 	int					status;
@@ -43,7 +43,7 @@ void	Server::SetupServer(void)
 
 Server::Server(const char* node, const char* service)
 {
-	node = node;
-	service = service;
+	this->node = node;
+	this->service = service;
 	this->setupServer();
 }
