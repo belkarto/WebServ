@@ -5,44 +5,55 @@ int	main(void)
 {
 
 	int					new_sockfd;
-	struct sockaddr_in	client_addr;
-	socklen_t			client_len;
 	std::vector<Server> servers;
-	std::vector<int>	clients;
+	fd_set				current_fds, ready_fds;
+	int					ready_size;
+	int					i;
 
 	servers.emplace_back("localhost", "1024");
 	servers.emplace_back("127.0.0.8", "1025");
 	servers.emplace_back("10.12.3.1", "1026");
+
+	FD_ZERO(current_fds);
+	FD_SET(servers[0].sockfd, &current_fds);
+	FD_SET(servers[1].sockfd, &current_fds);
+	FD_SET(servers[2].sockfd, &current_fds);
+
 	while (true)
 	{
-		std::cout << "waiting for connection.." << std::endl;
-		if ((new_sockfd = accept(servers.begin()->sockfd, (sockaddr *) &client_addr, &client_len)) < 0)
+		ready_fds = current_fds;
+		if ((ready_size = select(FD_SETSIZE, ready_fds, NULL, NULL, NULL)) < 0)
 		{
-			perror("accept()");
-			exit(EXIT_FAILURE);
+				perror("select()");
+				exit(EXIT_FAILURE);			
 		}
-		std::cout << "connection established" << std::endl;
-		clients.push_back(new_sockfd);
-		std::vector<int>::iterator	it  = clients.begin();
-		for (; it != clients.end(); it++)
+		std::cout << ready_size << " sockets are ready!!" << std::endl;
+		i = -1;
+		while (++i < FD_SETSIZE)
 		{
-			pid_t pid = fork();
-			if (pid == 0)
+			if (FD_ISSET(i, &ready_fds))
 			{
-				close(sockfd);
-				std::cout << "sending..." << std::endl;
-				send_response(new_sockfd);
-				std::cout << "sent" << std::endl;
-				std::cout << "closing connection..." << std::endl;
-				close(new_sockfd);
-				exit(0);
+				if (isserver(i))
+				{
+					if ()
+				}
+				else
+				{
+
+				}
 			}
 		}
-		close(new_sockfd);
 	}
-	// close(sockfd);
-	// freeaddrinfo(res);
     return 0;
+}
+
+bool	isserver(int fd, std::vector<Server>& servers)
+{
+	std::vector<Server>::iterator it = servers.begin();
+	for (; it != servers.end(), it++)
+		if (fd == it->sockfd)
+			return true;
+	return false;
 }
 
 std::string	get_headers(int sockfd)

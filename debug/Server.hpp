@@ -13,6 +13,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <vector>
+#include <sys/select.h>
 
 # define CHUNK 1024
 

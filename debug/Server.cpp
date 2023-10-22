@@ -45,4 +45,5 @@ Server::Server(const char* node, const char* service)
 {
 	node = node;
 	service = service;
+	this->setupServer();
 }
