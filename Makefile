@@ -1,10 +1,11 @@
 NAME		=	webserv
 CXX			=	c++
-CXXFLAGS	=	#-Wall -Wextra -Werror -std=c++98
+CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98
 RM			=	rm -rf
 
 SRC_DIR		=	src
-SRC_FILES	=	main.cpp Client.cpp Server.cpp WebServer.cpp
+SRC_FILES	=	main.cpp Client.cpp Server.cpp ConfigParser.cpp ConfigManager.cpp \
+				Exception.cpp
 SRC_OBJS	=	$(addprefix $(SRC_DIR)/, $(SRC_FILES:.cpp=.o))
 
 LIB_DIR		=	lib

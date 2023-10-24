@@ -43,16 +43,15 @@ int	main(void)
 						perror("accept()");
 						exit(EXIT_FAILURE);
 					}
-					//std::cout << get_headers(new_sockfd) << std::endl;
 					FD_SET(new_sockfd, &current_fds);
 				}
 				else
 				{
-					// std::cout << "sending response..." << std::endl;
+					std::cout << "sending response..." << std::endl;
 					send_response(i);
-					// std::cout << "response sent..." << std::endl;
+					std::cout << "response sent..." << std::endl;
 					close(i);
-					// std::cout << "connection closed..." << std::endl;
+					std::cout << "connection closed..." << std::endl;
 					FD_CLR(i, &current_fds);
 				}
 			}

@@ -20,16 +20,15 @@
 # include <queue>
 # include <map>
 # include <exception>
-# include "Client.hpp"
-# include "Server.hpp"
-# include "WebServer.hpp"
 # include <cstdlib>
+# include "Exception.hpp"
 
-/* lib */
+/*                  lib                         */
 void	sig_handler(int signum);
 void    split(std::vector<std::string>& fields, std::stringstream& ss);
 void	addr_resolver(struct addrinfo **resolved_addr, std::string& addr, std::string& port);
 void    check_directive_syntax(std::vector<std::string>& fields);
 size_t	ft_stoul(const char* str);
 size_t	convert_to_bytes(size_t size, char unit);
+
 #endif
