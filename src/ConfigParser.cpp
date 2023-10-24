@@ -11,7 +11,7 @@ const char	*ConfigParser::directives[NUM_DIREC] = {
 	"autoindex",
 };
 
-void (*ConfigParser::direct_parsers[NUM_DIREC])(void) = {
+void (ConfigParser::*ConfigParser::direct_parsers[NUM_DIREC])(void) = {
     &ConfigParser::parseListen,
     &ConfigParser::parseServerName,
     &ConfigParser::parseRoot,
@@ -21,6 +21,19 @@ void (*ConfigParser::direct_parsers[NUM_DIREC])(void) = {
     &ConfigParser::parseLocations,
     &ConfigParser::parseAutoIndex,
 };
+
+void     ConfigParser::checkDirectiveSyntax()
+{
+    if (directive_components.back() != ";" && directive_components.back().back() == ';')
+    {
+        directive_components.back().erase(directive_components.back().end() - 1);
+        directive_components.push_back(";");
+    }
+    if (directive_components.back() != ";" || directive_components.size() < 3)
+        throw ConfigFileParsingException("invalid server directive syntax");
+	directive_components.pop_back();
+	directive_components.erase(directive_components.begin());
+}
 
 bool	ConfigParser::checkServerSyntax()
 {
@@ -63,13 +76,13 @@ void	ConfigParser::parseServerBlock()
 					block_delem.second = true;
 				return ;
 			}
-			else
-				(*direct_parsers[(ptrdiff_t) (it - directives_vect.begin())])();
+			checkDirectiveSyntax();
+			(this->*direct_parsers[ptrdiff_t (it - directives_vect.begin())])();
 		}
 	}
 }
 
-ConfigParser::ConfigParser(const char *config_path)
+ConfigParser::ConfigParser(const char *config_path, std::vector<Server> &servers) : _servers(servers)
 {
 	std::string			line;	
 	
@@ -85,6 +98,8 @@ ConfigParser::ConfigParser(const char *config_path)
 			continue ;
 		if (!checkServerSyntax())
 			throw ConfigFileParsingException("invalid server block syntax");
+		Server server;
+		_servers.push_back(server);
 		parseServerBlock();
 		if (!block_delem.second)
 			throw ConfigFileParsingException("invalid server block syntax");
@@ -92,34 +107,92 @@ ConfigParser::ConfigParser(const char *config_path)
 }
 
 
-void	ConfigParser::parseListen()
-{
-
-}
-
 void	ConfigParser::parseServerName()
 {
-
-}
-
-void	ConfigParser::parseRoot()
-{
-
+	_servers.back().server_name = directive_components;
 }
 
 void	ConfigParser::parseIndex()
 {
+	_servers.back().index = directive_components;		 
+}
 
+void	ConfigParser::parseRoot()
+{
+	if (directive_components.size() != 1)
+		throw ConfigFileParsingException("invalid number of arguments in root directive");
+	_servers.back().root = directive_components.back();
+}
+
+void	ConfigParser::parseAutoIndex()
+{
+	std::string	value;
+
+	if (directive_components.size() != 1)
+		throw ConfigFileParsingException("invalid number of arguments in autoindex directive");
+	value = directive_components.back();
+	if (value == "on")
+		_servers.back().autoindex = true;
+	else if (value == "off")
+		_servers.back().autoindex = false;
+	else
+		throw ConfigFileParsingException("invalid value in autoindex directive");
 }
 
 void	ConfigParser::parseClientMaxBodySize()
 {
+	std::vector<char>::iterator	it;
+	std::string					value;
 
+	if (directive_components.size() != 1)
+		throw ConfigFileParsingException("invalid number of arguments in client_max_body_size directive");
+	value =  directive_components.back();
+	it = std::find_if(value.begin(), value.end(), isalpha);
+	if (it != value.end() && (!isunit(*it) || it != value.end() - 1))
+			throw ConfigFileParsingException("invalid value in client_max_body_size directive");
+	try
+	{
+		if (it != value.end())
+			_servers.back().client_max_body_size = converttobytes(ft_stoll(value.c_str()), std::tolower(*it));
+		else
+			_servers.back().client_max_body_size = converttobytes(ft_stoll(value.c_str()), 'b');
+	}
+	catch(const std::exception& e)
+	{
+		throw ConfigFileParsingException("invalid value in client_max_body_size directive");
+	}
+	
 }
 
 void	ConfigParser::parseErrorPages()
 {
+	std::vector<int>					codes;
+	int									code;
+	std::vector<std::string>::iterator	it;
 
+	if (directive_components.size() < 2)
+		throw ConfigFileParsingException("invalid number of arguments in error_page directive");
+	try
+	{
+		it = directive_components.begin();
+		for (; it != directive_components.end() - 1; it++)
+		{
+			code = ft_stoi(it->c_str());
+			if (code < 300 || code > 600)
+				throw ConfigFileParsingException("invalid code value in error_page directive");
+			codes.push_back(code);
+		}
+		_servers.back().error_page[codes] = directive_components.back();
+	}
+	catch(const std::exception& e)
+	{
+		throw ConfigFileParsingException("invalid code value in error_page directive");
+	}
+}
+
+void	ConfigParser::parseListen()
+{
+	
 }
 
 void	ConfigParser::parseLocations()
@@ -127,7 +200,3 @@ void	ConfigParser::parseLocations()
 
 }
 
-void	ConfigParser::parseAutoIndex()
-{
-
-}

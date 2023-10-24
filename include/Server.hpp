@@ -8,11 +8,11 @@ class Server
 	public:
 		struct addrinfo								*bind_addr;
 		std::vector<std::string>					server_name;
-		size_t										client_body_max_size;
-		std::string									root;
 		std::vector<std::string>					index;
-		std::map<std::vector<int>, std::string >	error_pages;
-		bool						autoindex;
+		std::string									root;
+		long long									client_max_body_size;
+		std::map<std::vector<int>, std::string >	error_page;
+		bool										autoindex;
 
 };
 #endif

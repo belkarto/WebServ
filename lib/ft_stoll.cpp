@@ -1,12 +1,12 @@
 #include "webserv.hpp"
 
-size_t	ft_stoul(const char* str)
+long long	ft_stoll(const char* str)
 {
-    char	*endptr;
-    size_t		value;
+    char		*endptr;
+    long long	value;
 
 	errno = 0;
-	value = strtoul(str, &endptr, 10);
+	value = strtoll(str, &endptr, 10);
 	if (errno == ERANGE)
 	    throw std::out_of_range(str);
 	if (str == endptr)
@@ -14,7 +14,13 @@ size_t	ft_stoul(const char* str)
 	return value;
 }
 
-size_t	convert_to_bytes(size_t size, char unit)
+int	isunit(int unit)
+{
+	unit = tolower(unit);
+	return (unit == 'k' || unit == 'm' || unit == 'g');
+}
+
+long long	converttobytes(long long size, char unit)
 {
 	switch (unit)
 	{
