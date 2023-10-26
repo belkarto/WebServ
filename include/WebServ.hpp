@@ -23,6 +23,7 @@
 # include <cstdlib>
 # include "Exception.hpp"
 
+
 /*                  lib                         */
 
 void		split(std::vector<std::string>& fields, std::stringstream& ss);
