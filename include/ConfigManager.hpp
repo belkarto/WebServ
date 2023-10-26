@@ -11,7 +11,6 @@ class ConfigManager
 	// std::vector<Client>	clients;
 
 	public:
-
 		ConfigManager(const char *config_path);
 };
 #endif

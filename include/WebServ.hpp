@@ -30,5 +30,6 @@ long long	ft_stoll(const char* str);
 int			ft_stoi(const char* str);
 long long	converttobytes(long long size, char unit);
 int			isunit(int unit);
-
+bool        addr_resolver(struct addrinfo **resolved_addr, const char *host, const char *port);
+void	    display_socket_addr(struct addrinfo *bind_addr);
 #endif

@@ -192,7 +192,17 @@ void	ConfigParser::parseErrorPages()
 
 void	ConfigParser::parseListen()
 {
-	
+	std::string	host, port;
+
+	if (directive_components.size() > 1)
+		throw ConfigFileParsingException("invalid number of arguments in listen directive");
+	std::stringstream	ss(directive_components[0]);
+	std::getline(ss, host, ':');
+	ss >> port;
+	if (host.empty() || port.empty() 
+		|| !addr_resolver(&_servers.back().bind_addr, host.c_str(), port.c_str()))
+		throw ConfigFileParsingException("invalid host or port in listen directive");
+	// display_socket_addr(_servers.back().bind_addr);
 }
 
 void	ConfigParser::parseLocations()

@@ -9,7 +9,8 @@ SRC_FILES	=	main.cpp Client.cpp Server.cpp ConfigParser.cpp ConfigManager.cpp \
 SRC_OBJS	=	$(addprefix $(SRC_DIR)/, $(SRC_FILES:.cpp=.o))
 
 LIB_DIR		=	lib
-LIB_FILES	=	signal.cpp	split.cpp	addr_resolver.cpp	ft_stoll.cpp ft_stoi.cpp
+LIB_FILES	=	signal.cpp	split.cpp	addr_resolver.cpp	ft_stoll.cpp ft_stoi.cpp \
+				display_socket_addr.cpp
 LIB_OBJS	=	$(addprefix $(LIB_DIR)/, $(LIB_FILES:.cpp=.o))
 
 
