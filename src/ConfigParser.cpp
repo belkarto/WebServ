@@ -74,6 +74,8 @@ void	ConfigParser::parseServerBlock()
 			{
 				if (directive_components[0]  == "}" && directive_components.size() == 1)
 					block_delem.second = true;
+				else
+					throw ConfigFileParsingException("invalid directive name");
 				return ;
 			}
 			checkDirectiveSyntax();
@@ -202,7 +204,7 @@ void	ConfigParser::parseListen()
 	if (host.empty() || port.empty() 
 		|| !addr_resolver(&_servers.back().bind_addr, host.c_str(), port.c_str()))
 		throw ConfigFileParsingException("invalid host or port in listen directive");
-	// display_socket_addr(_servers.back().bind_addr);
+	display_socket_addr(_servers.back().bind_addr);
 }
 
 void	ConfigParser::parseLocations()

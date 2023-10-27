@@ -23,6 +23,14 @@
 # include <cstdlib>
 # include "Exception.hpp"
 
+/*
+    10GB --> 107374182400B
+    5GB --> 5368709120
+    1GB --> 1073741824
+    9223372036GB --> MAX LONG LONG 9223372036854775807
+*/
+
+# define MAX_REQUEST_SIZE 107374182400
 
 /*                  lib                         */
 

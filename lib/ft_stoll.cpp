@@ -22,6 +22,8 @@ int	isunit(int unit)
 
 long long	converttobytes(long long size, char unit)
 {
+	//	TODO:	
+	//	check size if biger than max request size and fix it
 	switch (unit)
 	{
 		case 'g':
