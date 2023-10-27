@@ -21,6 +21,7 @@
 # include <map>
 # include <exception>
 # include <cstdlib>
+# include <climits>
 # include "Exception.hpp"
 
 /*
