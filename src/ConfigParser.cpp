@@ -26,7 +26,7 @@ void     ConfigParser::checkDirectiveSyntax()
 {
 	int	end;
 
-	end = directive_components.back()[directive_components.back().length() - 1];
+	end = directive_components.back().length() - 1;
     if (directive_components.back() != ";" && directive_components.back()[end] == ';')
     {
         directive_components.back().erase(directive_components.back().end() - 1);
