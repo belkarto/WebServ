@@ -24,7 +24,10 @@ void (ConfigParser::*ConfigParser::direct_parsers[NUM_DIREC])(void) = {
 
 void     ConfigParser::checkDirectiveSyntax()
 {
-    if (directive_components.back() != ";" && directive_components.back().back() == ';')
+	int	end;
+
+	end = directive_components.back()[directive_components.back().length() - 1];
+    if (directive_components.back() != ";" && directive_components.back()[end] == ';')
     {
         directive_components.back().erase(directive_components.back().end() - 1);
         directive_components.push_back(";");
@@ -143,7 +146,7 @@ void	ConfigParser::parseAutoIndex()
 
 void	ConfigParser::parseClientMaxBodySize()
 {
-	std::vector<char>::iterator	it;
+	std::string::iterator	it;`
 	std::string					value;
 
 	if (directive_components.size() != 1)
