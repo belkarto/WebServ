@@ -33,7 +33,10 @@ void     ConfigParser::checkDirectiveSyntax()
         directive_components.push_back(";");
     }
     if (directive_components.back() != ";" || directive_components.size() < 3)
+	{
+
         throw ConfigFileParsingException("invalid server directive syntax");
+	}
 	directive_components.pop_back();
 	directive_components.erase(directive_components.begin());
 }
@@ -82,7 +85,7 @@ void	ConfigParser::parseServerBlock()
 				return ;
 			}
 			checkDirectiveSyntax();
-			(this->*direct_parsers[ptrdiff_t (it - directives_vect.begin())])();
+			(this->*direct_parsers[std::ptrdiff_t (it - directives_vect.begin())])();
 		}
 	}
 }
