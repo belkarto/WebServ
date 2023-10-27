@@ -146,8 +146,8 @@ void	ConfigParser::parseAutoIndex()
 
 void	ConfigParser::parseClientMaxBodySize()
 {
-	std::string::iterator	it;`
-	std::string					value;
+	std::string::iterator	it;
+	std::string				value;
 
 	if (directive_components.size() != 1)
 		throw ConfigFileParsingException("invalid number of arguments in client_max_body_size directive");
