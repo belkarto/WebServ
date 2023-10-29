@@ -1,6 +1,6 @@
 #================================= Files to compile ===================================
-SRC_FILES	= main Client Server ConfigParser ConfigManager Exception
-LIB_FILES = signal split addr_resolver ft_stoll ft_stoi display_socket_addr
+SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser ConfigManager Exception
+LIB_FILES = signal split addr_resolver ft_stoll ft_stoi display_socket_addr displayConfig
 # #======================================================================================
 
 # #====================================== Colors ========================================

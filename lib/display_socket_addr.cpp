@@ -11,6 +11,5 @@ void	display_socket_addr(struct addrinfo *bind_addr)
 	addr = &(pin->sin_addr);
 	port = ntohs(pin->sin_port);
 	inet_ntop(bind_addr->ai_family, addr, ipstr, INET6_ADDRSTRLEN);
-	std::cout << "port: " << port << std::endl;
-	std::cout << "host: " << ipstr << std::endl;
+	std::cout << "	listen " << ipstr<< ":" << port << " ;" << std::endl;
 }
