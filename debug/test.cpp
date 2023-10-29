@@ -7,20 +7,19 @@ int	main(void)
 	int					new_sockfd;
 	std::vector<Server> servers;
 	fd_set				current_fds, read_fds;
-	int					i;
   int max_socket = 0;
 
 	servers.emplace_back("localhost", "1026");
 	servers.emplace_back("127.0.0.1", "1025");
-	servers.emplace_back("127.0.0.2", "1025");
-	servers.emplace_back("127.0.0.3", "1025");
+	// servers.emplace_back("127.0.0.2", "1025");
+	// servers.emplace_back("127.0.0.3", "1025");
 
 	FD_ZERO(&current_fds);
 	FD_SET(servers[0].sockfd, &current_fds);
 	FD_SET(servers[1].sockfd, &current_fds);
-	FD_SET(servers[2].sockfd, &current_fds);
-	FD_SET(servers[3].sockfd, &current_fds);
-  max_socket = servers[3].sockfd;
+	// FD_SET(servers[2].sockfd, &current_fds);
+	// FD_SET(servers[3].sockfd, &current_fds);
+  max_socket = servers[1].sockfd;
 
 	while (true)
 	{
