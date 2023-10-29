@@ -3,31 +3,35 @@
 const char	*ConfigParser::directives[NUM_DIREC] = {
 	"listen",
 	"server_name",
-	"root",
-	"index",
 	"client_max_body_size",
 	"error_page",
-	"location",
 	"autoindex",
+	"location",
+	"root",
+	"index",
+	"method",
+	"redirect",
 };
 
 void (ConfigParser::*ConfigParser::direct_parsers[NUM_DIREC])(void) = {
     &ConfigParser::parseListen,
     &ConfigParser::parseServerName,
-    &ConfigParser::parseRoot,
-    &ConfigParser::parseIndex,
     &ConfigParser::parseClientMaxBodySize,
     &ConfigParser::parseErrorPages,
-    &ConfigParser::parseLocations,
     &ConfigParser::parseAutoIndex,
+    &ConfigParser::parseLocations,
+    &ConfigParser::parseRoot,
+    &ConfigParser::parseIndex,
+	&ConfigParser::parseMethod,
+	&ConfigParser::parseRedirect,
 };
 
 void     ConfigParser::checkDirectiveSyntax()
 {
-	int	end;
+	char	del;
 
-	end = directive_components.back().length() - 1;
-    if (directive_components.back() != ";" && directive_components.back()[end] == ';')
+	del = directive_components.back()[directive_components.back().length() - 1];
+    if (directive_components.back() != ";" && del == ';')
     {
         directive_components.back().erase(directive_components.back().end() - 1);
         directive_components.push_back(";");
@@ -35,7 +39,7 @@ void     ConfigParser::checkDirectiveSyntax()
     if (directive_components.back() != ";" || directive_components.size() < 3)
 	{
 
-        throw ConfigFileParsingException("invalid server directive syntax");
+        throw ConfigFileParsingException("invalid directive syntax");
 	}
 	directive_components.pop_back();
 	directive_components.erase(directive_components.begin());
@@ -75,8 +79,8 @@ void	ConfigParser::parseServerBlock()
 		}
 		else
 		{
-			if ((it = std::find(directives_vect.begin(), directives_vect.end(), directive_components[0])) 
-				== directives_vect.end())
+			if ((it = std::find(server_directives.begin(), server_directives.end(), directive_components[0])) 
+				== server_directives.end())
 			{
 				if (directive_components[0]  == "}" && directive_components.size() == 1)
 					block_delem.second = true;
@@ -84,8 +88,9 @@ void	ConfigParser::parseServerBlock()
 					throw ConfigFileParsingException("invalid directive name");
 				return ;
 			}
-			checkDirectiveSyntax();
-			(this->*direct_parsers[std::ptrdiff_t (it - directives_vect.begin())])();
+			if (directive_components[0] != "location")
+				checkDirectiveSyntax();
+			(this->*direct_parsers[std::ptrdiff_t (it - server_directives.begin())])();
 		}
 	}
 }
@@ -97,7 +102,7 @@ ConfigParser::ConfigParser(const char *config_path, std::vector<Server> &servers
 	config.open(config_path);
 	if (!config.is_open())
 		throw ConfigFileParsingException("failed to open ");
-	directives_vect.assign(directives, directives + sizeof(directives) / sizeof(const char *));
+	server_directives.assign(directives, directives + (NUM_DIREC - 2));
 	while (std::getline(config, line))
 	{
 		std::stringstream	ss(line);
@@ -213,8 +218,100 @@ void	ConfigParser::parseListen()
 	display_socket_addr(_servers.back().bind_addr);
 }
 
+void	ConfigParser::checkLocationSyntax()
+{
+	locat_block_delem.first = false;
+	locat_block_delem.second = false;
+	if (directive_components.size() < 2 || directive_components.size() > 3)
+		throw ConfigFileParsingException("invalid location block syntax");
+	if (directive_components.size() == 3)
+	{
+		if (directive_components[2] != "{")
+			throw ConfigFileParsingException("invalid location block syntax");
+		else
+			locat_block_delem.first = true;
+	}
+}
+
+void	print(std::string str)
+{
+	std::cout << str << std::endl;
+}
+
+void	ConfigParser::parseMethod()
+{
+	std::vector<std::string>			methods;
+	std::vector<std::string>::iterator	it;
+
+	methods.push_back("GET");
+	methods.push_back("POST");
+	methods.push_back("DELETE");
+	it = directive_components.begin();
+	for (; it != directive_components.end(); it++)
+	{
+		if (std::find(methods.begin(), methods.end(), *it) == methods.end())
+			throw ConfigFileParsingException("invalid value in method directive");
+	}
+	_servers.back().location.method = directive_components;
+}
+
+void	ConfigParser::parseRedirect()
+{
+	int code;
+
+	if (directive_components.size() != 2)
+		throw ConfigFileParsingException("invalid number of arguments in redirect directive");
+	try
+	{
+		code = ft_stoi(directive_components[0].c_str());
+		// redirect code falls in 3xx range
+		if (code >= 400 || code < 300)
+			throw ConfigFileParsingException("invalid value in redirect directive");
+		_servers.back().location.redirect.first = code;
+		_servers.back().location.redirect.second = directive_components[1];
+	}
+	catch (std::exception &e)
+	{
+		throw ConfigFileParsingException("invalid value in redirect directive");
+	}
+}
+
 void	ConfigParser::parseLocations()
 {
+	std::string							line;
+	std::vector<std::string>::iterator	it;
 
+	locat_directives.assign(directives + 6, directives + NUM_DIREC);
+	checkLocationSyntax();
+	_servers.back().location.uri = directive_components[1];
+	while(getline(config, line))
+	{
+		std::stringstream	ss(line);
+		split(directive_components, ss);
+		if (directive_components.empty())
+			continue;
+		if (!locat_block_delem.first)
+		{
+			if (directive_components[0] != "{" || directive_components.size() > 1)
+				throw ConfigFileParsingException("invalid location block syntax");	
+			locat_block_delem.first = true;	
+		}
+		else
+		{
+			if ((it = std::find(locat_directives.begin(), locat_directives.end(), directive_components[0])) 
+				== locat_directives.end())
+			{
+				if (directive_components[0]  == "}" && directive_components.size() == 1)
+					locat_block_delem.second = true;
+				else
+					throw ConfigFileParsingException("invalid directive name");
+				return ;
+			}
+			checkDirectiveSyntax();
+			(this->*direct_parsers[std::ptrdiff_t (it - locat_directives.begin()) + 6])();
+		}
+	}
+	if (!locat_block_delem.second)
+			throw ConfigFileParsingException("invalid location block syntax");
 }
 

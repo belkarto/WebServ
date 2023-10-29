@@ -4,14 +4,16 @@
 # include "webserv.hpp"
 # include "Server.hpp"
 
-# define NUM_DIREC 8
+# define NUM_DIREC 10
 
 class ConfigParser
 {
 	std::ifstream					config;
-	std::vector<std::string>		directives_vect;
 	std::vector<std::string>		directive_components;
+	std::vector<std::string>		server_directives;
+	std::vector<std::string>		locat_directives;
 	std::pair<bool, bool>			block_delem;
+	std::pair<bool, bool>			locat_block_delem;
 	std::vector<Server> 			&_servers;
 
     public:
@@ -26,8 +28,11 @@ class ConfigParser
 		void		parseIndex();
 		void		parseClientMaxBodySize();
 		void		parseErrorPages();
-		void		parseLocations();
 		void		parseAutoIndex();
+		void		parseLocations();
+		void		checkLocationSyntax();
+		void		parseMethod();
+		void		parseRedirect();
 
 		static const char			*directives[NUM_DIREC];
 		static void					(ConfigParser::*direct_parsers[NUM_DIREC])(void);
