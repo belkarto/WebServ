@@ -69,13 +69,13 @@ void getMethod(const char *filePath, int fd) {
   std::stringstream ss;
   std::string str;
 
-  std::cout << "\n\n\n\n--------------------------------" << std::endl;
   if (file.is_open()) {
     file.seekg(0, std::ios::end);
     fileLenght = file.tellg();
+    file.seekg(0, std::ios::beg);
     sendGetHeaders(fd, fileLenght);
-    while (std::getline(file, str))
-    {
+    std::cout << "\n\n\n\n-------------------------------- " << fileLenght << std::endl;
+    while (std::getline(file, str)) {
       write(fd, str.c_str(), str.length());
       write(fd, "\n", 1);
       std::cout << str.c_str() << std::endl;
