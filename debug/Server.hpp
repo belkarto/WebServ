@@ -14,6 +14,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+#include <fstream>
 #include <sstream>
 
 #define CHUNK 1024
