@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <sstream>
+#include <string>
 #include <unistd.h>
 
 void init_servers_pool(t_pool &serversPool);
@@ -49,12 +50,17 @@ void sendGetHeaders(int fd, size_t len) {
   std::stringstream ss;
   std::string sLen;
   write(fd, "HTTP/1.1 200 OK\n", 16);
+  write(1, "HTTP/1.1 200 OK\n", 16);
   write(fd, "Content-Type: text/html\n", 24);
+  write(1, "Content-Type: text/html\n", 24);
   write(fd, "Content-Length: ", 16);
+  write(1, "Content-Length: ", 16);
   ss << len;
   ss >> sLen;
   write(fd, sLen.c_str(), sLen.size());
+  write(1, sLen.c_str(), sLen.size());
   write(fd, "\n\n", 2);
+  write(1, "\n\n", 2);
 }
 
 void getMethod(const char *filePath, int fd) {
@@ -63,15 +69,16 @@ void getMethod(const char *filePath, int fd) {
   std::stringstream ss;
   std::string str;
 
+  std::cout << "\n\n\n\n--------------------------------" << std::endl;
   if (file.is_open()) {
     file.seekg(0, std::ios::end);
     fileLenght = file.tellg();
     sendGetHeaders(fd, fileLenght);
-    while (file.good())
+    while (std::getline(file, str))
     {
-      std::getline(file, str);
       write(fd, str.c_str(), str.length());
       write(fd, "\n", 1);
+      std::cout << str.c_str() << std::endl;
     }
     write(fd, "\n\n\n", 3);
   }
@@ -82,7 +89,7 @@ void sendReponse(int socketFd) {
   // else if post upload the file
   // else if delet fetch the file and delet it
   // else its not a valid method
-  getMethod("../wwww/index.html", socketFd);
+  getMethod("index.html", socketFd);
 }
 
 void readRequest(int socketFd) {

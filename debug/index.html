@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>WebServ</title>
+  <style>
+    body,
+    h1 {
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #600f6f;
+      text-align: center;
+      padding: 30px 0;
+      color: #fff;
+    }
+
+    .header-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 36px;
+    }
+
+    .upload-button-container {
+      text-align: center;
+      background-color: #f79328;
+      padding: 20px 0;
+    }
+
+    .upload-button {
+      padding: 10px 20px;
+      background-color: #fff;
+      color: #e74c3c;
+      border: none;
+      cursor: pointer;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <h1>WebServe</h1>
+    </div>
+    <div class="upload-button-container">
+      <label for="file-upload" class="upload-button">Upload File</label>
+      <input type="file" id="file-upload" style="display: none;">
+    </div>
+  </header>
+</body>
+
+</html>
