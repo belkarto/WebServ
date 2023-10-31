@@ -3,19 +3,19 @@
 
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <fstream>
 #include <iostream>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <signal.h>
+#include <sstream>
 #include <string.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
-#include <fstream>
-#include <sstream>
 
 #define CHUNK 1024
 
@@ -38,6 +38,14 @@ typedef struct {
   int max_socket;
   int ready_size;
 } t_pool;
+
+typedef struct {
+  int socketFd;
+  int connectionFd;
+  int responsFd;
+  bool isToRead;
+  bool isToWrite;
+} t_dataPool;
 
 std::string get_headers(int sockfd);
 #endif

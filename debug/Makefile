@@ -2,7 +2,7 @@ name = server
 
 CC = c++
 
-CPPFLAGS = -Wall -Wextra -Werror -std=c++11
+CPPFLAGS = -Wall -Wextra -Werror -std=c++11 -g
 
 SRC = Server.cpp main.cpp
 

@@ -4,17 +4,20 @@
 #include <sstream>
 #include <string>
 #include <unistd.h>
+#include <vector>
 
 void init_servers_pool(t_pool &serversPool);
 void errAnExit(const char *er);
 void readRequest(int socketFd);
 void sendReponse(int socketFD);
-void getRequestAndRespond(int socketFd, t_pool serversPool,
-                          int connectedSocket);
+void getRequestAndRespond(std::vector<t_dataPool> &data, fd_set &masterSet);
+void initData(t_dataPool &data, int socketFd, int connectionFd);
 
 int main() {
   t_pool serversPool;
   int connFd;
+  std::vector<t_dataPool> data;
+  t_dataPool dataSet;
 
   init_servers_pool(serversPool);
   while (1) {
@@ -25,25 +28,32 @@ int main() {
              select(serversPool.max_socket, &serversPool.workinSet, NULL, NULL,
                     NULL)) < 0)
       errAnExit("select()");
-
-    std::cout << "ready sockets -------> " << serversPool.ready_size
-              << std::endl;
     for (int i = 0; i < serversPool.max_socket && serversPool.ready_size > 0;
          i++) {
+
       if (FD_ISSET(i, &serversPool.workinSet)) {
         serversPool.ready_size -= 1;
         if ((connFd = accept(i, NULL, NULL)) < 0)
           errAnExit("accept()");
-        std::cout << connFd << " " << i << std::endl;
+        initData(dataSet, i, connFd);
+        data.push_back(dataSet);
         FD_SET(connFd, &serversPool.masterSet);
         if (connFd > serversPool.max_socket)
           serversPool.max_socket = connFd;
-        getRequestAndRespond(i, serversPool, connFd);
-        std::cout << "[[[[[[[--  client served  --]]]]]]]\n\n\n" << std::endl;
       }
+      getRequestAndRespond(data, serversPool.masterSet);
+      std::cout << "[[[[[[[--  client served  --]]]]]]]\n\n\n" << std::endl;
     }
   }
   return (EXIT_SUCCESS);
+}
+
+void initData(t_dataPool &data, int socketFd, int connectionFd) {
+  data.isToRead = true;
+  data.isToWrite = false;
+  data.responsFd = -1;
+  data.socketFd = socketFd;
+  data.connectionFd = connectionFd;
 }
 
 void sendGetHeaders(int fd, size_t len) {
@@ -74,7 +84,6 @@ void getMethod(const char *filePath, int fd) {
     fileLenght = file.tellg();
     file.seekg(0, std::ios::beg);
     sendGetHeaders(fd, fileLenght);
-    std::cout << "\n\n\n\n-------------------------------- " << fileLenght << std::endl;
     while (std::getline(file, str)) {
       write(fd, str.c_str(), str.length());
       write(fd, "\n", 1);
@@ -103,14 +112,29 @@ void readRequest(int socketFd) {
   write(1, buffer, readed);
 }
 
-void getRequestAndRespond(int socketFd, t_pool serversPool,
-                          int connectedSocket) {
-  std::cout << connectedSocket << std::endl;
-  readRequest(connectedSocket);
-  sendReponse(connectedSocket);
-  close(connectedSocket);
-  FD_CLR(connectedSocket, &serversPool.masterSet);
-  (void)socketFd;
+void getRequestAndRespond(std::vector<t_dataPool> &data, fd_set &masterSet) {
+  size_t i = 0;
+  for (;!data.empty();) {
+    if (data[i].isToRead)
+    {
+      readRequest(data[i].connectionFd);
+      data[i].isToRead = false;
+      data[i].isToWrite = true;
+    }
+    if (data[i].isToWrite)
+    {
+      sendReponse(data[i].connectionFd);
+      data[i].isToWrite = false;
+    }
+    if (!data[i].isToRead && !data[i].isToWrite){
+      close(data[i].connectionFd);
+      FD_CLR(data[i].connectionFd, &masterSet);
+      data.erase(data.begin() + i);
+    }
+    i++;
+    if (i > data.size())
+      i = 0;
+  }
 }
 
 void errAnExit(const char *er) {
