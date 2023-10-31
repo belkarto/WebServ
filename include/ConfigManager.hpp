@@ -12,5 +12,8 @@ class ConfigManager
 
 	public:
 		ConfigManager(const char *config_path);
+		~ConfigManager();
+
+		void	setupServers();
 };
 #endif

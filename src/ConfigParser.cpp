@@ -17,6 +17,9 @@ const char	*ConfigParser::location_direct[NUM_LOCAT_DIREC] = {
 	"index",
 	"method",
 	"redirect",
+	"cgi",
+	"upload_store",
+
 };
 
 void (ConfigParser::*ConfigParser::server_parsers[NUM_SERV_DIREC])(void) = {
@@ -36,6 +39,8 @@ void (ConfigParser::*ConfigParser::location_parsers[NUM_LOCAT_DIREC])(void) = {
     &ConfigParser::parseLocationIndex,
 	&ConfigParser::parseMethod,
 	&ConfigParser::parseRedirect,
+	&ConfigParser::parseCgi,
+	&ConfigParser::parseUploadStore,
 };
 
 void     ConfigParser::checkDirectiveSyntax()
@@ -80,7 +85,10 @@ ConfigParser::ConfigParser(const char *config_path, std::vector<Server> &servers
 		if (!block_delem.second)
 			throw ConfigFileParsingException("invalid server block syntax");
 	}
+	if (_servers.empty())
+		throw ConfigFileParsingException("no configuration provided in config file");
 }
+
 
 
 

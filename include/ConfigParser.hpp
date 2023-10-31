@@ -4,9 +4,6 @@
 # include "webserv.hpp"
 # include "Server.hpp"
 
-# define NUM_SERV_DIREC 8
-# define NUM_LOCAT_DIREC 5
-
 class ConfigParser
 {
 	std::ifstream					config;
@@ -41,6 +38,8 @@ class ConfigParser
 		void		parseLocationAutoIndex();
 		void		parseMethod();
 		void		parseRedirect();
+		void		parseCgi();
+		void		parseUploadStore();
 
 		// server directives and their corresponding functions to parse them
 		static const char			*server_direct[NUM_SERV_DIREC];

@@ -125,3 +125,18 @@ void	ConfigParser::parseLocationAutoIndex()
 	else
 		throw ConfigFileParsingException("invalid value in autoindex directive");
 }
+
+void	ConfigParser::parseCgi()
+{
+	if (directive_components.size() != 2)
+		throw ConfigFileParsingException("invalid number of arguments in cgi directive");
+	_servers.back().location.back().cgi.first = directive_components[0];	// extension
+	_servers.back().location.back().cgi.second = directive_components[1];	// interpreter
+}
+
+void	ConfigParser::parseUploadStore()
+{
+	if (directive_components.size() > 1)
+		throw ConfigFileParsingException("invalid number of arguments in upload_store directive");
+	_servers.back().location.back().upload_store = directive_components.back();
+}
