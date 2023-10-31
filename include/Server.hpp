@@ -31,7 +31,7 @@ class Server
 		std::vector<Location>						location;
 		
 		Server();
-
+		void	emplaceBackLocation();
 		void	initServer();
 };
 #endif

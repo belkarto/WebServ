@@ -19,7 +19,6 @@ const char	*ConfigParser::location_direct[NUM_LOCAT_DIREC] = {
 	"redirect",
 	"cgi",
 	"upload_store",
-
 };
 
 void (ConfigParser::*ConfigParser::server_parsers[NUM_SERV_DIREC])(void) = {
@@ -43,6 +42,7 @@ void (ConfigParser::*ConfigParser::location_parsers[NUM_LOCAT_DIREC])(void) = {
 	&ConfigParser::parseUploadStore,
 };
 
+// each directive should end with ; and have at least one arg
 void     ConfigParser::checkDirectiveSyntax()
 {
 	char	del;
@@ -50,14 +50,13 @@ void     ConfigParser::checkDirectiveSyntax()
 	del = directive_components.back()[directive_components.back().length() - 1];
     if (directive_components.back() != ";" && del == ';')
     {
+		// in case we have the following syntax
+		// directive arg1 arg2;
         directive_components.back().erase(directive_components.back().end() - 1);
         directive_components.push_back(";");
     }
     if (directive_components.back() != ";" || directive_components.size() < 3)
-	{
-
         throw ConfigFileParsingException("invalid directive syntax");
-	}
 	directive_components.pop_back();
 	directive_components.erase(directive_components.begin());
 }
