@@ -1,6 +1,7 @@
 #include "Server.hpp"
 #include <cstdio>
 #include <cstdlib>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <unistd.h>
@@ -8,8 +9,8 @@
 
 void init_servers_pool(t_pool &serversPool);
 void errAnExit(const char *er);
-void readRequest(int socketFd);
-void sendReponse(int socketFD);
+void readRequest(t_dataPool &data);
+void sendReponse(t_dataPool &data);
 void getRequestAndRespond(std::vector<t_dataPool> &data, fd_set &masterSet);
 void initData(t_dataPool &data, int socketFd, int connectionFd);
 
@@ -42,7 +43,6 @@ int main() {
           serversPool.max_socket = connFd;
       }
       getRequestAndRespond(data, serversPool.masterSet);
-      std::cout << "[[[[[[[--  client served  --]]]]]]]\n\n\n" << std::endl;
     }
   }
   return (EXIT_SUCCESS);
@@ -51,7 +51,7 @@ int main() {
 void initData(t_dataPool &data, int socketFd, int connectionFd) {
   data.isToRead = true;
   data.isToWrite = false;
-  data.responsFd = -1;
+  // data.responsFile = -1;
   data.socketFd = socketFd;
   data.connectionFd = connectionFd;
 }
@@ -73,66 +73,74 @@ void sendGetHeaders(int fd, size_t len) {
   write(1, "\n\n", 2);
 }
 
-void getMethod(const char *filePath, int fd) {
-  std::ifstream file(filePath);
-  size_t fileLenght;
-  std::stringstream ss;
-  std::string str;
+void getMethod(const char *filePath, t_dataPool &data) {
+  if ((data.responsFile = open(filePath, O_RDONLY)) < 0)
+    exit(1);
 
-  if (file.is_open()) {
-    file.seekg(0, std::ios::end);
-    fileLenght = file.tellg();
-    file.seekg(0, std::ios::beg);
-    sendGetHeaders(fd, fileLenght);
-    while (std::getline(file, str)) {
-      write(fd, str.c_str(), str.length());
-      write(fd, "\n", 1);
-      std::cout << str.c_str() << std::endl;
-    }
-    write(fd, "\n\n\n", 3);
+  std::ifstream respons(filePath);
+  respons.seekg(0, std::ios::end);
+  data.responsFileLenght = respons.tellg();
+  data.writedRespons = 0;
+  respons.seekg(0, std::ios::beg);
+  sendGetHeaders(data.connectionFd, data.responsFileLenght);
+  respons.close();
+  data.sentHeaders = !data.sentHeaders;
+}
+
+void sendReponse(t_dataPool &data) {
+  char buffer[PACKET_SIZE];
+  int readed;
+  if (!data.sentHeaders)
+    getMethod("index.html", data);
+  else {
+    readed = read(data.responsFile, buffer, PACKET_SIZE);
+    write(data.connectionFd, buffer, readed);
+    data.writedRespons += readed;
+  }
+  if (data.responsFileLenght == data.writedRespons)
+  {
+    data.isToWrite = false;
+    write(data.connectionFd, "\n\n\n\n", 3);
   }
 }
 
-void sendReponse(int socketFd) {
-  // if get then read fetch the desired file
-  // else if post upload the file
-  // else if delet fetch the file and delet it
-  // else its not a valid method
-  getMethod("index.html", socketFd);
-}
-
-void readRequest(int socketFd) {
-  char buffer[4096];
+void readRequest(t_dataPool &data) {
+  char buffer[PACKET_SIZE];
   ssize_t readed;
 
-  std::cout << "getting request... from " << socketFd << std::endl;
-  if ((readed = read(socketFd, buffer, 4096)) < 0)
+  std::cout << "getting request... from " << data.socketFd << std::endl;
+  if ((readed = read(data.connectionFd, buffer, PACKET_SIZE)) < 0)
     errAnExit("read()");
   std::cout << readed << " readed from request" << std::endl;
   write(1, buffer, readed);
+  if (strstr(buffer, "\r\n\r\n") != NULL) {
+    // got the end of request
+    data.isToRead = false;
+    data.isToWrite = true;
+    data.sentHeaders = false;
+    data.writedRespons = 0;
+  }
 }
 
 void getRequestAndRespond(std::vector<t_dataPool> &data, fd_set &masterSet) {
   size_t i = 0;
-  for (;!data.empty();) {
-    if (data[i].isToRead)
-    {
-      readRequest(data[i].connectionFd);
-      data[i].isToRead = false;
-      data[i].isToWrite = true;
+  for (; !data.empty();) {
+    if (data[i].isToRead) {
+      std::cout << "readRequest" << std::endl;
+      readRequest(data[i]);
     }
-    if (data[i].isToWrite)
-    {
-      sendReponse(data[i].connectionFd);
-      data[i].isToWrite = false;
+    if (data[i].isToWrite) {
+      sendReponse(data[i]);
     }
-    if (!data[i].isToRead && !data[i].isToWrite){
+    if (!data[i].isToRead && !data[i].isToWrite) {
       close(data[i].connectionFd);
+      close(data[i].responsFile);
       FD_CLR(data[i].connectionFd, &masterSet);
       data.erase(data.begin() + i);
+      std::cout << "[[[[[[[--  client served  --]]]]]]]\n\n\n" << std::endl;
     }
     i++;
-    if (i > data.size())
+    if (i == data.size())
       i = 0;
   }
 }

@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
@@ -18,6 +19,7 @@
 #include <vector>
 
 #define CHUNK 1024
+# define PACKET_SIZE 100
 
 class Server {
 public:
@@ -42,10 +44,24 @@ typedef struct {
 typedef struct {
   int socketFd;
   int connectionFd;
-  int responsFd;
+  int responsFile;
+  size_t responsFileLenght;
+  size_t writedRespons;
+  bool sentHeaders;
   bool isToRead;
   bool isToWrite;
 } t_dataPool;
+
+
+// class t_dataPool {
+//   std::ifstream *responsFile;
+// public:
+//   int socketFd;
+//   int connectionFd;
+//   bool sentHeaders;
+//   bool isToRead;
+//   bool isToWrite;
+// };
 
 std::string get_headers(int sockfd);
 #endif
