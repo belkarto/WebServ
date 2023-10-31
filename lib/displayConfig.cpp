@@ -42,7 +42,7 @@ void	printServer(Server& server)
 {
 	std::cout << "server {" << std::endl;
 
-	display_socket_addr(server.bind_addr);
+	std::cout << "	listen " << server.bind_addr_str << " ;" << std::endl;
 
 	std::cout << "	server_name ";
 	std::for_each(server.server_name.begin(), server.server_name.end(), printstr);

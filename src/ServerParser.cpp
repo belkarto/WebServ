@@ -55,12 +55,21 @@ void	ConfigParser::parseListen()
 
 	if (directive_components.size() > 1)
 		throw ConfigFileParsingException("invalid number of arguments in listen directive");
+	freeaddrinfo(_servers.back().bind_addr);
 	std::stringstream	ss(directive_components[0]);
 	std::getline(ss, host, ':');
 	ss >> port;
 	if (host.empty() || port.empty() 
 		|| !addr_resolver(&_servers.back().bind_addr, host.c_str(), port.c_str()))
 		throw ConfigFileParsingException("invalid host or port in listen directive");
+	/* 
+		getaddrinfo accept ip addr in the following format
+		a.b.c.d
+		a.b.c
+		a.b			127.0.0.1 <=> 127.0.1 <=> 127.1 <=> localhost
+		a
+	*/
+	_servers.back().bind_addr_str = socket_addr_ntop(_servers.back().bind_addr);
 }
 
 void	ConfigParser::parseServerName()
