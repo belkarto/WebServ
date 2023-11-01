@@ -56,7 +56,9 @@ void     ConfigParser::checkDirectiveSyntax()
         directive_components.push_back(";");
     }
     if (directive_components.back() != ";" || directive_components.size() < 3)
+	{
         throw ConfigFileParsingException("invalid directive syntax");
+	}
 	directive_components.pop_back();
 	directive_components.erase(directive_components.begin());
 }

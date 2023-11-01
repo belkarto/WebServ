@@ -9,4 +9,6 @@ int	main(int ac, char **av)
 		ConfigManager	config_manager(av[1]);
 	// else 
 		// error
+
+		
 }

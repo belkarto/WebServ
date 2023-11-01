@@ -2,6 +2,7 @@
 # define SERVER_HPP
 
 #include "webserv.hpp"
+#include "Client.hpp"
 
 typedef struct Location
 {
@@ -33,5 +34,6 @@ class Server
 		Server();
 		void	emplaceBackLocation();
 		void	initServer();
+		void	acceptConnection(Client &client);
 };
 #endif
