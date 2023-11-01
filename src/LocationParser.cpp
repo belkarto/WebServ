@@ -8,12 +8,7 @@ void	ConfigParser::parseLocationBlock()
 
 	locat_directives.assign(location_direct , location_direct + NUM_LOCAT_DIREC);
 	checkLocationSyntax();
-	// whenever a location block is found => a location struct is defined and added to server's location in _servers
-	location.root = _servers.back().root;
-    location.index = _servers.back().index;
-    location.autoindex = _servers.back().autoindex;
-	_servers.back().location.push_back(location);
-	// _servers.back().location.back() => the last location added in the last added server 
+	_servers.back().emplaceBackLocation();
 	_servers.back().location.back().uri = directive_components[1];
 	while(getline(config, line))
 	{
@@ -74,8 +69,16 @@ void	ConfigParser::parseMethod()
 	{
 		if (std::find(methods.begin(), methods.end(), *it) == methods.end())
 			throw ConfigFileParsingException("invalid value in method directive");
+		// not allowing multiple occurrences of a method
+		// int cnt;
+		// if ((cnt = std::count(directive_components.begin(), directive_components.end(), *it)) > 1)
+		// 	throw ConfigFileParsingException("multiple occurences of a value in method directive");
 	}
-	_servers.back().location.back().method = directive_components;
+	// remove multiple ocuurences
+	std::sort(directive_components.begin(), directive_components.end());
+	_servers.back().location.back().method.resize(directive_components.size());
+	std::unique_copy(directive_components.begin(), directive_components.end()
+		, _servers.back().location.back().method.begin());
 }
 
 void	ConfigParser::parseRedirect()
@@ -88,7 +91,7 @@ void	ConfigParser::parseRedirect()
 	{
 		code = ft_stoi(directive_components[0].c_str());
 		// redirect code falls in 3xx range
-		if (code >= 400 || code < 300)
+		if (code < 300 || code >= 400)
 			throw ConfigFileParsingException("invalid value in redirect directive");
 		_servers.back().location.back().redirect.first = code;
 		_servers.back().location.back().redirect.second = directive_components[1];

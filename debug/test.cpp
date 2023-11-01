@@ -24,7 +24,7 @@ int main(void)
 
 	while (true)
 	{
-		// creat a copy of current_fds because select take fd_set buy refrence and it modifier it
+		// creat a copy of current_fds because select take fd_set by refrence and it modifies it
 		// and it delets all fd_set that aren't ready for read
 		read_fds = current_fds;
 		int ready_size;

@@ -27,6 +27,7 @@ void ConfigParser::parseServerBlock()
 					throw ConfigFileParsingException("invalid directive name");
 				return;
 			}
+			// all directive besides location should ends with ; 
 			if (directive_components[0] != "location")
 				checkDirectiveSyntax();
 			(this->*server_parsers[std::ptrdiff_t(it - server_directives.begin())])();
@@ -68,6 +69,7 @@ void	ConfigParser::parseListen()
 		a.b.c
 		a.b			127.0.0.1 <=> 127.0.1 <=> 127.1 <=> localhost
 		a
+		the use of socket_addr_ntop to unify these formats
 	*/
 	_servers.back().bind_addr_str = socket_addr_ntop(_servers.back().bind_addr);
 }
@@ -90,16 +92,15 @@ void	ConfigParser::parseClientMaxBodySize()
 			throw ConfigFileParsingException("invalid value in client_max_body_size directive");
 	try
 	{
-		if (it != value.end())
+		if (it != value.end())	// in case a unit was provided
 			_servers.back().client_max_body_size = converttobytes(ft_stoll(value.c_str()), std::tolower(*it));
 		else
-			_servers.back().client_max_body_size = converttobytes(ft_stoll(value.c_str()), 'b');
+			_servers.back().client_max_body_size = ft_stoll(value.c_str());
 	}
 	catch(const std::exception& e)
 	{
 		throw ConfigFileParsingException("invalid value in client_max_body_size directive");
 	}
-	
 }
 
 void	ConfigParser::parseErrorPages()
@@ -108,6 +109,7 @@ void	ConfigParser::parseErrorPages()
 	int									code;
 	std::vector<std::string>::iterator	it;
 
+	// error_page directive should have at least two args => a code and a path
 	if (directive_components.size() < 2)
 		throw ConfigFileParsingException("invalid number of arguments in error_page directive");
 	try
@@ -116,7 +118,7 @@ void	ConfigParser::parseErrorPages()
 		for (; it != directive_components.end() - 1; it++)
 		{
 			code = ft_stoi(it->c_str());
-			if (code < 300 || code > 600)
+			if (code < 400 || code > 600)
 				throw ConfigFileParsingException("invalid code value in error_page directive");
 			codes.push_back(code);
 		}
@@ -135,6 +137,7 @@ void	ConfigParser::parseIndex()
 
 void	ConfigParser::parseRoot()
 {
+	// root directive should have only one arg
 	if (directive_components.size() != 1)
 		throw ConfigFileParsingException("invalid number of arguments in root directive");
 	_servers.back().root = directive_components.back();
@@ -144,6 +147,7 @@ void	ConfigParser::parseAutoIndex()
 {
 	std::string	value;
 
+	// autoindex directive should have only one arg => on or off
 	if (directive_components.size() != 1)
 		throw ConfigFileParsingException("invalid number of arguments in autoindex directive");
 	value = directive_components.back();
