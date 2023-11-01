@@ -44,3 +44,14 @@ void    Server::initServer()
 		exit(EXIT_FAILURE);
 	}	
 }
+
+
+void	Server::acceptConnection(Client &client)
+{
+	if ((client.sockfd = accept(this->sockfd, NULL, NULL)) < 0)
+	{
+		perror("accept()");
+		exit(EXIT_FAILURE);
+	}
+	client.listen_socket = this->sockfd;
+}

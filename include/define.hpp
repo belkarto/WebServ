@@ -20,4 +20,7 @@
 # define NUM_SERV_DIREC 8
 # define NUM_LOCAT_DIREC 7
 
+/*      ConfigManager   */
+# define MAX_EVENTS 1024
+
 #endif

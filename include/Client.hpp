@@ -5,6 +5,10 @@
 
 class Client
 {
-
+    public:
+        int sockfd;
+        int listen_socket;
+        int read;
+        int write;
 };
 #endif
