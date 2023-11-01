@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include <bits/types/struct_timeval.h>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -23,6 +24,9 @@ int main() {
   init_servers_pool(serversPool);
   while (1) {
     serversPool.workinSet = serversPool.masterSet;
+    for (size_t i = 0; i < data.size(); i++) {
+      FD_SET(data[i].connectionFd, &serversPool.masterSet);
+    }
     std::cout << "waiting on select....." << std::endl;
 
     if ((serversPool.ready_size =
@@ -36,6 +40,9 @@ int main() {
         serversPool.ready_size -= 1;
         if ((connFd = accept(i, NULL, NULL)) < 0)
           errAnExit("accept()");
+        std::cout << serversPool.max_socket
+                  << "---------------------------------------------"
+                  << std::endl;
         initData(dataSet, i, connFd);
         data.push_back(dataSet);
         FD_SET(connFd, &serversPool.masterSet);
@@ -53,6 +60,7 @@ void initData(t_dataPool &data, int socketFd, int connectionFd) {
   data.isToWrite = false;
   // data.responsFile = -1;
   data.socketFd = socketFd;
+  data.connectionClosed = false;
   data.connectionFd = connectionFd;
 }
 
@@ -97,8 +105,7 @@ void sendReponse(t_dataPool &data) {
     write(data.connectionFd, buffer, readed);
     data.writedRespons += readed;
   }
-  if (data.responsFileLenght == data.writedRespons)
-  {
+  if (data.responsFileLenght == data.writedRespons) {
     data.isToWrite = false;
     write(data.connectionFd, "\n\n\n\n", 3);
   }
@@ -113,7 +120,12 @@ void readRequest(t_dataPool &data) {
     errAnExit("read()");
   std::cout << readed << " readed from request" << std::endl;
   write(1, buffer, readed);
-  if (strstr(buffer, "\r\n\r\n") != NULL) {
+  if (readed == 0)
+    data.isToRead = false;
+  else if (readed < 0) {
+    data.isToRead = false;
+    close(data.connectionFd);
+  } else if (strstr(buffer, "\r\n\r\n") != NULL) {
     // got the end of request
     data.isToRead = false;
     data.isToWrite = true;
@@ -124,7 +136,7 @@ void readRequest(t_dataPool &data) {
 
 void getRequestAndRespond(std::vector<t_dataPool> &data, fd_set &masterSet) {
   size_t i = 0;
-  for (; !data.empty();) {
+  for (; i < data.size(); i++) {
     if (data[i].isToRead) {
       std::cout << "readRequest" << std::endl;
       readRequest(data[i]);
@@ -133,15 +145,15 @@ void getRequestAndRespond(std::vector<t_dataPool> &data, fd_set &masterSet) {
       sendReponse(data[i]);
     }
     if (!data[i].isToRead && !data[i].isToWrite) {
-      close(data[i].connectionFd);
+      if (!data[i].connectionClosed) {
+        close(data[i].connectionFd);
+        FD_CLR(data[i].connectionFd, &masterSet);
+        data.erase(data.begin() + i);
+      } else
+        data[i].isToRead = true;
       close(data[i].responsFile);
-      FD_CLR(data[i].connectionFd, &masterSet);
-      data.erase(data.begin() + i);
       std::cout << "[[[[[[[--  client served  --]]]]]]]\n\n\n" << std::endl;
     }
-    i++;
-    if (i == data.size())
-      i = 0;
   }
 }
 

@@ -19,7 +19,7 @@
 #include <vector>
 
 #define CHUNK 1024
-# define PACKET_SIZE 100
+# define PACKET_SIZE 2024
 
 class Server {
 public:
@@ -50,6 +50,7 @@ typedef struct {
   bool sentHeaders;
   bool isToRead;
   bool isToWrite;
+  bool connectionClosed;
 } t_dataPool;
 
 
