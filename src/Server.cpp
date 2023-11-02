@@ -54,4 +54,8 @@ void	Server::acceptConnection(Client &client)
 		exit(EXIT_FAILURE);
 	}
 	client.listen_socket = this->sockfd;
+	client.recieved = 0;
+	client.sent = 0;
+	client.sending = false;
+	std::cout << "\na connection is established " << client.sockfd << std::endl;
 }

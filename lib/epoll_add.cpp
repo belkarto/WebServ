@@ -5,6 +5,19 @@ void	epoll_add(int epfd, int fd)
 	struct epoll_event						event;
 
 	event.data.fd = fd;
+	event.events = EPOLLIN;
+	if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &event) < 0)
+	{
+		perror("epoll_ctl()");
+		exit(EXIT_FAILURE);
+	}
+}
+
+void	epoll_add2(int epfd, int fd)
+{
+	struct epoll_event						event;
+
+	event.data.fd = fd;
 	event.events = EPOLLIN | EPOLLOUT;
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &event) < 0)
 	{

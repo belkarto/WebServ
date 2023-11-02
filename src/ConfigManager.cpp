@@ -17,6 +17,7 @@ ConfigManager::ConfigManager(const char *config_path)
 
 ConfigManager::~ConfigManager()
 {
+	std::cout << "destrcutor called" << std::endl;
 	std::vector<Server>::iterator	it;
 	it = servers.begin();
 	for (; it != servers.end(); it++)
@@ -76,40 +77,116 @@ std::vector<Client>::iterator	ConfigManager::findConnectSocket(int sockfd)
 }
 
 
-void send_response(int sockfd)
-{
-	std::string response = "HTTP/1.1 200 OK\n";
-	response += "Content-Type: text/html\n";
-	response += "\n";
-	response += "<!DOCTYPE html>\n";
-	response += "<html>\n";
-	response += "<body>\n";
-	response += "<h1>Hello World!</h1>\n";
-	response += "</body>\n";
-	response += "</html>\n\n\n";
-	write(sockfd, response.c_str(), response.size());
+std::string getMimeType(const std::string& fileExtension) {
+    // Define a map to associate file extensions with MIME types
+    std::map<std::string, std::string> mimeTypes = {
+        {".jpg", "image/jpeg"},
+        {".jpeg", "image/jpeg"},
+        {".html", "text/html"},
+        // Add more mappings as needed
+    };
+
+    // Lookup the MIME type based on the file extension
+    std::map<std::string, std::string>::iterator it = mimeTypes.find(fileExtension);
+    if (it != mimeTypes.end()) {
+        return it->second;
+    } else {
+        return "application/octet-stream"; // Default MIME type
+    }
 }
 
-std::string get_headers(int sockfd)
-{
-	int		CHUNK = 1024;
-	size_t readval;
-	char buffer[CHUNK];
-	size_t pos;
-	std::string s;
-	std::string headers;
-	std::string body;
+std::string getFileExtension(const std::string& fileName) {
+    size_t dotPosition = fileName.find_last_of('.');
+    if (dotPosition != std::string::npos) {
+        return fileName.substr(dotPosition);
+    } else {
+        // No file extension found
+        return "";
+    }
+}
 
-	while ((readval = read(sockfd, buffer, CHUNK)) > 0)
+
+void send_response_headers(Client &client) 
+{
+	client.sending = true;	// client can recieve response body after recieving headers
+	std::string	fullpath = "www" + client.path;
+	// client.response = new std::ifstream("www/html/example.html");
+	client.response = new std::ifstream(fullpath.c_str());
+	if (!client.response->is_open())
 	{
-		s.append(buffer, readval);
-		if ((pos = s.find_last_of("\r\n\r\n")) != std::string::npos)
-		{
-			headers = s.substr(0, pos);
-			break;
-		}
+		std::cout << "failed to open file" << std::endl;
+		client.sending = false;
+		client.recieved = 0;
+		client.sent = 0;
+		client.response_size = 0;
+		client.path.clear();
+		client.headers.clear();
+		delete client.response;
+		std::string response_body = "<html><body><h1>404 Not Found</h1><p>The requested resource was not found.</p></body></html>";
+		std::stringstream	ss;
+		ss << response_body.length();
+		std::string content_length = ss.str();
+		std::string httpResponse = "HTTP/1.1 404 Not Found\r\n"
+                          "Content-Type: text/html\r\n"
+                          "Content-Length: " + content_length + "\r\n"
+                          "\r\n" + response_body;
+
+		write(client.sockfd, httpResponse.c_str(), httpResponse.size());
+		return ;
 	}
-	return headers;
+	// Get file size
+	client.response->seekg(0, std::ios::end);
+	client.response_size = client.response->tellg();
+	client.response->seekg(0, std::ios::beg);
+
+    // Convert the file length to a string
+	std::stringstream ss;
+	ss << client.response_size;
+    std::string content_length = ss.str();
+
+    // Construct the HTTP response with the file content
+    std::string httpResponse = "HTTP/1.1 200 OK\r\n"
+                              "Content-Type: " + getMimeType(getFileExtension(fullpath)) + "\r\n"
+                              "Connection: keep-alive\r\n"
+                              "Content-Length: " + content_length + "\r\n"
+                              "\r\n";
+
+    // Send the rheaders to the client
+    write(client.sockfd, httpResponse.c_str(), httpResponse.size());
+}
+
+void	send_response_body(Client &client)
+{
+	int	count;
+
+	if (client.sent == client.response_size)
+	{
+		std::cout << "all data is sent for " << client.sockfd << std::endl;
+		client.sending = false;
+		client.recieved = 0;
+		client.sent = 0;
+		client.response_size = 0;
+		client.path.clear();
+		client.headers.clear();
+		delete client.response;
+		return ;
+	}
+	client.response->read(client.buffer, MAX_SIZE);
+	count = client.response->gcount();
+	client.sent += write(client.sockfd, client.buffer, count);
+	std::cout << client.sent << "     " << client.response_size << std::endl;
+		if (client.sent == client.response_size)
+	{
+		std::cout << "all data is sent for " << client.sockfd << std::endl;
+		client.sending = false;
+		client.recieved = 0;
+		client.sent = 0;
+		client.response_size = 0;
+		client.path.clear();
+		client.headers.clear();
+		delete client.response;
+		return ;
+	}
 }
 
 void	ConfigManager::eventListener()
@@ -120,7 +197,7 @@ void	ConfigManager::eventListener()
 	std::vector<Server>::iterator	it;
 	std::vector<Client>::iterator	itc;
 	Client							client;
-
+	int								r;
 	while (true)
 	{
 		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 0)
@@ -133,35 +210,54 @@ void	ConfigManager::eventListener()
 		{
 			if ((it = this->findListenSocket(events[i].data.fd)) != servers.end())
 			{
-				std::cout << "new Client connected" << std::endl;
+				std::cout << "\nnew Client connected..." << std::endl;
 				it->acceptConnection(client);
-				epoll_add(epfd, client.sockfd);
-				client.read = true;
-				client.write = true;
+				epoll_add2(epfd, client.sockfd);
 				clients.push_back(client);
 			}
 			else
 			{
-				// Client is ready for readness
 				itc = this->findConnectSocket(events[i].data.fd);
-				if (itc->read)
+				
+				if (events[i].events & EPOLLIN)
 				{
-					std::cout << "read client request" << std::endl;
-					get_headers(itc->sockfd);
-					itc->read = false;
-					
+					// Client is ready for readness
+					r = recv(itc->sockfd, itc->buffer + itc->recieved, MAX_REQUEST_SIZE - itc->recieved, 0);
+					// keep alive connection
+					if (r < 1)
+					{
+						std::cout << "\nclient disconnected..." << std::endl;
+						epoll_delete(epfd, itc->sockfd);
+						close(itc->sockfd);
+						clients.erase(itc);
+					}
+					else
+					{
+						std::cout << "\n" << r << " bytes of request recieved from " << itc->sockfd << std::endl;
+						// std::string	headers(itc->buffer, itc->recieved);
+						itc->headers.append(itc->buffer + itc->recieved, r);
+						itc->recieved += r;
+						if (itc->headers.find("\r\n\r\n") != std::string::npos)
+						{
+							// SENDING Headers
+							std::cout << "sending headers..." << std::endl;
+							std::cout << itc->headers << std::endl;
+							std::stringstream	ss(itc->headers);
+							ss >> itc->path;
+							itc->path.clear();
+							ss >> itc->path;
+							std::cout << itc->path << std::endl;
+							send_response_headers(*itc);
+						}
+					}
 				}
-				else if (itc->write)
+				else if ((events[i].events & EPOLLOUT) && itc->sending)
 				{
-					std::cout << "response set" << std::endl;
-					send_response(itc->sockfd);
-					itc->write = false;
-					// epoll_delete(epfd, events[i].data.fd);
-					// close(events[i].data.fd);
+					// sending body
+					send_response_body(*itc);
 				}
 			}
 		}
-		sleep(2);
-		std::cout << "an iteration is done" << std::endl;
+		sleep(1);
 	}
 }

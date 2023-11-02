@@ -38,6 +38,7 @@ int			isunit(int unit);
 bool        addr_resolver(struct addrinfo **resolved_addr, const char *host, const char *port);
 std::string	socket_addr_ntop(struct addrinfo *bind_addr);
 void	    epoll_add(int epfd, int fd);
+void	    epoll_add2(int epfd, int fd);
 void	    epoll_delete(int epfd, int fd);
 
 /*                  debug                                       */
