@@ -12,6 +12,7 @@
 #include <signal.h>
 #include <sstream>
 #include <string.h>
+#include <string>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -19,7 +20,7 @@
 #include <vector>
 
 #define CHUNK 1024
-# define PACKET_SIZE 2024
+#define PACKET_SIZE 2024
 
 class Server {
 public:
@@ -53,7 +54,6 @@ typedef struct {
   bool connectionClosed;
 } t_dataPool;
 
-
 // class t_dataPool {
 //   std::ifstream *responsFile;
 // public:
@@ -63,6 +63,22 @@ typedef struct {
 //   bool isToRead;
 //   bool isToWrite;
 // };
+
+class requestHeaders {
+  std::string methodType;
+  std::string URI;
+  std::string ProtocolVersion;
+  size_t contentLenght;
+  std::string Host;
+};
+
+class responsHeaders {
+  std::string Status; // Ex: 200 OK // if errno of open ==> ENOENT not found | EACCES permission denied
+  std::string contentType;
+  std::string contentLenght;
+  std::string server;
+  std::string ContentEncoding; // always will be set to chunked
+};
 
 std::string get_headers(int sockfd);
 #endif
