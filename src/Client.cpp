@@ -1,10 +1,8 @@
 #include "Client.hpp"
 
 
-Client::Client(int sockfd, int listen_socket)
+Client::Client()
 {
-	this->sockfd = sockfd;
-	this->listen_socket = listen_socket;
 	this->recieved = 0;
 	this->sent = 0;
 	this->response = NULL;
@@ -12,6 +10,7 @@ Client::Client(int sockfd, int listen_socket)
 	this->headers = "";
 	this->sending = false;
 	this->path = "";
+
 }
 
 void    Client::resetState()

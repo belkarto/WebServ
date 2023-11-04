@@ -7,20 +7,24 @@
 class Client
 {
     public:
-        int             sockfd;
-        int             listen_socket;
-        char            buffer[MAX_SIZE];
-        int             recieved;
-        int             sent;
-        std::ifstream   *response;
-        int             response_size;
-        std::string     headers;
-        bool            sending;
-        std::string     path;
+        int                 connect_socket;
+        char*               str_addr;
+        int                 listen_socket;
+        char                buffer[MAX_SIZE];
+        int                 recieved;
+        int                 sent;
+        std::ifstream       *response;
+        int                 response_size;
+        std::string         headers;
+        bool                sending;
+        bool                recieving;
+        std::string         path;
+        time_t              last_activity;
 
-        Client(){}
-        Client(int sockfd, int listen_socket);
+        Client();
 
         void    resetState();
+
+   
 };
 #endif

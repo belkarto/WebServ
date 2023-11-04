@@ -1,6 +1,7 @@
 #================================= Files to compile ===================================
-SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser ConfigManager Exception
-LIB_FILES = signal split addr_resolver ft_stoll ft_stoi socket_addr_ntop displayConfig epoll_add
+SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer MultiplexerUtils Exception
+LIB_FILES = signal split addr_resolver ft_stoll ft_stoi socket_addr_ntop displayConfig epoll_add \
+			getFileExtension getMimeType getFileSize
 # #======================================================================================
 
 # #====================================== Colors ========================================
