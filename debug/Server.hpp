@@ -20,6 +20,7 @@
 #include <vector>
 
 #define CHUNK 1024
+#define BUFFER_SIZE 10
 #define PACKET_SIZE 2024
 
 class Server {
@@ -64,20 +65,33 @@ typedef struct {
 //   bool isToWrite;
 // };
 
+#define HEADERS_END 1
+#define CONTINUE 0
+
 class requestHeaders {
-  std::string methodType;
-  std::string URI;
-  std::string ProtocolVersion;
-  size_t contentLenght;
-  std::string Host;
+  std::string methodType;      // GET POST DELETE
+  std::string URI;             // path to file or rediriction
+  std::string ProtocolVersion; // only accept HTTP/1.1 version if it doesnt
+                               // match respond with 505 error page
+  std::string contentType;     // text/html image/jpeg  .....
+  std::string contentLenght;   // needed in post request
+  std::string Host;            // host or also server_name
+  std::string connenction;     // keep-alive OR closed
+  int seekIndex;
+
+public:
+  requestHeaders(int connectionFd);
+  int headersParser(std::string &buffer);
 };
 
 class responsHeaders {
-  std::string Status; // Ex: 200 OK // if errno of open ==> ENOENT not found | EACCES permission denied
+  std::string ResponsStatus;   // Ex: 200 OK // if errno of open ==> ENOENT not
+                               // found | EACCES permission denied
+  std::string server;          // webServ *server name*
+  std::string ContentEncoding; // always will be set to chunked
+  std::string connenction;     // keep-alive OR closed
   std::string contentType;
   std::string contentLenght;
-  std::string server;
-  std::string ContentEncoding; // always will be set to chunked
 };
 
 std::string get_headers(int sockfd);

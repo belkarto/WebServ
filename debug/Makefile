@@ -4,7 +4,7 @@ CC = c++
 
 CPPFLAGS = -Wall -Wextra -Werror -std=c++11 -g
 
-SRC = Server.cpp main.cpp
+SRC = Server.cpp main.cpp requestParser.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

@@ -137,6 +137,8 @@ void readRequest(t_dataPool &data) {
 void getRequestAndRespond(std::vector<t_dataPool> &data, fd_set &masterSet) {
   size_t i = 0;
   for (; i < data.size(); i++) {
+    requestHeaders test(data[i].connectionFd);
+    exit(0);
     if (data[i].isToRead) {
       std::cout << "readRequest" << std::endl;
       readRequest(data[i]);
