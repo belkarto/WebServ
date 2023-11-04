@@ -21,7 +21,11 @@ requestHeaders::requestHeaders(int connectionFd) {
     headers.append(bufferInstens);
     headersState = headersParser(headers);
     if (headersState == HEADERS_END) {
-      std::cout << headers << std::endl;
+      std::cout << "-----> " << readed << std::endl;
+      std::cout << "-----> " << seekIndex << std::endl;
+      std::cout << methodType << " " << URI << " " << ProtocolVersion << "\n"
+                << contentLenght << "\n" << Host << "\n" << connection
+                << std::endl;
       exit(100);
     }
   }
@@ -40,19 +44,46 @@ int requestHeaders::headersParser(std::string &buffer) {
   if (buffer.find("\n") == std::string::npos)
     return CONTINUE;
   std::string line;
-  std::istringstream iss(buffer);
-  std::string validMethods[] = {"GET", "POST", "DELETE"};
   int wordsInLine;
-  int lenght = 0;
+  size_t pos;
+  std::string requestHeaders::*attribs[] = {
+      &requestHeaders::contentType,
+      &requestHeaders::Host,
+      &requestHeaders::connection,
+      &requestHeaders::contentLenght,
+  };
+  std::string directiveList[] = {
+      "Content-Type:", "Host:", "Connection:", "Content-Length:"};
 
-  while (std::getline(iss, line)) {
+  while (true) {
+    pos = buffer.find("\n");
+    if (pos == std::string::npos)
+      return CONTINUE;
+    line = buffer.substr(0, pos);
+    seekIndex += line.size() + 1;
+    buffer.erase(0, pos + 1);
     wordsInLine = wordCount(line);
-    std::cout << wordsInLine << std::endl;
-    if (wordsInLine == 0)
+    if (!wordsInLine)
       return HEADERS_END;
+    std::istringstream iss(line);
+    if (wordsInLine == 3) {
+      iss >> methodType >> URI >> ProtocolVersion;
+    } else {
+      std::string directive;
+      iss >> directive;
+      for (int i = 0; i < DIRECT_LIST_SIZE; i++) {
+        if (directive == directiveList[i])
+          iss >> this->*attribs[i];
+      }
+    }
   }
-  lenght = buffer.find_last_of("\n");
-  buffer.erase(0, lenght + 1);
-  return CONTINUE;
 }
-
+// while (std::getline(iss, line)) {
+//   wordsInLine = wordCount(line);
+//   std::cout << wordsInLine << std::endl;
+//   if (wordsInLine == 0)
+//     return HEADERS_END;
+// }
+// lenght = buffer.find_last_of("\n");
+// buffer.erase(0, lenght + 1);
+// return CONTINUE;

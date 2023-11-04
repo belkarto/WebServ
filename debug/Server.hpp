@@ -20,7 +20,7 @@
 #include <vector>
 
 #define CHUNK 1024
-#define BUFFER_SIZE 10
+#define BUFFER_SIZE 1024
 #define PACKET_SIZE 2024
 
 class Server {
@@ -66,6 +66,7 @@ typedef struct {
 // };
 
 #define HEADERS_END 1
+#define DIRECT_LIST_SIZE 4
 #define CONTINUE 0
 
 class requestHeaders {
@@ -76,8 +77,8 @@ class requestHeaders {
   std::string contentType;     // text/html image/jpeg  .....
   std::string contentLenght;   // needed in post request
   std::string Host;            // host or also server_name
-  std::string connenction;     // keep-alive OR closed
-  int seekIndex;
+  std::string connection;     // keep-alive OR closed
+  size_t seekIndex;
 
 public:
   requestHeaders(int connectionFd);
