@@ -68,17 +68,12 @@ void sendGetHeaders(int fd, size_t len) {
   std::stringstream ss;
   std::string sLen;
   write(fd, "HTTP/1.1 200 OK\n", 16);
-  write(1, "HTTP/1.1 200 OK\n", 16);
   write(fd, "Content-Type: text/html\n", 24);
-  write(1, "Content-Type: text/html\n", 24);
   write(fd, "Content-Length: ", 16);
-  write(1, "Content-Length: ", 16);
   ss << len;
   ss >> sLen;
   write(fd, sLen.c_str(), sLen.size());
-  write(1, sLen.c_str(), sLen.size());
   write(fd, "\n\n", 2);
-  write(1, "\n\n", 2);
 }
 
 void getMethod(const char *filePath, t_dataPool &data) {
@@ -138,7 +133,10 @@ void getRequestAndRespond(std::vector<t_dataPool> &data, fd_set &masterSet) {
   size_t i = 0;
   for (; i < data.size(); i++) {
     requestHeaders test(data[i].connectionFd);
-    exit(0);
+    std::cout << test.methodType << " " << test.URI << " "
+              << test.ProtocolVersion << " " << test.contentType << " "
+              << test.contentLenght << " " << test.Host << " "
+              << test.connection << std::endl;
     if (data[i].isToRead) {
       std::cout << "readRequest" << std::endl;
       readRequest(data[i]);

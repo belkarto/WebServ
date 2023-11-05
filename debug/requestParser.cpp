@@ -9,8 +9,8 @@ requestHeaders::requestHeaders(int connectionFd) {
 
   seekIndex = 0;
   while (true) {
-    // readed = recv(connectionFd, buffer, BUFFER_SIZE, MSG_DONTWAIT);
-    readed = read(connectionFd, buffer, BUFFER_SIZE);
+    readed = recv(connectionFd, buffer, BUFFER_SIZE, 0);
+    // readed = read(connectionFd, buffer, BUFFER_SIZE);
     if (readed < 0) {
       perror("recv fialed");
       exit(1);
@@ -21,12 +21,8 @@ requestHeaders::requestHeaders(int connectionFd) {
     headers.append(bufferInstens);
     headersState = headersParser(headers);
     if (headersState == HEADERS_END) {
-      std::cout << "-----> " << readed << std::endl;
-      std::cout << "-----> " << seekIndex << std::endl;
-      std::cout << methodType << " " << URI << " " << ProtocolVersion << "\n"
-                << contentLenght << "\n" << Host << "\n" << connection
-                << std::endl;
-      exit(100);
+      lseek(connectionFd, seekIndex, SEEK_SET);
+      break;
     }
   }
 }
@@ -78,12 +74,3 @@ int requestHeaders::headersParser(std::string &buffer) {
     }
   }
 }
-// while (std::getline(iss, line)) {
-//   wordsInLine = wordCount(line);
-//   std::cout << wordsInLine << std::endl;
-//   if (wordsInLine == 0)
-//     return HEADERS_END;
-// }
-// lenght = buffer.find_last_of("\n");
-// buffer.erase(0, lenght + 1);
-// return CONTINUE;

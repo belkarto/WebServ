@@ -2,6 +2,7 @@
 #define SERVER_HPP
 
 #include <arpa/inet.h>
+#include <cwchar>
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
@@ -20,7 +21,7 @@
 #include <vector>
 
 #define CHUNK 1024
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 10
 #define PACKET_SIZE 2024
 
 class Server {
@@ -70,6 +71,7 @@ typedef struct {
 #define CONTINUE 0
 
 class requestHeaders {
+public:
   std::string methodType;      // GET POST DELETE
   std::string URI;             // path to file or rediriction
   std::string ProtocolVersion; // only accept HTTP/1.1 version if it doesnt
@@ -77,7 +79,7 @@ class requestHeaders {
   std::string contentType;     // text/html image/jpeg  .....
   std::string contentLenght;   // needed in post request
   std::string Host;            // host or also server_name
-  std::string connection;     // keep-alive OR closed
+  std::string connection;      // keep-alive OR closed
   size_t seekIndex;
 
 public:
