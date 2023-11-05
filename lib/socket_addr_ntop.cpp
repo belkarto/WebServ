@@ -15,6 +15,6 @@ std::string	socket_addr_ntop(struct addrinfo *bind_addr)
 	inet_ntop(bind_addr->ai_family, addr, ipstr, INET6_ADDRSTRLEN);
     ss << port;
 	p = "";
-	p.append(ipstr).append("").append(ss.str());
+	p.append(ipstr).append(":").append(ss.str());
 	return (p);
 }

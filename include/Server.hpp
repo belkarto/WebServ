@@ -20,7 +20,7 @@ typedef struct Location
 class Server
 {
 	public:
-		int											sockfd;
+		int											listen_socket;
 		std::string									bind_addr_str;
 		struct addrinfo								*bind_addr;
 		std::vector<std::string>					server_name;

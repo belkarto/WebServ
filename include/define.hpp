@@ -23,4 +23,10 @@
 /*      ConfigManager   */
 # define MAX_EVENTS 1024
 
+
+typedef int Socket;
+
+# define Running true
+# define TIMEOUT 60
+
 #endif
