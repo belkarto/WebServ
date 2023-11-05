@@ -1,0 +1,115 @@
+#include "ScalarConverter.hpp"
+
+ScalarConverter::ScalarConverter() {}
+ScalarConverter::ScalarConverter(const ScalarConverter& other) {(void) other;}
+ScalarConverter& ScalarConverter::operator=(const ScalarConverter& other) {
+    (void) other;
+    return *this;}
+ScalarConverter::~ScalarConverter() {}
+
+void ScalarConverter::convert(const char* literal)
+{
+    try{
+        int value = ft_stoi(literal);
+        printConversion(static_cast<char> (value), value, static_cast<float>(value), static_cast<double>(value));
+    }
+    catch(const std::exception& e){
+        try{
+            float value = ft_stof(literal);
+            printConversion(static_cast<char> (value), static_cast<int>(value), value, static_cast<double>(value));            
+        }
+        catch(const std::exception& e){
+            try{
+                double value = ft_stod(literal);
+                printConversion(static_cast<char> (value), static_cast<int>(value), static_cast<float>(value), value);
+            }
+            catch(const std::exception& e){
+                try{
+                    char value = ft_stoc(literal);
+                    printConversion(value, static_cast<int>(value), static_cast<float>(value), static_cast<double>(value)); 
+                }
+                catch(const std::exception& e){
+                    std::cout << "char: impossible" << std::endl;
+                    std::cout << "int: impossible" << std::endl;
+                    std::cout << "float: impossible" << std::endl;
+                    std::cout << "double: impossible" << std::endl;
+                }
+            }
+        }
+    } 
+}
+
+void    printConversion(char convertedChar, int convertedInt, float convertedFloat, double convertedDouble)
+{
+    bool nanf = std::isnan(convertedFloat);
+    bool nan = std::isnan(convertedDouble);
+    std::cout << "char: ";
+    if (nanf || nan || convertedDouble < CHAR_MIN || convertedDouble > CHAR_MAX)
+        std::cout << "impossible" << std::endl;
+    else
+        if (isprint(convertedChar))
+            std::cout << convertedChar << std::endl;
+        else
+               std::cout << "non printable" << std::endl;
+    std::cout << "int: ";
+    if (nanf || nan || convertedDouble < INT_MIN || convertedDouble > INT_MAX)
+        std::cout << "impossible" << std::endl;
+    else
+        std::cout << convertedInt<< std::endl;
+    std::cout << "float: ";
+    if (std::isinf(convertedFloat) || nanf)
+        std::cout << convertedFloat << "f" << std::endl;            
+    else if (!(std::abs(convertedFloat) > std::numeric_limits<float>::max()))
+        std::cout << std::setprecision(FLT_MAX_PRECISION) << convertedFloat << (std::floor(convertedFloat) == convertedFloat ? ".0" : "") << "f" << std::endl; 
+    else
+        std::cout << "impossible" << std::endl;
+    if (nan || std::isinf(convertedDouble))
+        std::cout << "double: " << convertedDouble << std::endl;
+    else
+        std::cout << std::setprecision(DBL_MAX_PRECISION) << "double: " << convertedDouble << (std::floor(convertedDouble) == convertedDouble ? ".0" : "") << std::endl;
+}
+
+int ft_stoi(const char *str)
+{
+    errno = 0;
+    char *endptr;
+    long value = std::strtol(str, &endptr, 10);
+    if (errno == ERANGE || value > INT_MAX || value < INT_MIN)
+        throw std::out_of_range(str);
+    if (str == endptr || *endptr)
+        throw std::invalid_argument(str);
+    return value;    
+}
+
+float ft_stof(const char *str)
+{
+    errno = 0;
+    char *endptr;
+    float value = std::strtof(str, &endptr);
+    if (errno == ERANGE)
+        throw std::out_of_range(str);
+    if (str == endptr || *endptr != 'f' || endptr[1])
+        throw std::invalid_argument(str);
+    if (!strchr(str, '.') && strcmp(str, "inff") && strcmp(str, "nanf"))
+        throw std::invalid_argument(str);
+    return value;
+}
+
+double ft_stod(const char *str)
+{
+    errno = 0; 
+    char *endptr;
+    double value = std::strtod(str, &endptr);
+    if (errno == ERANGE)
+        throw std::out_of_range(str);
+    if (str == endptr || *endptr)
+        throw std::invalid_argument(str);
+    return value;
+}
+
+char ft_stoc(const char *str)
+{
+    if (*str == '\0' || *(str + 1) == '\0')
+        return *str;
+    throw std::invalid_argument(str);
+}
