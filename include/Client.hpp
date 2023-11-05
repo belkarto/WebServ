@@ -3,28 +3,24 @@
 
 #include "webserv.hpp"
 
-# define MAX_SIZE  1024
+
 class Client
 {
     public:
         int                 connect_socket;
-        char*               str_addr;
         int                 listen_socket;
-        char                buffer[MAX_SIZE];
-        int                 recieved;
-        int                 sent;
-        std::ifstream       *response;
-        int                 response_size;
+        char*               header_buffer;
         std::string         headers;
-        bool                sending;
-        bool                recieving;
-        std::string         path;
+        time_t              header_timeout;
+        bool                headers_recieved;
+        bool                request_line_received;
         time_t              last_activity;
+        std::string         method;
+        std::string         request_uri;
 
         Client();
 
         void    resetState();
-
-   
+        bool    headerTimedout();
 };
 #endif

@@ -20,13 +20,11 @@
 # define NUM_SERV_DIREC 8
 # define NUM_LOCAT_DIREC 7
 
-/*      ConfigManager   */
-# define MAX_EVENTS 1024
-
-
-typedef int Socket;
-
-# define Running true
-# define TIMEOUT 60
-
+/*                Multiplexer                                  */
+# define Running                    true
+# define MAX_EVENTS                 1024
+# define CLIENT_HEADER_BUFFER_SIZE  1024
+# define CLIENT_HEADER_timeout      30
+# define KEEPALIVE_CONNECTIONS      500
+# define KEEPALIVE_TIMEOUT          60
 #endif

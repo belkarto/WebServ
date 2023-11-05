@@ -48,16 +48,10 @@ void    Server::initServer()
 
 void	Server::acceptConnection(Client &client)
 {
-	struct sockaddr_in	*p;
-	struct sockaddr     addr;
-    socklen_t           addrlen;
-
-	if ((client.connect_socket = accept(listen_socket, &addr, &addrlen)) < 0)
+	if ((client.connect_socket = accept(listen_socket, NULL, NULL)) < 0)
 	{
 		perror("accept()");
 		exit(EXIT_FAILURE);
 	}
 	client.listen_socket = this->listen_socket;
-	p = (struct sockaddr_in*) &addr;
-	client.str_addr = inet_ntoa(p->sin_addr);
 }
