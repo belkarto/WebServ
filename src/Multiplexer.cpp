@@ -48,25 +48,28 @@ void	Multiplexer::registerClient(std::vector<Server>::iterator& serverIt)
 {
 	Client client;
 	serverIt->acceptConnection(client);
+	std::cout << "a client " << client.connect_socket << " has connected..." << std::endl;
 	epoll_add2(epfd, client.connect_socket);
 	clients.push_back(client);
 }
 
-void	Multiplexer::dropClient(std::vector<Client>::iterator& clientIt)
+int	Multiplexer::dropClient(std::vector<Client>::iterator& clientIt)
 {
+	std::cout << "a client " << clientIt->connect_socket << " has disconnected..." << std::endl;
 	close(clientIt->connect_socket);
 	clients.erase(clientIt);
+	return (RETURN_FAILURE);
 }
 
 
 void	Multiplexer::sendResponseHeaders(std::vector<Client>::iterator& clientIt)
 {
-	
+	(void)clientIt;
 }
 
 void	Multiplexer::sendResponse(std::vector<Client>::iterator& clientIt)
 {
-	
+	send_response(clientIt);
 }
 
 void	Multiplexer::connectionListener()
@@ -77,7 +80,8 @@ void	Multiplexer::connectionListener()
 
 	while (Running)
 	{
-		
+		dropInactiveClients();
+		// std::cout << "waiting for incoming connections..." << std::endl;
 		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 0)
 		{
 			perror("epoll_wait()");
@@ -92,10 +96,13 @@ void	Multiplexer::connectionListener()
 			{
 				if ((events[i].events & EPOLLIN))
 				{
-					if (clientIt->headers_recieved)
+					if (clientIt->headers_all_recieved)
 					{
-						// body ignored in case of GET and DELETE
-						// handle POST body
+						
+						// in case of GET and HEAD => read the body and discard it or send an error;
+						// in case of POST => read the the body and process it
+						//// content length !!!
+						// make sure not to exceed max body size
 						// TODO:
 					}
 					else
@@ -103,17 +110,27 @@ void	Multiplexer::connectionListener()
 				}
 				if ((events[i].events & EPOLLOUT))
 				{
-					if (!clientIt->headers_recieved && clientIt->headerTimedout())
+					// if (!clientIt->headers_all_recieved && clientIt->headerTimedout())
+					// {
+					// 	// send 408 error  (Request Time-out)
+					// 	// TODO:
+					// 	std::cout << "request timedout" << std::endl;
+					// 	dropClient(clientIt);
+					// }
+					if (clientIt->headers_all_recieved)
 					{
-						// send 408 error  (Request Time-out)
-						// TODO:
-						dropClient(clientIt);
-					}
-					else if (clientIt->headers_recieved)
-					{
+						std::cout << "sending data" << std::endl;
 						// send response in case of a GET request
 						// TODO:
-						// pay attention to GET request
+						// pay attention to the type request
+						// when all data is set 
+						send_response(clientIt);
+						if (clientIt->response_all_sent)
+						{
+							clientIt->last_activity = time(NULL);
+							clientIt->keepalive_requests += 1;
+							clientIt->resetState();
+						}
 					}
 				}
 			}
@@ -142,7 +159,7 @@ std::vector<Client>::iterator	Multiplexer::findConnectSocket(int socket, std::ve
 	return clientIt;
 }
 
-void	Multiplexer::getClientHeaders(std::vector<Client>::iterator& clientIt)
+int	Multiplexer::getClientHeaders(std::vector<Client>::iterator& clientIt)
 {
 	ssize_t				r;
 	const char			*delim;
@@ -150,12 +167,15 @@ void	Multiplexer::getClientHeaders(std::vector<Client>::iterator& clientIt)
 	size_t				pos;
 
 	clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
-	bzero(clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE);
 	r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
 	if (r < 1)
-		dropClient(clientIt);
+	{
+		std::cout << "recv" << std::endl;
+		return (dropClient(clientIt));
+	}
 	else
 	{
+		delim = "\r\n";
 		clientIt->headers.append(clientIt->header_buffer, r);
 		if (!clientIt->request_line_received)
 		{
@@ -163,13 +183,13 @@ void	Multiplexer::getClientHeaders(std::vector<Client>::iterator& clientIt)
 			{
 				// 414 (Request-URI Too Large)
 				// TODO:
-				dropClient(clientIt);
+				std::cout << "request-uri too large" << std::endl;
+				return (dropClient(clientIt));
 			}
 			else
 			{
 				ss << clientIt->headers;
-				ss >> clientIt->method;
-				ss >> clientIt->request_uri;
+				ss >> clientIt->method >> clientIt->request_uri;
 				// parse method && URI 
 				// TODO:
 				clientIt->headers = clientIt->headers.substr(pos + sizeof(delim));
@@ -183,7 +203,7 @@ void	Multiplexer::getClientHeaders(std::vector<Client>::iterator& clientIt)
 }
 
 
-void	Multiplexer::parseHeaders(std::vector<Client>::iterator& clientIt)
+int	Multiplexer::parseHeaders(std::vector<Client>::iterator& clientIt)
 {
 	size_t	pos, offset;
 
@@ -192,19 +212,37 @@ void	Multiplexer::parseHeaders(std::vector<Client>::iterator& clientIt)
 	{
 		if (pos == offset)	// end of headers
 		{
-			clientIt->headers_recieved = true;
-			clientIt->headers.clear();
+			clientIt->headers_all_recieved = true;
 			return ;
 		}
 		offset = pos + 2;
-		// set header field;
+		// parse header fields;
 		// TODO:
 	}
 	if (!offset && clientIt->headers.length() > CLIENT_HEADER_BUFFER_SIZE)
 	{
 		// 400 (Bad Request)
 		// TODO:
-		dropClient(clientIt);
+		std::cout << "bad request" << std::endl;
+		return (dropClient(clientIt));
 	}
 	clientIt->headers = clientIt->headers.substr(offset);
+}
+
+
+void	Multiplexer::dropInactiveClients()
+{
+	std::vector<Client>::iterator	it;
+	time_t							elapsed;
+
+	it = clients.begin();
+	for (; it != clients.end(); it++)
+	{
+		elapsed = time(NULL) - it->last_activity;
+		if (it->keepalive_requests && elapsed > KEEPALIVE_TIMEOUT)
+		{
+			std::cout << "connection timed out" << std::endl;
+			dropClient(it);
+		}
+	}
 }

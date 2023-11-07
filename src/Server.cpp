@@ -38,7 +38,7 @@ void    Server::initServer()
 	}
 
 	std::cout << "listening socket..." << std::endl;
-	if (listen(listen_socket, 10) < 0)
+	if (listen(listen_socket, BACKLOG) < 0)
 	{
 		perror("listen()");
 		exit(EXIT_FAILURE);

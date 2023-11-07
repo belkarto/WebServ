@@ -7,8 +7,7 @@
 #include "ConfigParser.hpp"
 
 
-void	send_response_body(Client &client);
-void	send_response_headers(Client &client);
+void send_response(std::vector<Client>::iterator &clientIt);
 
 class Multiplexer
 {
@@ -25,12 +24,13 @@ class Multiplexer
 
 		void							registerServers();
 		void							registerClient(std::vector<Server>::iterator& serverIt);
-		void							dropClient(std::vector<Client>::iterator& clientIt);
+		int								dropClient(std::vector<Client>::iterator& clientIt);
 		void							connectionListener();
-		void							getClientHeaders(std::vector<Client>::iterator& clientIt);
-		void							parseHeaders(std::vector<Client>::iterator& clientIt);
+		int								getClientHeaders(std::vector<Client>::iterator& clientIt);
+		int								parseHeaders(std::vector<Client>::iterator& clientIt);
 		void							sendResponseHeaders(std::vector<Client>::iterator& clientIt);
 		void							sendResponse(std::vector<Client>::iterator& clientIt);
+		void							dropInactiveClients();
 		std::vector<Server>::iterator	findListenSocket(int socket, std::vector<Server> &sockets);
 		std::vector<Client>::iterator	findConnectSocket(int socket, std::vector<Client> &sockets);
 };

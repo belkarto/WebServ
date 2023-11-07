@@ -5,15 +5,24 @@ Client::Client()
 {
 	headers = "";
 	header_timeout = time(NULL);
-	headers_recieved = false;
+	headers_all_recieved = false;
 	request_line_received = false;
 	method = "";
 	request_uri = "";
+	last_activity = 0;
+	keepalive_requests = 0;
+	response_all_sent = false;
 }
 
 void    Client::resetState()
 {
-
+	headers = "";
+	header_timeout = time(NULL);
+	headers_all_recieved = false;
+	request_line_received = false;
+	method = "";
+	request_uri = "";
+	response_all_sent = false;
 }
 
 bool	Client::headerTimedout()

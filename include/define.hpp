@@ -27,4 +27,7 @@
 # define CLIENT_HEADER_timeout      30
 # define KEEPALIVE_CONNECTIONS      500
 # define KEEPALIVE_TIMEOUT          60
+# define BACKLOG                    500
+# define RETURN_SUCCESS             1
+# define RETURN_FAILURE             0
 #endif

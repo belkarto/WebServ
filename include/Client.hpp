@@ -12,9 +12,11 @@ class Client
         char*               header_buffer;
         std::string         headers;
         time_t              header_timeout;
-        bool                headers_recieved;
+        bool                headers_all_recieved;
         bool                request_line_received;
         time_t              last_activity;
+        int                 keepalive_requests;
+        bool                response_all_sent;
         std::string         method;
         std::string         request_uri;
 

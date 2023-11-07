@@ -1,51 +1,20 @@
 #include "Multiplexer.hpp"
 
-void send_response_headers(Client &client) 
+void send_response(std::vector<Client>::iterator &clientIt)
 {
+    std::string response = "HTTP/1.1 200 OK\n";
+    response += "Content-Type: text/html\n";
 
-	client.sending = true;	// client can recieve response body after recieving headers
-	std::stringstream	ss1(client.headers);
-	ss1 >> client.path;
-	client.path.clear();
-	ss1 >> client.path;
-	std::string	fullpath = "www" + client.path;
-	// client.response = new std::ifstream("www/html/example.html");
-	client.response = new std::ifstream(fullpath.c_str());
+    // Calculate the length of the response body
+    std::string htmlBody = "<!DOCTYPE html>\n<html>\n<body>\n<h1>Hello World!</h1>\n</body>\n</html>\n\n\n";
+    int contentLength = htmlBody.size();
 
-	// Get file size
-	client.response->seekg(0, std::ios::end);
-	client.response_size = client.response->tellg();
-	client.response->seekg(0, std::ios::beg);
+    // Add the Content-Length header
+    response += "Content-Length: " + std::to_string(contentLength) + "\n";
 
-    // Convert the file length to a string
-	std::stringstream ss;
-	ss << client.response_size;
-    std::string content_length = ss.str();
+    response += "\n";
+    response += htmlBody;
 
-    // Construct the HTTP response with the file content
-    std::string httpResponse = "HTTP/1.1 200 OK\r\n"
-                              "Content-Type: " + getMimeType(getFileExtension(fullpath)) + "\r\n"
-                              "Connection: keep-alive\r\n"
-                              "Content-Length: " + content_length + "\r\n"
-                              "\r\n";
-
-    // Send the rheaders to the client
-    write(client.connect_socket, httpResponse.c_str(), httpResponse.size());
+    write(clientIt->connect_socket, response.c_str(), response.size());
+	clientIt->response_all_sent = true;
 }
-
-void	send_response_body(Client &client)
-{
-	int	count;
-
-	client.response->read(client.buffer, MAX_SIZE);
-	count = client.response->gcount();
-	client.sent += write(client.connect_socket, client.buffer, count);
-	// std::cout << client.sent << "     " << client.response_size << std::endl;
-	if (client.sent == client.response_size)
-	{
-		std::cout << "all data is sent for " << client.connect_socket << std::endl;
-		client.resetState();
-		return ;
-	}
-}
-
