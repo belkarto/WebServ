@@ -48,14 +48,12 @@ void	Multiplexer::registerClient(std::vector<Server>::iterator& serverIt)
 {
 	Client client;
 	serverIt->acceptConnection(client);
-	std::cout << "a client " << client.connect_socket << " has connected..." << std::endl;
 	epoll_add2(epfd, client.connect_socket);
 	clients.push_back(client);
 }
 
 int	Multiplexer::dropClient(std::vector<Client>::iterator& clientIt)
 {
-	std::cout << "a client " << clientIt->connect_socket << " has disconnected..." << std::endl;
 	close(clientIt->connect_socket);
 	clients.erase(clientIt);
 	return (RETURN_FAILURE);
@@ -81,7 +79,6 @@ void	Multiplexer::connectionListener()
 	while (Running)
 	{
 		dropInactiveClients();
-		// std::cout << "waiting for incoming connections..." << std::endl;
 		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 0)
 		{
 			perror("epoll_wait()");
@@ -98,39 +95,18 @@ void	Multiplexer::connectionListener()
 				{
 					if (clientIt->headers_all_recieved)
 					{
-						
-						// in case of GET and HEAD => read the body and discard it or send an error;
-						// in case of POST => read the the body and process it
-						//// content length !!!
-						// make sure not to exceed max body size
 						// TODO:
 					}
 					else
-						getClientHeaders(clientIt);
+						getClientRequest(clientIt);
 				}
 				if ((events[i].events & EPOLLOUT))
 				{
-					// if (!clientIt->headers_all_recieved && clientIt->headerTimedout())
-					// {
-					// 	// send 408 error  (Request Time-out)
-					// 	// TODO:
-					// 	std::cout << "request timedout" << std::endl;
-					// 	dropClient(clientIt);
-					// }
-					if (clientIt->headers_all_recieved)
+					if (clientIt->request_all_processed)
 					{
-						std::cout << "sending data" << std::endl;
-						// send response in case of a GET request
 						// TODO:
-						// pay attention to the type request
-						// when all data is set 
-						send_response(clientIt);
 						if (clientIt->response_all_sent)
-						{
-							clientIt->last_activity = time(NULL);
-							clientIt->keepalive_requests += 1;
 							clientIt->resetState();
-						}
 					}
 				}
 			}
@@ -159,20 +135,18 @@ std::vector<Client>::iterator	Multiplexer::findConnectSocket(int socket, std::ve
 	return clientIt;
 }
 
-int	Multiplexer::getClientHeaders(std::vector<Client>::iterator& clientIt)
+int	Multiplexer::getClientRequest(std::vector<Client>::iterator& clientIt)
 {
 	ssize_t				r;
 	const char			*delim;
 	std::stringstream	ss;
 	size_t				pos;
+	std::string			method, request_uri, protocol_version;
 
 	clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
 	r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
 	if (r < 1)
-	{
-		std::cout << "recv" << std::endl;
 		return (dropClient(clientIt));
-	}
 	else
 	{
 		delim = "\r\n";
@@ -183,27 +157,27 @@ int	Multiplexer::getClientHeaders(std::vector<Client>::iterator& clientIt)
 			{
 				// 414 (Request-URI Too Large)
 				// TODO:
-				std::cout << "request-uri too large" << std::endl;
 				return (dropClient(clientIt));
 			}
 			else
 			{
 				ss << clientIt->headers;
-				ss >> clientIt->method >> clientIt->request_uri;
-				// parse method && URI 
-				// TODO:
+				ss >> method >> request_uri >> protocol_version;
+				clientIt->fields["method"] = method;
+				clientIt->fields["request_uri"] = request_uri;
+				clientIt->fields["protocol_version"] = protocol_version;
 				clientIt->headers = clientIt->headers.substr(pos + sizeof(delim));
 				clientIt->request_line_received = true;
 			}
 		}
 		if (!clientIt->headers.empty())
-			parseHeaders(clientIt);
+			getRequestHeaders(clientIt);
 		delete[] clientIt->header_buffer;
 	}
 }
 
 
-int	Multiplexer::parseHeaders(std::vector<Client>::iterator& clientIt)
+int	Multiplexer::getRequestHeaders(std::vector<Client>::iterator& clientIt)
 {
 	size_t	pos, offset;
 
@@ -216,14 +190,11 @@ int	Multiplexer::parseHeaders(std::vector<Client>::iterator& clientIt)
 			return ;
 		}
 		offset = pos + 2;
-		// parse header fields;
-		// TODO:
 	}
 	if (!offset && clientIt->headers.length() > CLIENT_HEADER_BUFFER_SIZE)
 	{
 		// 400 (Bad Request)
 		// TODO:
-		std::cout << "bad request" << std::endl;
 		return (dropClient(clientIt));
 	}
 	clientIt->headers = clientIt->headers.substr(offset);
