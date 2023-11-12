@@ -50,3 +50,8 @@ long long	converttobytes(long long size, char unit)
 	// 	safeConvert(size, 1024);
 	return size;
 }
+
+int not_digit(char c) 
+{
+    return !std::isdigit(static_cast<unsigned char>(c));
+}

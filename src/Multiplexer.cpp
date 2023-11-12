@@ -1,5 +1,19 @@
 #include "Multiplexer.hpp"
 
+const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {
+	"Host",
+	"Content-Type",
+	"Content-Length",
+	"Connection",
+};
+
+void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(std::string &field) = {
+	&Client::setHost,
+	&Client::setContentType,
+	&Client::setContentLength,
+	&Client::setConnection,
+};
+
 Multiplexer::Multiplexer(std::vector<Server> &servers) : servers(servers)
 {
 	epfd = epoll_create1(0);
@@ -52,11 +66,10 @@ void	Multiplexer::registerClient(std::vector<Server>::iterator& serverIt)
 	clients.push_back(client);
 }
 
-int	Multiplexer::dropClient(std::vector<Client>::iterator& clientIt)
+void	Multiplexer::dropClient(std::vector<Client>::iterator& clientIt)
 {
 	close(clientIt->connect_socket);
 	clients.erase(clientIt);
-	return (RETURN_FAILURE);
 }
 
 
@@ -67,7 +80,7 @@ void	Multiplexer::sendResponseHeaders(std::vector<Client>::iterator& clientIt)
 
 void	Multiplexer::sendResponse(std::vector<Client>::iterator& clientIt)
 {
-	send_response(clientIt);
+	(void)clientIt;
 }
 
 void	Multiplexer::connectionListener()
@@ -135,13 +148,12 @@ std::vector<Client>::iterator	Multiplexer::findConnectSocket(int socket, std::ve
 	return clientIt;
 }
 
-int	Multiplexer::getClientRequest(std::vector<Client>::iterator& clientIt)
+void	Multiplexer::getClientRequest(std::vector<Client>::iterator& clientIt)
 {
 	ssize_t				r;
 	const char			*delim;
-	std::stringstream	ss;
 	size_t				pos;
-	std::string			method, request_uri, protocol_version;
+	
 
 	clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
 	r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
@@ -155,20 +167,12 @@ int	Multiplexer::getClientRequest(std::vector<Client>::iterator& clientIt)
 		{
 			if ((pos = clientIt->headers.find(delim)) == std::string::npos)
 			{
-				// 414 (Request-URI Too Large)
-				// TODO:
-				return (dropClient(clientIt));
+				errorHandler(clientIt, 414, "Request-URI Too Large");
+				return ;
 			}
 			else
-			{
-				ss << clientIt->headers;
-				ss >> method >> request_uri >> protocol_version;
-				clientIt->fields["method"] = method;
-				clientIt->fields["request_uri"] = request_uri;
-				clientIt->fields["protocol_version"] = protocol_version;
-				clientIt->headers = clientIt->headers.substr(pos + sizeof(delim));
-				clientIt->request_line_received = true;
-			}
+				parseRequestLine(clientIt, pos);
+				
 		}
 		if (!clientIt->headers.empty())
 			getRequestHeaders(clientIt);
@@ -177,7 +181,7 @@ int	Multiplexer::getClientRequest(std::vector<Client>::iterator& clientIt)
 }
 
 
-int	Multiplexer::getRequestHeaders(std::vector<Client>::iterator& clientIt)
+void	Multiplexer::getRequestHeaders(std::vector<Client>::iterator& clientIt)
 {
 	size_t	pos, offset;
 
@@ -193,9 +197,8 @@ int	Multiplexer::getRequestHeaders(std::vector<Client>::iterator& clientIt)
 	}
 	if (!offset && clientIt->headers.length() > CLIENT_HEADER_BUFFER_SIZE)
 	{
-		// 400 (Bad Request)
-		// TODO:
-		return (dropClient(clientIt));
+		errorHandler(clientIt, 400, "Bad Request");
+		return ;
 	}
 	clientIt->headers = clientIt->headers.substr(offset);
 }
@@ -211,9 +214,6 @@ void	Multiplexer::dropInactiveClients()
 	{
 		elapsed = time(NULL) - it->last_activity;
 		if (it->keepalive_requests && elapsed > KEEPALIVE_TIMEOUT)
-		{
-			std::cout << "connection timed out" << std::endl;
 			dropClient(it);
-		}
 	}
 }

@@ -6,17 +6,16 @@
 #include "Client.hpp"
 #include "ConfigParser.hpp"
 
-
 void send_response(std::vector<Client>::iterator &clientIt);
 
 class Multiplexer
 {
-	std::vector<Server>				&servers;
-	std::vector<Client>				clients;
-	int								epfd;
-	int								num_events;
-	struct epoll_event				events[MAX_EVENTS];
-	
+	std::vector<Server>					&servers;
+	std::vector<Client>					clients;
+	int									epfd;
+	int									num_events;
+	struct epoll_event					events[MAX_EVENTS];
+	std::vector<std::string>     		headers_fields;
 
 	public:
 		Multiplexer(std::vector<Server>	&servers);
@@ -24,16 +23,21 @@ class Multiplexer
 
 		void							registerServers();
 		void							registerClient(std::vector<Server>::iterator& serverIt);
-		int								dropClient(std::vector<Client>::iterator& clientIt);
+		void							dropClient(std::vector<Client>::iterator& clientIt);
 		void							connectionListener();
-		int								getClientRequest(std::vector<Client>::iterator& clientIt);
-		int								getRequestHeaders(std::vector<Client>::iterator& clientIt);
-		void							parseRequestLine(std::vector<Client>::iterator& clientIt);
+		void							getClientRequest(std::vector<Client>::iterator& clientIt);
+		void							getRequestHeaders(std::vector<Client>::iterator& clientIt);
+		void							parseRequestLine(std::vector<Client>::iterator& clientIt, size_t pos);
 		void							parseRequestHeaders(std::vector<Client>::iterator& clientIt);
 		void							sendResponseHeaders(std::vector<Client>::iterator& clientIt);
 		void							sendResponse(std::vector<Client>::iterator& clientIt);
+		void							errorHandler(std::vector<Client>::iterator& clientIt, int code, const std::string& error);
 		void							dropInactiveClients();
 		std::vector<Server>::iterator	findListenSocket(int socket, std::vector<Server> &sockets);
 		std::vector<Client>::iterator	findConnectSocket(int socket, std::vector<Client> &sockets);
+
+		static const char*				fields[HEADERS_FIELDS_SIZE];
+		static void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(const std::string &field);
+		static std::map<std::string, std::string>	mime_types;
 };
 #endif
