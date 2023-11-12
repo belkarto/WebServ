@@ -14,7 +14,6 @@ class Client
         bool                                request_line_received;
         bool                                headers_all_recieved;
         bool                                request_all_processed;
-        bool								error_occurred; 
         bool                                response_all_sent;
         time_t                              last_activity;
         int                                 keepalive_requests;
@@ -22,6 +21,8 @@ class Client
 
         Client();
         void								resetState();
+        void								setProtocolVersion(std::string &protocol_version);
+		void								setMethod(std::string &method);
 		void								setHost(std::string &host);
         void								setContentType(std::string &content_type);
 		void								setContentLength(std::string &content_length);

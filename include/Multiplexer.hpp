@@ -4,9 +4,7 @@
 #include "webserv.hpp"
 #include "Server.hpp"
 #include "Client.hpp"
-#include "ConfigParser.hpp"
 
-void send_response(std::vector<Client>::iterator &clientIt);
 
 class Multiplexer
 {
@@ -27,11 +25,10 @@ class Multiplexer
 		void							connectionListener();
 		void							getClientRequest(std::vector<Client>::iterator& clientIt);
 		void							getRequestHeaders(std::vector<Client>::iterator& clientIt);
-		void							parseRequestLine(std::vector<Client>::iterator& clientIt, size_t pos);
+		void							parseRequestLine(std::vector<Client>::iterator& clientIt);
 		void							parseRequestHeaders(std::vector<Client>::iterator& clientIt);
 		void							sendResponseHeaders(std::vector<Client>::iterator& clientIt);
 		void							sendResponse(std::vector<Client>::iterator& clientIt);
-		void							errorHandler(std::vector<Client>::iterator& clientIt, int code, const std::string& error);
 		void							dropInactiveClients();
 		std::vector<Server>::iterator	findListenSocket(int socket, std::vector<Server> &sockets);
 		std::vector<Client>::iterator	findConnectSocket(int socket, std::vector<Client> &sockets);

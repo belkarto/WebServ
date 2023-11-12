@@ -1,5 +1,7 @@
 #include "Multiplexer.hpp"
 
+std::map<std::string, std::string> Multiplexer::mime_types;
+
 const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {
 	"Host",
 	"Content-Type",
@@ -111,7 +113,18 @@ void	Multiplexer::connectionListener()
 						// TODO:
 					}
 					else
-						getClientRequest(clientIt);
+					{
+						try
+						{
+							getClientRequest(clientIt);	
+						}
+						catch (const RequestParsingException& e)
+						{
+							std::cout << e.what() << std::endl;
+							dropClient(clientIt);
+							continue;
+						}
+					}
 				}
 				if ((events[i].events & EPOLLOUT))
 				{
@@ -166,13 +179,10 @@ void	Multiplexer::getClientRequest(std::vector<Client>::iterator& clientIt)
 		if (!clientIt->request_line_received)
 		{
 			if ((pos = clientIt->headers.find(delim)) == std::string::npos)
-			{
-				errorHandler(clientIt, 414, "Request-URI Too Large");
-				return ;
-			}
-			else
-				parseRequestLine(clientIt, pos);
-				
+				throw RequestParsingException("414 URI Too Long");
+			parseRequestLine(clientIt);
+			clientIt->headers = clientIt->headers.substr(pos + 2);
+			clientIt->request_line_received = true;
 		}
 		if (!clientIt->headers.empty())
 			getRequestHeaders(clientIt);
@@ -188,7 +198,7 @@ void	Multiplexer::getRequestHeaders(std::vector<Client>::iterator& clientIt)
 	offset = 0;
 	while ((pos = clientIt->headers.find("\r\n", offset)) != std::string::npos)
 	{
-		if (pos == offset)	// end of headers
+		if (pos == offset)
 		{
 			clientIt->headers_all_recieved = true;
 			return ;
@@ -196,10 +206,7 @@ void	Multiplexer::getRequestHeaders(std::vector<Client>::iterator& clientIt)
 		offset = pos + 2;
 	}
 	if (!offset && clientIt->headers.length() > CLIENT_HEADER_BUFFER_SIZE)
-	{
-		errorHandler(clientIt, 400, "Bad Request");
-		return ;
-	}
+		throw RequestParsingException("431 Request Header Fields Too Large");
 	clientIt->headers = clientIt->headers.substr(offset);
 }
 

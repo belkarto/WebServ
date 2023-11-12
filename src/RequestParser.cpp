@@ -17,33 +17,25 @@ void	Multiplexer::parseRequestHeaders(std::vector<Client>::iterator& clientIt)
 			getline(ss, key, ':');
 			ss >> value;
 			if ((it = std::find(headers_fields.begin(), headers_fields.end(), key)) != headers_fields.end())
-				fields_setters[ptrdiff_t (it - headers_fields.begin())];
+				fields_setters[std::ptrdiff_t (it - headers_fields.begin())];
 		}
 		else
-		{
-			errorHandler(clientIt, 400, "Bad request");
-			return;
-		}
+			throw RequestParsingException("400 Bad Request");
 	}
 }
 
-void	Multiplexer::parseRequestLine(std::vector<Client>::iterator& clientIt, size_t pos)
+void	Multiplexer::parseRequestLine(std::vector<Client>::iterator& clientIt)
 {
-	std::stringstream	ss;
-	std::string			method, request_uri, protocol_version;
+	std::stringstream					ss;
+	std::string							method, request_uri, protocol_version, blank;
 
 	ss << clientIt->headers;
-	ss >> method >> request_uri >> protocol_version;
-	clientIt->fields["method"] = method;
+	ss >> method >> request_uri >> protocol_version >> blank;
+	if (method.empty() || request_uri.empty() || protocol_version.empty() || !blank.empty())
+		throw RequestParsingException("400 Bad Request");
 	clientIt->fields["request_uri"] = request_uri;
-	clientIt->fields["protocol_version"] = protocol_version;
-	if (method.empty() || request_uri.empty() || protocol_version.empty())
-	{
-		// bad request;
-	}
-	clientIt->headers = clientIt->headers.substr(pos + sizeof("\r\n"));
-	clientIt->request_line_received = true;
-
+	clientIt->setMethod(method);
+	clientIt->setProtocolVersion(protocol_version);
 }
 
 /*
