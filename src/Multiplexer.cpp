@@ -24,6 +24,7 @@ Multiplexer::Multiplexer(std::vector<Server> &servers) : servers(servers)
 		perror("epoll_create1()");
 		exit(EXIT_FAILURE);
 	}
+	headers_fields.assign(fields, fields + HEADERS_FIELDS_SIZE);
 	this->registerServers();
 	this->connectionListener();
 }
@@ -173,7 +174,7 @@ void	Multiplexer::getClientRequest(std::vector<Client>::iterator& clientIt)
 	if (r < 1)
 		return (dropClient(clientIt));
 	else
-	{
+	{ 
 		delim = "\r\n";
 		clientIt->headers.append(clientIt->header_buffer, r);
 		if (!clientIt->request_line_received)
@@ -185,31 +186,10 @@ void	Multiplexer::getClientRequest(std::vector<Client>::iterator& clientIt)
 			clientIt->request_line_received = true;
 		}
 		if (!clientIt->headers.empty())
-			getRequestHeaders(clientIt);
+			parseRequestHeaders(clientIt);
 		delete[] clientIt->header_buffer;
 	}
 }
-
-
-void	Multiplexer::getRequestHeaders(std::vector<Client>::iterator& clientIt)
-{
-	size_t	pos, offset;
-
-	offset = 0;
-	while ((pos = clientIt->headers.find("\r\n", offset)) != std::string::npos)
-	{
-		if (pos == offset)
-		{
-			clientIt->headers_all_recieved = true;
-			return ;
-		}
-		offset = pos + 2;
-	}
-	if (!offset && clientIt->headers.length() > CLIENT_HEADER_BUFFER_SIZE)
-		throw RequestParsingException("431 Request Header Fields Too Large");
-	clientIt->headers = clientIt->headers.substr(offset);
-}
-
 
 void	Multiplexer::dropInactiveClients()
 {

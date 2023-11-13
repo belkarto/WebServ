@@ -24,7 +24,6 @@ class Multiplexer
 		void							dropClient(std::vector<Client>::iterator& clientIt);
 		void							connectionListener();
 		void							getClientRequest(std::vector<Client>::iterator& clientIt);
-		void							getRequestHeaders(std::vector<Client>::iterator& clientIt);
 		void							parseRequestLine(std::vector<Client>::iterator& clientIt);
 		void							parseRequestHeaders(std::vector<Client>::iterator& clientIt);
 		void							sendResponseHeaders(std::vector<Client>::iterator& clientIt);

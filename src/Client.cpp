@@ -50,34 +50,30 @@ void	Client::setConnection(std::string &connection)
 
 void	Client::setProtocolVersion(std::string &protocol_version)
 {
-	// std::stringstream	ss;
-	// std::string			prefix, major, minor;
-	// int					val1, val2;
-	// size_t				pos;
+	std::stringstream	ss;
+	std::string			prefix, major, minor;
+	int					val1, val2;
+	size_t				pos;
 
-	// if (protocol_version.find("HTTP/") != 0)
-	// 	throw RequestParsingException("400 Bad Request");
-	// pos = protocol_version.find('.', strlen("HTTP/"));
-	// if (pos != std::string::npos && pos == protocol_version.length() - 1)
-	// 	throw RequestParsingException("400 Bad Request");
-	// ss << protocol_version;
-	// std::getline(ss, prefix, '/');
-	// std::getline(ss, major, '.');
-	// ss >> minor;
-	// try
-	// {
-	// 	val1 = ft_stoi(major.c_str());
-	// 	if (!minor.empty())
-	// 	{
-	// 		val2 = ft_stoi(minor.c_str());
-	// 		if (val1 < val2)
-	// 			throw RequestParsingException("400 Bad Request");
-	// 	}
-	// }
-	// catch(std::exception &e)
-	// {
-	// 	throw RequestParsingException("400 Bad Request");
-	// }
+	if (protocol_version.find("HTTP/") != 0)
+		throw RequestParsingException("400 Bad Request");
+	pos = protocol_version.find('.', strlen("HTTP/"));
+	if (pos != std::string::npos && pos == protocol_version.length() - 1)
+		throw RequestParsingException("400 Bad Request");
+	ss << protocol_version;
+	std::getline(ss, prefix, '/');
+	std::getline(ss, major, '.');
+	ss >> minor;
+	try
+	{
+		val1 = ft_stoi(major.c_str());
+		if (!minor.empty())
+			val2 = ft_stoi(minor.c_str());
+	}
+	catch(std::exception &e)
+	{
+		throw RequestParsingException("400 Bad Request");
+	}
 	if (protocol_version != "HTTP/1.1")
 		throw RequestParsingException("505 HTTP Version Not Supported");
 	fields["protocol_version"] = protocol_version;

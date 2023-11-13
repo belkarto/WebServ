@@ -9,7 +9,7 @@ class Client
         int                                 connect_socket;
         int                                 listen_socket;
         char*                               header_buffer;
-        std::string                         headers;
+        std::string                         headers; 
         time_t                              header_timeout;
         bool                                request_line_received;
         bool                                headers_all_recieved;

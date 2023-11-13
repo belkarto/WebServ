@@ -10,6 +10,11 @@ void	Multiplexer::parseRequestHeaders(std::vector<Client>::iterator& clientIt)
 	offset = 0;
     while ((pos = clientIt->headers.find("\r\n", offset)) != std::string::npos)
 	{
+		if (pos == offset)
+		{
+			clientIt->headers_all_recieved = true;
+			return ;
+		}
 		header = clientIt->headers.substr(offset, pos - offset);
 		if ((sep = header.find(':')) != std::string::npos)
 		{
@@ -20,8 +25,14 @@ void	Multiplexer::parseRequestHeaders(std::vector<Client>::iterator& clientIt)
 				fields_setters[std::ptrdiff_t (it - headers_fields.begin())];
 		}
 		else
+		{
 			throw RequestParsingException("400 Bad Request");
+		}
+		offset = pos + 2;
 	}
+	if (!offset && clientIt->headers.length() > CLIENT_HEADER_BUFFER_SIZE)
+		throw RequestParsingException("431 Request Header Fields Too Large");
+	clientIt->headers = clientIt->headers.substr(offset);
 }
 
 void	Multiplexer::parseRequestLine(std::vector<Client>::iterator& clientIt)
