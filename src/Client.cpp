@@ -3,24 +3,23 @@
 
 Client::Client()
 {
-	this->recieved = 0;
-	this->sent = 0;
-	this->response = NULL;
-	this->response_size = 0;
-	this->headers = "";
-	this->sending = false;
-	this->path = "";
-
+	headers = "";
+	header_timeout = time(NULL);
+	headers_recieved = false;
+	request_line_received = false;
+	method = "";
+	request_uri = "";
 }
 
 void    Client::resetState()
 {
-	delete this->response;
-	this->recieved = 0;
-	this->sent = 0;
-	this->response = NULL;
-	this->response_size = 0;
-	this->headers.clear();
-	this->sending = false;
-	this->path = "";
+
+}
+
+bool	Client::headerTimedout()
+{
+	time_t	elapsed;
+
+	elapsed = time(NULL) - this->header_timeout;
+	return (elapsed > CLIENT_HEADER_timeout);
 }
