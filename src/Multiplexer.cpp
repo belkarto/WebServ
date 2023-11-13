@@ -3,17 +3,19 @@
 std::map<std::string, std::string> Multiplexer::mime_types;
 
 const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {
-	"Host",
-	"Content-Type",
-	"Content-Length",
-	"Connection",
+	"host",
+	"content-Type",
+	"content-Length",
+	"connection",
+	"transfer-encoding",
 };
 
-void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(std::string &field) = {
+void (Client::*Multiplexer::fields_setters[HEADERS_FIELDS_SIZE])(std::string &field) = {
 	&Client::setHost,
 	&Client::setContentType,
 	&Client::setContentLength,
 	&Client::setConnection,
+	&Client::setTransferEncoding,
 };
 
 Multiplexer::Multiplexer(std::vector<Server> &servers) : servers(servers)
