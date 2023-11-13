@@ -1,5 +1,21 @@
 #include "Multiplexer.hpp"
 
+std::map<std::string, std::string> Multiplexer::mime_types;
+
+const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {
+	"Host",
+	"Content-Type",
+	"Content-Length",
+	"Connection",
+};
+
+void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(std::string &field) = {
+	&Client::setHost,
+	&Client::setContentType,
+	&Client::setContentLength,
+	&Client::setConnection,
+};
+
 Multiplexer::Multiplexer(std::vector<Server> &servers) : servers(servers)
 {
 	epfd = epoll_create1(0);
@@ -8,6 +24,7 @@ Multiplexer::Multiplexer(std::vector<Server> &servers) : servers(servers)
 		perror("epoll_create1()");
 		exit(EXIT_FAILURE);
 	}
+	headers_fields.assign(fields, fields + HEADERS_FIELDS_SIZE);
 	this->registerServers();
 	this->connectionListener();
 }
@@ -61,12 +78,12 @@ void	Multiplexer::dropClient(std::vector<Client>::iterator& clientIt)
 
 void	Multiplexer::sendResponseHeaders(std::vector<Client>::iterator& clientIt)
 {
-	
+	(void)clientIt;
 }
 
 void	Multiplexer::sendResponse(std::vector<Client>::iterator& clientIt)
 {
-	
+	(void)clientIt;
 }
 
 void	Multiplexer::connectionListener()
@@ -77,7 +94,7 @@ void	Multiplexer::connectionListener()
 
 	while (Running)
 	{
-		
+		dropInactiveClients();
 		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 0)
 		{
 			perror("epoll_wait()");
@@ -92,28 +109,31 @@ void	Multiplexer::connectionListener()
 			{
 				if ((events[i].events & EPOLLIN))
 				{
-					if (clientIt->headers_recieved)
+					if (clientIt->headers_all_recieved)
 					{
-						// body ignored in case of GET and DELETE
-						// handle POST body
 						// TODO:
 					}
 					else
-						getClientHeaders(clientIt);
+					{
+						try
+						{
+							getClientRequest(clientIt);	
+						}
+						catch (const RequestParsingException& e)
+						{
+							std::cout << e.what() << std::endl;
+							dropClient(clientIt);
+							continue;
+						}
+					}
 				}
 				if ((events[i].events & EPOLLOUT))
 				{
-					if (!clientIt->headers_recieved && clientIt->headerTimedout())
+					if (clientIt->request_all_processed)
 					{
-						// send 408 error  (Request Time-out)
 						// TODO:
-						dropClient(clientIt);
-					}
-					else if (clientIt->headers_recieved)
-					{
-						// send response in case of a GET request
-						// TODO:
-						// pay attention to GET request
+						if (clientIt->response_all_sent)
+							clientIt->resetState();
 					}
 				}
 			}
@@ -142,69 +162,45 @@ std::vector<Client>::iterator	Multiplexer::findConnectSocket(int socket, std::ve
 	return clientIt;
 }
 
-void	Multiplexer::getClientHeaders(std::vector<Client>::iterator& clientIt)
+void	Multiplexer::getClientRequest(std::vector<Client>::iterator& clientIt)
 {
 	ssize_t				r;
 	const char			*delim;
-	std::stringstream	ss;
 	size_t				pos;
+	
 
 	clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
-	bzero(clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE);
 	r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
 	if (r < 1)
-		dropClient(clientIt);
+		return (dropClient(clientIt));
 	else
-	{
+	{ 
+		delim = "\r\n";
 		clientIt->headers.append(clientIt->header_buffer, r);
 		if (!clientIt->request_line_received)
 		{
 			if ((pos = clientIt->headers.find(delim)) == std::string::npos)
-			{
-				// 414 (Request-URI Too Large)
-				// TODO:
-				dropClient(clientIt);
-			}
-			else
-			{
-				ss << clientIt->headers;
-				ss >> clientIt->method;
-				ss >> clientIt->request_uri;
-				// parse method && URI 
-				// TODO:
-				clientIt->headers = clientIt->headers.substr(pos + sizeof(delim));
-				clientIt->request_line_received = true;
-			}
+				throw RequestParsingException("414 URI Too Long");
+			parseRequestLine(clientIt);
+			clientIt->headers = clientIt->headers.substr(pos + 2);
+			clientIt->request_line_received = true;
 		}
 		if (!clientIt->headers.empty())
-			parseHeaders(clientIt);
+			parseRequestHeaders(clientIt);
 		delete[] clientIt->header_buffer;
 	}
 }
 
-
-void	Multiplexer::parseHeaders(std::vector<Client>::iterator& clientIt)
+void	Multiplexer::dropInactiveClients()
 {
-	size_t	pos, offset;
+	std::vector<Client>::iterator	it;
+	time_t							elapsed;
 
-	offset = 0;
-	while ((pos = clientIt->headers.find("\r\n", offset)) != std::string::npos)
+	it = clients.begin();
+	for (; it != clients.end(); it++)
 	{
-		if (pos == offset)	// end of headers
-		{
-			clientIt->headers_recieved = true;
-			clientIt->headers.clear();
-			return ;
-		}
-		offset = pos + 2;
-		// set header field;
-		// TODO:
+		elapsed = time(NULL) - it->last_activity;
+		if (it->keepalive_requests && elapsed > KEEPALIVE_TIMEOUT)
+			dropClient(it);
 	}
-	if (!offset && clientIt->headers.length() > CLIENT_HEADER_BUFFER_SIZE)
-	{
-		// 400 (Bad Request)
-		// TODO:
-		dropClient(clientIt);
-	}
-	clientIt->headers = clientIt->headers.substr(offset);
 }

@@ -1,7 +1,7 @@
 #================================= Files to compile ===================================
-SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer MultiplexerUtils Exception
+SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer  Exception RequestParser
 LIB_FILES = signal split addr_resolver ft_stoll ft_stoi socket_addr_ntop displayConfig epoll_add \
-			getFileExtension getMimeType getFileSize
+			getFileSize
 # #======================================================================================
 
 # #====================================== Colors ========================================
@@ -30,7 +30,7 @@ CC			= c++
 
 OBJF		= .cache_exists
 
-FLAGS		=  -Wall -Wextra -Werror -std=c++11 -Iinclude -g
+FLAGS		=  -Wall -Wextra -Werror -std=c++98 -Iinclude -g
 #-g -fsanitize=address
 
 # #======================================================================================

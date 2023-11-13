@@ -87,7 +87,7 @@ void	ConfigParser::parseClientMaxBodySize()
 	if (directive_components.size() != 1)
 		throw ConfigFileParsingException("invalid number of arguments in client_max_body_size directive");
 	value =  directive_components.back();
-	it = std::find_if(value.begin(), value.end(), isalpha);
+	it = std::find_if(value.begin(), value.end(), not_digit);
 	if (it != value.end() && (!isunit(*it) || it != value.end() - 1))
 			throw ConfigFileParsingException("invalid value in client_max_body_size directive");
 	try
