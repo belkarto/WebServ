@@ -33,7 +33,7 @@ class Multiplexer
 		std::vector<Client>::iterator	findConnectSocket(int socket, std::vector<Client> &sockets);
 
 		static const char*				fields[HEADERS_FIELDS_SIZE];
-		static void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(const std::string &field);
+		static void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(std::string &field);
 		static std::map<std::string, std::string>	mime_types;
 };
 #endif

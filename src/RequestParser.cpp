@@ -6,6 +6,7 @@ void	Multiplexer::parseRequestHeaders(std::vector<Client>::iterator& clientIt)
 	std::string							header, key, value;
 	std::stringstream					ss;
 	std::vector<std::string>::iterator	it;
+	std::string::iterator				last;
 
 	offset = 0;
     while ((pos = clientIt->headers.find("\r\n", offset)) != std::string::npos)
@@ -18,16 +19,18 @@ void	Multiplexer::parseRequestHeaders(std::vector<Client>::iterator& clientIt)
 		header = clientIt->headers.substr(offset, pos - offset);
 		if ((sep = header.find(':')) != std::string::npos)
 		{
+			last = header.begin() + sep;
+			if (std::find_if(header.begin(), last, isspace) != last)
+				throw RequestParsingException("400 Bad Request");
 			ss << header;
 			getline(ss, key, ':');
-			ss >> value;
+			getline(ss, value);
+			std::transform(key.begin(), key.end(), key.begin(), tolower);
 			if ((it = std::find(headers_fields.begin(), headers_fields.end(), key)) != headers_fields.end())
-				fields_setters[std::ptrdiff_t (it - headers_fields.begin())];
+				((*clientIt).*(Multiplexer::fields_setters)[std::ptrdiff_t(it - headers_fields.begin())])(value);
 		}
 		else
-		{
 			throw RequestParsingException("400 Bad Request");
-		}
 		offset = pos + 2;
 	}
 	if (!offset && clientIt->headers.length() > CLIENT_HEADER_BUFFER_SIZE)
@@ -48,8 +51,3 @@ void	Multiplexer::parseRequestLine(std::vector<Client>::iterator& clientIt)
 	clientIt->setMethod(method);
 	clientIt->setProtocolVersion(protocol_version);
 }
-
-/*
-	Each header field consists of a case-insensitive field name followed by a colon (":"),
-	optional leading whitespace, the field value, and optional trailing whitespace.
-*/

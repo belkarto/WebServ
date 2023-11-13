@@ -27,5 +27,6 @@ class Client
         void								setContentType(std::string &content_type);
 		void								setContentLength(std::string &content_length);
 		void								setConnection(std::string &connection);
+        void								setTransferEncoding(std::string &encoding);
 };
 #endif
