@@ -77,7 +77,7 @@ void sendGetHeaders(int fd, size_t len) {
 }
 
 void getMethod(const char *filePath, t_dataPool &data) {
-  if ((data.responsFile = open(filePath, O_RDONLY)) < 0)
+  if ((data.responsFile = open(filePath + 1, O_RDONLY)) < 0)
     exit(1);
 
   std::ifstream respons(filePath);
@@ -93,8 +93,9 @@ void getMethod(const char *filePath, t_dataPool &data) {
 void sendReponse(t_dataPool &data) {
   char buffer[PACKET_SIZE];
   int readed;
+  std::cout << data.request->URI << std::endl;
   if (!data.sentHeaders)
-    getMethod("index.html", data);
+    getMethod(data.request->URI.c_str(), data);
   else {
     readed = read(data.responsFile, buffer, PACKET_SIZE);
     write(data.connectionFd, buffer, readed);
@@ -132,16 +133,12 @@ void readRequest(t_dataPool &data) {
 void getRequestAndRespond(std::vector<t_dataPool> &data, fd_set &masterSet) {
   size_t i = 0;
   for (; i < data.size(); i++) {
-    requestHeaders test(data[i].connectionFd);
-    std::cout << test.methodType << " " << test.URI << " "
-              << test.ProtocolVersion << " " << test.contentType << " "
-              << test.contentLenght << " " << test.Host << " "
-              << test.connection << std::endl;
     if (data[i].isToRead) {
-      std::cout << "readRequest" << std::endl;
-      readRequest(data[i]);
+      requestHeaders readed(data[i]);
+      data[i].request = &readed;
     }
     if (data[i].isToWrite) {
+      std::cout << "sending Respons" << std::endl;
       sendReponse(data[i]);
     }
     if (!data[i].isToRead && !data[i].isToWrite) {

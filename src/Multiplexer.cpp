@@ -133,7 +133,7 @@ void	Multiplexer::connectionListener()
 				{
 					if (clientIt->request_all_processed)
 					{
-						// TODO:
+						sendResponseToClient(*clientIt);
 						if (clientIt->response_all_sent)
 							clientIt->resetState();
 					}

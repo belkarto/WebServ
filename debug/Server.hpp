@@ -24,6 +24,8 @@
 #define BUFFER_SIZE 10
 #define PACKET_SIZE 2024
 
+class requestHeaders;
+
 class Server {
 public:
   const char *node;
@@ -54,6 +56,7 @@ typedef struct {
   bool isToRead;
   bool isToWrite;
   bool connectionClosed;
+  requestHeaders *request;
 } t_dataPool;
 
 // class t_dataPool {
@@ -64,8 +67,6 @@ typedef struct {
 //   bool sentHeaders;
 //   bool isToRead;
 //   bool isToWrite;
-// };
-
 #define HEADERS_END 1
 #define DIRECT_LIST_SIZE 4
 #define CONTINUE 0
@@ -83,11 +84,12 @@ public:
   size_t seekIndex;
 
 public:
-  requestHeaders(int connectionFd);
+  requestHeaders(t_dataPool &data);
   int headersParser(std::string &buffer);
 };
 
 class responsHeaders {
+  public:
   std::string ResponsStatus;   // Ex: 200 OK // if errno of open ==> ENOENT not
                                // found | EACCES permission denied
   std::string server;          // webServ *server name*
@@ -96,6 +98,8 @@ class responsHeaders {
   std::string contentType;
   std::string contentLenght;
 };
+// };
+
 
 std::string get_headers(int sockfd);
 #endif

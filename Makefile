@@ -1,5 +1,6 @@
 #================================= Files to compile ===================================
-SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer  Exception RequestParser
+SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer  Exception RequestParser \
+						ResponsParser
 LIB_FILES = signal split addr_resolver ft_stoll ft_stoi socket_addr_ntop displayConfig epoll_add \
 			getFileSize
 # #======================================================================================

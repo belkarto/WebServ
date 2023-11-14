@@ -23,26 +23,32 @@ void	Server::emplaceBackLocation()
 
 void    Server::initServer()
 {
-	std::cout << "creating socket..." << std::endl;
+	int					reuse = 0;
 	if ((listen_socket = socket(bind_addr->ai_family, bind_addr->ai_socktype, bind_addr->ai_protocol)) < 0)
 	{
 		perror("socket()");
 		exit(EXIT_FAILURE);		
 	}
     
-	std::cout << "binding socket..." << std::endl;
+	reuse = 1;
+	if (setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0)
+	{
+		perror("setsockopt()");
+		exit(EXIT_FAILURE);
+	}
+
 	if (bind(listen_socket, bind_addr->ai_addr, bind_addr->ai_addrlen))
 	{
 		perror("bind()");
 		exit(EXIT_FAILURE);
 	}
 
-	std::cout << "listening socket..." << std::endl;
 	if (listen(listen_socket, BACKLOG) < 0)
 	{
 		perror("listen()");
 		exit(EXIT_FAILURE);
 	}	
+  std::cout << "listen on " << bind_addr_str << std::endl;
 }
 
 

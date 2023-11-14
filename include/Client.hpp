@@ -15,6 +15,7 @@ class Client
         bool                                headers_all_recieved;
         bool                                request_all_processed;
         bool                                response_all_sent;
+        bool                                response_template_set;
         time_t                              last_activity;
         int                                 keepalive_requests;
         std::map<std::string, std::string>  fields;

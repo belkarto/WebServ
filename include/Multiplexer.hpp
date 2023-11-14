@@ -31,6 +31,7 @@ class Multiplexer
 		void							dropInactiveClients();
 		std::vector<Server>::iterator	findListenSocket(int socket, std::vector<Server> &sockets);
 		std::vector<Client>::iterator	findConnectSocket(int socket, std::vector<Client> &sockets);
+    void              sendResponseToClient(Client clientData);
 
 		static const char*				fields[HEADERS_FIELDS_SIZE];
 		static void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(std::string &field);

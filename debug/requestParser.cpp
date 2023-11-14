@@ -1,7 +1,7 @@
 #include "Server.hpp"
 #include <sys/socket.h>
 
-requestHeaders::requestHeaders(int connectionFd) {
+requestHeaders::requestHeaders(t_dataPool &data) {
   ssize_t readed;
   char buffer[BUFFER_SIZE];
   int headersState;
@@ -9,7 +9,7 @@ requestHeaders::requestHeaders(int connectionFd) {
 
   seekIndex = 0;
   while (true) {
-    readed = recv(connectionFd, buffer, BUFFER_SIZE, 0);
+    readed = recv(data.connectionFd, buffer, BUFFER_SIZE, 0);
     // readed = read(connectionFd, buffer, BUFFER_SIZE);
     if (readed < 0) {
       perror("recv fialed");
@@ -21,7 +21,9 @@ requestHeaders::requestHeaders(int connectionFd) {
     headers.append(bufferInstens);
     headersState = headersParser(headers);
     if (headersState == HEADERS_END) {
-      lseek(connectionFd, seekIndex, SEEK_SET);
+      lseek(data.connectionFd, seekIndex, SEEK_SET);
+      data.isToRead = false;
+      data.isToWrite = true;
       break;
     }
   }
