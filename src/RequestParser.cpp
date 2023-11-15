@@ -44,7 +44,7 @@ void	Multiplexer::parseRequestLine(std::vector<Client>::iterator& clientIt)
 	std::string							method, request_uri, protocol_version, blank;
 
 	ss << clientIt->headers;
-	ss >> method >> request_uri >> protocol_version >> blank;
+	ss >> method >> request_uri >> protocol_version;
 	if (method.empty() || request_uri.empty() || protocol_version.empty() || !blank.empty())
 		throw RequestParsingException("400 Bad Request");
 	clientIt->fields["request_uri"] = request_uri;

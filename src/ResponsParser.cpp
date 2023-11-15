@@ -3,5 +3,5 @@
 void Multiplexer::sendResponseToClient(Client clientData)
 {
   (void)clientData;
-  std::cout << clientData.fields["host:"] << std::endl;
+  std::cout << "herrrrr---->" << std::endl;
 }
