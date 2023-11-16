@@ -18,7 +18,7 @@ void (Client::*Multiplexer::fields_setters[HEADERS_FIELDS_SIZE])(std::string &fi
 	&Client::setTransferEncoding,
 };
 
-Multiplexer::Multiplexer(std::vector<Server> &servers) : servers(servers)
+Multiplexer::Multiplexer(SERVVECT &servers) : servers(servers)
 {
 	epfd = epoll_create1(0);
 	if (epfd < 0)
@@ -33,7 +33,7 @@ Multiplexer::Multiplexer(std::vector<Server> &servers) : servers(servers)
 
 Multiplexer::~Multiplexer()
 {
-	std::vector<Server>::iterator	serverIt;
+	SERVIT	serverIt;
 
 	serverIt = servers.begin();
 	for (; serverIt != servers.end(); serverIt++)
@@ -46,8 +46,8 @@ Multiplexer::~Multiplexer()
 void	Multiplexer::registerServers()
 {
 	std::map<std::string, int>				sockfds;
-	std::vector<Server>::iterator			it;
 	std::map<std::string, int>::iterator	it2;
+	SERVIT			it;
 
 	it = servers.begin();
 	for (; it != servers.end(); it++)
@@ -63,7 +63,7 @@ void	Multiplexer::registerServers()
 	}
 }
 
-void	Multiplexer::registerClient(std::vector<Server>::iterator& serverIt)
+void	Multiplexer::registerClient(SERVIT& serverIt)
 {
 	Client client;
 	serverIt->acceptConnection(client);
@@ -71,28 +71,28 @@ void	Multiplexer::registerClient(std::vector<Server>::iterator& serverIt)
 	clients.push_back(client);
 }
 
-void	Multiplexer::dropClient(std::vector<Client>::iterator& clientIt)
+void	Multiplexer::dropClient(CLIENTIT& clientIt)
 {
 	close(clientIt->connect_socket);
 	clients.erase(clientIt);
 }
 
 
-void	Multiplexer::sendResponseHeaders(std::vector<Client>::iterator& clientIt)
+void	Multiplexer::sendResponseHeaders(CLIENTIT& clientIt)
 {
 	(void)clientIt;
 }
 
-void	Multiplexer::sendResponse(std::vector<Client>::iterator& clientIt)
+void	Multiplexer::sendResponse(CLIENTIT& clientIt)
 {
 	(void)clientIt;
 }
 
 void	Multiplexer::connectionListener()
 {
-	int								i;
-	std::vector<Server>::iterator	serverIt;
-	std::vector<Client>::iterator	clientIt;
+	int			i;
+	SERVIT		serverIt;
+	CLIENTIT	clientIt;
 
 	while (Running)
 	{
@@ -144,9 +144,9 @@ void	Multiplexer::connectionListener()
 }
 
 
-std::vector<Server>::iterator	Multiplexer::findListenSocket(int socket, std::vector<Server> &sockets)
+SERVIT	Multiplexer::findListenSocket(int socket, SERVVECT &sockets)
 {
-	std::vector<Server>::iterator	serverIt;
+	SERVIT	serverIt;
 
 	serverIt = sockets.begin();
 	while (serverIt != sockets.end() && serverIt->listen_socket != socket)
@@ -154,9 +154,9 @@ std::vector<Server>::iterator	Multiplexer::findListenSocket(int socket, std::vec
 	return serverIt;
 }
 
-std::vector<Client>::iterator	Multiplexer::findConnectSocket(int socket, std::vector<Client> &sockets)
+CLIENTIT	Multiplexer::findConnectSocket(int socket, CLIENTVECT &sockets)
 {
-	std::vector<Client>::iterator	clientIt;
+	CLIENTIT	clientIt;
 
 	clientIt = sockets.begin();
 	while (clientIt != sockets.end() && clientIt->connect_socket != socket)
@@ -164,12 +164,9 @@ std::vector<Client>::iterator	Multiplexer::findConnectSocket(int socket, std::ve
 	return clientIt;
 }
 
-void	Multiplexer::getClientRequest(std::vector<Client>::iterator& clientIt)
+void	Multiplexer::getClientRequest(CLIENTIT& clientIt)
 {
 	ssize_t				r;
-	const char			*delim;
-	size_t				pos;
-	
 
 	clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
 	r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
@@ -177,16 +174,9 @@ void	Multiplexer::getClientRequest(std::vector<Client>::iterator& clientIt)
 		return (dropClient(clientIt));
 	else
 	{ 
-		delim = "\r\n";
 		clientIt->headers.append(clientIt->header_buffer, r);
 		if (!clientIt->request_line_received)
-		{
-			if ((pos = clientIt->headers.find(delim)) == std::string::npos)
-				throw RequestParsingException("414 URI Too Long");
 			parseRequestLine(clientIt);
-			clientIt->headers = clientIt->headers.substr(pos + 2);
-			clientIt->request_line_received = true;
-		}
 		if (!clientIt->headers.empty())
 			parseRequestHeaders(clientIt);
 		delete[] clientIt->header_buffer;
@@ -195,8 +185,8 @@ void	Multiplexer::getClientRequest(std::vector<Client>::iterator& clientIt)
 
 void	Multiplexer::dropInactiveClients()
 {
-	std::vector<Client>::iterator	it;
-	time_t							elapsed;
+	CLIENTIT	it;
+	time_t		elapsed;
 
 	it = clients.begin();
 	for (; it != clients.end(); it++)
