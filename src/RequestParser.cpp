@@ -25,6 +25,7 @@ void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
 			ss << header;
 			getline(ss, key, ':');
 			getline(ss, value);
+			trim(value);
 			std::transform(key.begin(), key.end(), key.begin(), tolower);
 			if ((it = std::find(headers_fields.begin(), headers_fields.end(), key)) != headers_fields.end())
 				((*clientIt).*(Multiplexer::fields_setters)[std::ptrdiff_t(it - headers_fields.begin())])(value);

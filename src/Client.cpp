@@ -16,65 +16,29 @@ void    Client::resetState()
 
 void	Client::setTransferEncoding(std::string &encoding)
 {
-	(void) encoding;
+	fields["Transfer-Encoding"] = encoding;
 }
-
 
 void	Client::setContentType(std::string &content_type)
 {
-	std::map<std::string, std::string>::iterator	it;
-
-	if ((it = Multiplexer::mime_types.find(content_type)) != Multiplexer::mime_types.end())
-		fields["Content-Type"] = content_type;
-	else
-		throw RequestParsingException("400 Bad Request");
+	fields["Content-Type"] = content_type;
 }
 
 void	Client::setHost(std::string &host)
 {
-	std::vector<std::string>	directives;
-
-	split(directives, host);
-	if (directives.empty() || directives.size() > 1)
-		throw RequestParsingException("400 Bad Request");
 	fields["host"] = host;
 }
 
 void	Client::setContentLength(std::string &content_length)
 {
-	std::vector<std::string>	directives;
-	std::string::iterator 		it;
-
-	split(directives, content_length);
-	if (directives.empty() || directives.size() > 1)
-		throw RequestParsingException("400 Bad Request");
-	if ((std::find_if(directives[0].begin(), directives[0].end(), not_digit)) != directives[0].end())
-		throw RequestParsingException("400 Bad Request");
-	try
-	{
-		ft_stoll(directives[0].c_str());
-	}
-	catch (std::exception &e)
-	{
-		throw RequestParsingException("400 Bad Request");
-	}
-	fields["Content-Length"] = directives[0];
-
+	fields["Content-Length"] = content_length;
 }
 
 void	Client::setConnection(std::string &connection)
 {
-	std::vector<std::string>	directives;
-
-	split(directives, connection);
-	if (directives.empty() || directives.size() > 1 || fields.find("Connection") != fields.end())
-		throw RequestParsingException("400 Bad Request");
-	if (directives[0] == "close" || directives[0] == "keep-alive")
-		fields["Connection"] = connection;
-	else
-		throw RequestParsingException("400 Bad Request");
-
+	fields["Connection"] = connection;
 }
+
 void	Client::setProtocolVersion(std::string &protocol_version)
 {
 	std::stringstream		ss;
