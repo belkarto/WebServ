@@ -2,6 +2,7 @@
 # define CLIENT_HPP
 
 #include "Multiplexer.hpp"
+#include "ResponseTemplate.hpp"
 
 class Client
 {
@@ -19,6 +20,7 @@ class Client
         time_t                              last_activity;
         int                                 keepalive_requests;
         std::map<std::string, std::string>  fields;
+    ResponseTemplate ResponseTemplate;
 
         Client();
         void								resetState();
