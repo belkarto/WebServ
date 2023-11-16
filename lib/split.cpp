@@ -9,3 +9,14 @@ void    split(std::vector<std::string>& params, std::stringstream& ss)
     ss.clear();
     ss.str("");
 }
+
+void    split(std::vector<std::string>& params, std::string str)
+{
+    std::stringstream   ss;
+    std::string         param;
+
+    ss << str;
+    params.clear();
+    while (ss >> param)
+        params.push_back(param);
+}

@@ -14,10 +14,11 @@ void    Client::resetState()
 
 }
 
-void	Client::setHost(std::string &host)
+void	Client::setTransferEncoding(std::string &encoding)
 {
-	fields["host"] = host;
+	(void) encoding;
 }
+
 
 void	Client::setContentType(std::string &content_type)
 {
@@ -29,32 +30,51 @@ void	Client::setContentType(std::string &content_type)
 		throw RequestParsingException("400 Bad Request");
 }
 
+void	Client::setHost(std::string &host)
+{
+	std::vector<std::string>	directives;
+
+	split(directives, host);
+	if (directives.empty() || directives.size() > 1)
+		throw RequestParsingException("400 Bad Request");
+	fields["host"] = host;
+}
+
 void	Client::setContentLength(std::string &content_length)
 {
-	std::string::iterator it;
-	if ((std::find_if(content_length.begin(), content_length.end(), not_digit)) == content_length.end())
-	{
-		
-		fields["Content-Length"] = content_length;
-	}
-	else
+	std::vector<std::string>	directives;
+	std::string::iterator 		it;
+
+	split(directives, content_length);
+	if (directives.empty() || directives.size() > 1)
 		throw RequestParsingException("400 Bad Request");
+	if ((std::find_if(directives[0].begin(), directives[0].end(), not_digit)) != directives[0].end())
+		throw RequestParsingException("400 Bad Request");
+	try
+	{
+		ft_stoll(directives[0].c_str());
+	}
+	catch (std::exception &e)
+	{
+		throw RequestParsingException("400 Bad Request");
+	}
+	fields["Content-Length"] = directives[0];
 
 }
 
 void	Client::setConnection(std::string &connection)
 {
-	if (connection == "close" || connection == "keep-alive")
-		fields["connection"] = connection;
+	std::vector<std::string>	directives;
+
+	split(directives, connection);
+	if (directives.empty() || directives.size() > 1 || fields.find("Connection") != fields.end())
+		throw RequestParsingException("400 Bad Request");
+	if (directives[0] == "close" || directives[0] == "keep-alive")
+		fields["Connection"] = connection;
 	else
 		throw RequestParsingException("400 Bad Request");
-}
 
-void	Client::setTransferEncoding(std::string &encoding)
-{
-	(void) encoding;
 }
-
 void	Client::setProtocolVersion(std::string &protocol_version)
 {
 	std::stringstream		ss;

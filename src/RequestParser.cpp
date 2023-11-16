@@ -1,6 +1,6 @@
 #include "Multiplexer.hpp"
 
-void	Multiplexer::parseRequestHeaders(std::vector<Client>::iterator& clientIt)
+void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
 {
 	size_t  							pos, offset, sep;
 	std::string							header, key, value;
@@ -38,16 +38,24 @@ void	Multiplexer::parseRequestHeaders(std::vector<Client>::iterator& clientIt)
 	clientIt->headers = clientIt->headers.substr(offset);
 }
 
-void	Multiplexer::parseRequestLine(std::vector<Client>::iterator& clientIt)
+void	Multiplexer::parseRequestLine(CLIENTIT& clientIt)
 {
-	std::stringstream					ss;
-	std::string							method, request_uri, protocol_version, blank;
+	std::string			delim;
+	std::string			method, request_uri, protocol_version, blank;
+	size_t				pos;
+	std::stringstream	ss;
 
-	ss << clientIt->headers;
-	ss >> method >> request_uri >> protocol_version;
+	delim = "\r\n";
+	if (clientIt->headers.length() == CLIENT_HEADER_BUFFER_SIZE 
+		&& (pos = clientIt->headers.find(delim)) == std::string::npos)
+		throw RequestParsingException("414 URI Too Long");
+	ss << clientIt->headers.substr(0, pos);	// request line
+	ss >> method >> request_uri >> protocol_version >> blank;	// method uri protocol_version\r\n
 	if (method.empty() || request_uri.empty() || protocol_version.empty() || !blank.empty())
 		throw RequestParsingException("400 Bad Request");
 	clientIt->fields["request_uri"] = request_uri;
 	clientIt->setMethod(method);
 	clientIt->setProtocolVersion(protocol_version);
+	clientIt->headers = clientIt->headers.substr(pos + delim.length());
+	clientIt->request_line_received = true;
 }
