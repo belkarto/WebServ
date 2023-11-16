@@ -36,8 +36,8 @@ class Multiplexer
 		static void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(std::string &field);
 		static std::map<std::string, std::string>	mime_types;
     // respons functions
-		void							sendResponseHeaders(std::vector<Client>::iterator& clientIt);
-		void							sendResponse(std::vector<Client>::iterator& clientIt);
+		// void							sendResponseHeaders(std::vector<Client>::iterator& clientIt);
+		// void							sendResponse(std::vector<Client>::iterator& clientIt);
     void              sendResponseToClient(Client clientData);
     SERVIT getMatchingServer(std::string &str, int socketFd);
 };

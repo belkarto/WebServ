@@ -20,7 +20,7 @@ class Client
         time_t                              last_activity;
         int                                 keepalive_requests;
         std::map<std::string, std::string>  fields;
-    ResponseTemplate ResponseTemplate;
+        ResponseTemplate ResTemplate;
 
         Client();
         void								resetState();

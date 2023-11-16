@@ -24,8 +24,9 @@ void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
 				throw RequestParsingException("400 Bad Request");
 			ss << header;
 			getline(ss, key, ':');
-			getline(ss, value);
 			std::transform(key.begin(), key.end(), key.begin(), tolower);
+			getline(ss, value);
+			trim(value);
 			if ((it = std::find(headers_fields.begin(), headers_fields.end(), key)) != headers_fields.end())
 				((*clientIt).*(Multiplexer::fields_setters)[std::ptrdiff_t(it - headers_fields.begin())])(value);
 		}
@@ -46,9 +47,10 @@ void	Multiplexer::parseRequestLine(CLIENTIT& clientIt)
 	std::stringstream	ss;
 
 	delim = "\r\n";
-	if (clientIt->headers.length() == CLIENT_HEADER_BUFFER_SIZE 
-		&& (pos = clientIt->headers.find(delim)) == std::string::npos)
-		throw RequestParsingException("414 URI Too Long");
+	if ((pos = clientIt->headers.find(delim)) == std::string::npos &&
+    clientIt->headers.length() == CLIENT_HEADER_BUFFER_SIZE)
+      throw RequestParsingException("414 URI Too Long");
+  std::cout << pos << " " << clientIt->headers.length() << std::endl;
 	ss << clientIt->headers.substr(0, pos);	// request line
 	ss >> method >> request_uri >> protocol_version >> blank;	// method uri protocol_version\r\n
 	if (method.empty() || request_uri.empty() || protocol_version.empty() || !blank.empty())

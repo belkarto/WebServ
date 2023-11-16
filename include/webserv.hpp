@@ -36,6 +36,7 @@ void				webServManager(const char *config_path);
 /*                  lib                                         */
 void		    	split(std::vector<std::string>& fields, std::stringstream& ss);
 void                split(std::vector<std::string>& params, std::string str);
+void	            trim(std::string &str);
 long long	    	ft_stoll(const char* str);
 int			    	ft_stoi(const char* str);
 long long	    	converttobytes(long long size, char unit);
