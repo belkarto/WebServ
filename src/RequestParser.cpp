@@ -12,10 +12,7 @@ void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
     while ((pos = clientIt->headers.find("\r\n", offset)) != std::string::npos)
 	{
 		if (pos == offset)
-		{
-			clientIt->headers_all_recieved = true;
-			return ;
-		}
+			return (reviewHeaders(clientIt));
 		header = clientIt->headers.substr(offset, pos - offset);
 		if ((sep = header.find(':')) != std::string::npos)
 		{
@@ -42,21 +39,34 @@ void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
 void	Multiplexer::parseRequestLine(CLIENTIT& clientIt)
 {
 	std::string			delim;
-	std::string			method, request_uri, protocol_version, blank;
+	std::string			method, request_target, protocol_version, blank;
 	size_t				pos;
 	std::stringstream	ss;
 
 	delim = "\r\n";
-	if (clientIt->headers.length() == CLIENT_HEADER_BUFFER_SIZE 
-		&& (pos = clientIt->headers.find(delim)) == std::string::npos)
-		throw RequestParsingException("414 URI Too Long");
-	ss << clientIt->headers.substr(0, pos);	// request line
-	ss >> method >> request_uri >> protocol_version >> blank;	// method uri protocol_version\r\n
-	if (method.empty() || request_uri.empty() || protocol_version.empty() || !blank.empty())
+	pos = clientIt->headers.find(delim);
+	if (clientIt->headers.length() == CLIENT_HEADER_BUFFER_SIZE && pos == std::string::npos)
 		throw RequestParsingException("400 Bad Request");
-	clientIt->fields["request_uri"] = request_uri;
+	ss << clientIt->headers.substr(0, pos);	// request line
+	ss >> method >> request_target >> protocol_version >> blank;	// method uri protocol_version\r\n
+	if (method.empty() || request_target.empty() || protocol_version.empty() || !blank.empty())
+		throw RequestParsingException("400 Bad Request");
+	clientIt->fields["request_target"] = request_target;
 	clientIt->setMethod(method);
 	clientIt->setProtocolVersion(protocol_version);
 	clientIt->headers = clientIt->headers.substr(pos + delim.length());
 	clientIt->request_line_received = true;
+}
+
+void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
+{
+	if (clientIt->fields.find("Host") == clientIt->fields.end())
+		throw RequestParsingException("400 Bad Request");
+	if (clientIt->fields.find("Content-Length") != clientIt->fields.end() 
+		&& clientIt->fields.find("Transfer-Encoding") != clientIt->fields.end())
+		throw RequestParsingException("400 Bad Request");
+	if (clientIt->fields["method"] == "POST" && clientIt->fields.find("Content-Length") == clientIt->fields.end() 
+		&& clientIt->fields.find("Transfer-Encoding") == clientIt->fields.end())
+		throw RequestParsingException("400 Bad Request");
+	clientIt->headers_all_recieved = true;
 }

@@ -26,6 +26,7 @@ class Multiplexer
 		void		getClientRequest(CLIENTIT& clientIt);
 		void		parseRequestLine(CLIENTIT& clientIt);
 		void		parseRequestHeaders(CLIENTIT& clientIt);
+		void		reviewHeaders(CLIENTIT& clientIt);
 		void		sendResponseHeaders(CLIENTIT& clientIt);
 		void		sendResponse(CLIENTIT& clientIt);
 		void		dropInactiveClients();

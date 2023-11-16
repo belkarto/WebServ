@@ -4,8 +4,8 @@ std::map<std::string, std::string> Multiplexer::mime_types;
 
 const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {
 	"host",
-	"content-Type",
-	"content-Length",
+	"content-type",
+	"content-length",
 	"connection",
 	"transfer-encoding",
 };
