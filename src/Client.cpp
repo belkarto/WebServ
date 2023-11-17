@@ -17,33 +17,94 @@ void    Client::resetState()
 
 void	Client::setTransferEncoding(std::string &encoding)
 {
-	fields["Transfer-Encoding"] = encoding;
+	std::transform(encoding.begin(), encoding.end(), encoding.begin(), tolower);
+	if (encoding == "chunked")
+		fields.insert(std::make_pair("Transfer-Encoding", encoding));
+	else
+		throw RequestParsingException("501 Not Implemented");
+	/*
+		A server that receives a request message with a transfer encoding it
+   		does not understand SHOULD respond with 501 (Not Implemented).
+	*/
 }
 
 void	Client::setContentType(std::string &content_type)
 {
-	fields["Content-Type"] = content_type;
+	std::cout << "here" << std::endl;
+	std::map<std::string, std::string>::iterator	it, ite;
+
+	std::transform(content_type.begin(), content_type.end(), content_type.begin(), tolower);
+	it = Multiplexer::mime_types.begin();
+	ite = Multiplexer::mime_types.end();
+	while(it != ite && it->second != content_type)
+		it++;
+	if (it == ite)
+		throw RequestParsingException("400 Bad Request");
+	std::cout << "here2" << std::endl;
+	fields.insert(std::make_pair("Content-Type", content_type));
+	/*
+		in case Content-Type wasnt specified 
+		the media is defaulted to application/octet-stream
+	*/
 }
 
 void	Client::setHost(std::string &host)
 {
-	fields["host"] = host;
+	std::vector<std::string>	directives;
+	std::stringstream			ss;
+	std::string					host_uri, port;
+	size_t						colonpos;
+
+	split(directives, host);
+	if (directives.size() != 1)
+		throw RequestParsingException("400 Bad Request");
+	colonpos = directives[0].find(':');
+	if (colonpos != std::string::npos && colonpos == directives[0].length() - 1)	// at least host_uri should be present
+		throw RequestParsingException("400 Bad Request");
+	ss << directives[0];
+	getline(ss, host_uri, ':');
+	ss >> port;
+	fields["Host"] = host;
+	// optional 
+	// struct addrinfo				*addr;
+	// if (!addr_resolver(&addr, host_uri.c_str(), port.c_str()))
+	// 	throw RequestParsingException("400 Bad Request");
+	// freeaddrinfo(addr);
+	/*
+		syntax:
+			Host = uri-host [ ":" port ]
+		NB:
+		A server MUST respond with a 400 (Bad Request) status code to any
+	   	HTTP/1.1 request message that lacks a Host header field and to any
+	   	request message that contains more than one Host header field or a
+	   	Host header field with an invalid field-value.
+	*/
 }
 
 void	Client::setContentLength(std::string &content_length)
 {
-	fields["Content-Length"] = content_length;
+	if (content_length.empty() 
+		|| find_if(content_length.begin(), content_length.end(), not_digit) != content_length.end())
+		throw RequestParsingException("400 Bad Request");
+	fields.insert(std::make_pair("Content-Length", content_length));
+	/*
+	 Content-Length = 1*DIGIT
+	*/
 }
-
+ 
 void	Client::setConnection(std::string &connection)
 {
-	fields["Connection"] = connection;
+	std::transform(connection.begin(), connection.end(), connection.begin(), tolower);
+	if (connection == "keep-alive" || connection == "close")
+		fields.insert(std::make_pair("Connection", connection));
+	else
+		throw RequestParsingException("400 Bad Request");
 }
 
-void	Client::setProtocolVersion(std::string &protocol_version)
+void	Client::setProtocolVersion(std::string &protocol_version)	// HTTP-version = HTTP-name "/" DIGIT "." DIGIT
 {
 	std::stringstream		ss;
-	std::string				prefix, major, minor;
+	std::string				prefix, digit1, digit2;
 	size_t					dotpos;
 
 	if (protocol_version.find("HTTP/"))	// start with "HTTP/"
@@ -53,10 +114,10 @@ void	Client::setProtocolVersion(std::string &protocol_version)
 		throw RequestParsingException("400 Bad Request");
 	ss << protocol_version;
 	std::getline(ss, prefix, '/');
-	std::getline(ss, major, '.');
-	ss >> minor;
-	if (major.empty() || std::find_if(major.begin(), major.end(), not_digit) != major.end()
-		|| (!minor.empty() && std::find_if(minor.begin(), minor.end(), not_digit) != minor.end()))
+	std::getline(ss, digit1, '.');
+	ss >> digit2;
+	if (digit1.length() != 1  || !isdigit(digit1[0])
+		|| (!digit2.empty() && (digit2.length() > 1  || !isdigit(digit2[0]))))
 		throw RequestParsingException("400 Bad Request");
 	if (protocol_version != "HTTP/1.1")
 		throw RequestParsingException("505 HTTP Version Not Supported");

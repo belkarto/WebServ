@@ -27,9 +27,11 @@ class Multiplexer
 		void		getClientRequest(CLIENTIT& clientIt);
 		void		parseRequestLine(CLIENTIT& clientIt);
 		void		parseRequestHeaders(CLIENTIT& clientIt);
+		void		reviewHeaders(CLIENTIT& clientIt);
 		void		sendResponseHeaders(CLIENTIT& clientIt);
 		void		sendResponse(CLIENTIT& clientIt);
 		void		dropInactiveClients();
+		void		loadMimeTypes();
 		SERVIT		findListenSocket(int socket, SERVVECT &sockets);
 		CLIENTIT	findConnectSocket(int socket, CLIENTVECT &sockets);
 

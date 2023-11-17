@@ -37,6 +37,7 @@ class Client;
 # define KEEPALIVE_CONNECTIONS      500
 # define KEEPALIVE_TIMEOUT          60
 # define BACKLOG                    500
+# define MIMETYPE_PATH              "./config/mimes.txt"
 
 /*                  typedef                                     */
 typedef std::vector<Client>  CLIENTVECT;
