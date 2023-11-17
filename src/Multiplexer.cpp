@@ -27,6 +27,7 @@ Multiplexer::Multiplexer(SERVVECT &servers) : servers(servers)
 		exit(EXIT_FAILURE);
 	}
 	headers_fields.assign(fields, fields + HEADERS_FIELDS_SIZE);
+	this->loadMimeTypes();
 	this->registerServers();
 	this->connectionListener();
 }
@@ -194,5 +195,23 @@ void	Multiplexer::dropInactiveClients()
 		elapsed = time(NULL) - it->last_activity;
 		if (it->keepalive_requests && elapsed > KEEPALIVE_TIMEOUT)
 			dropClient(it);
+	}
+}
+
+void	Multiplexer::loadMimeTypes()
+{
+	std::string			line, key, value;
+	std::stringstream	ss;
+	std::ifstream		infile(MIMETYPE_PATH);
+
+	if (!infile.is_open())
+		return ;
+	while (getline(infile, line))
+	{
+		ss << line;
+		ss >> key;
+		ss >> value;
+		mime_types[key] = value;
+		ss.str("");
 	}
 }

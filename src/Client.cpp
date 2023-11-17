@@ -22,22 +22,24 @@ void	Client::setTransferEncoding(std::string &encoding)
 	else
 		throw RequestParsingException("501 Not Implemented");
 	/*
-		A server that receives a request message with a transfer coding it
+		A server that receives a request message with a transfer encoding it
    		does not understand SHOULD respond with 501 (Not Implemented).
 	*/
 }
 
 void	Client::setContentType(std::string &content_type)
 {
+	std::cout << "here" << std::endl;
 	std::map<std::string, std::string>::iterator	it, ite;
 
+	std::transform(content_type.begin(), content_type.end(), content_type.begin(), tolower);
 	it = Multiplexer::mime_types.begin();
 	ite = Multiplexer::mime_types.end();
-	std::transform(content_type.begin(), content_type.end(), content_type.begin(), tolower);
 	while(it != ite && it->second != content_type)
 		it++;
 	if (it == ite)
 		throw RequestParsingException("400 Bad Request");
+	std::cout << "here2" << std::endl;
 	fields.insert(std::make_pair("Content-Type", content_type));
 	/*
 		in case Content-Type wasnt specified 

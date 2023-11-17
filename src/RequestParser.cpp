@@ -21,14 +21,15 @@ void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
 				throw RequestParsingException("400 Bad Request");
 			ss << header;
 			getline(ss, key, ':');
-			std::transform(key.begin(), key.end(), key.begin(), tolower);
 			getline(ss, value);
+			std::transform(key.begin(), key.end(), key.begin(), tolower);
 			trim(value);
 			if ((it = std::find(headers_fields.begin(), headers_fields.end(), key)) != headers_fields.end())
 				((*clientIt).*(Multiplexer::fields_setters)[std::ptrdiff_t(it - headers_fields.begin())])(value);
 		}
 		else
 			throw RequestParsingException("400 Bad Request");
+		ss.clear();
 		offset = pos + 2;
 	}
 	if (!offset && clientIt->headers.length() > CLIENT_HEADER_BUFFER_SIZE)
@@ -68,5 +69,9 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 	if (clientIt->fields["method"] == "POST" && clientIt->fields.find("Content-Length") == clientIt->fields.end() 
 		&& clientIt->fields.find("Transfer-Encoding") == clientIt->fields.end())
 		throw RequestParsingException("400 Bad Request");
+	// std::map<std::string, std::string>::iterator	it;
+	// it = clientIt->fields.begin();
+	// for (; it != clientIt->fields.end(); it++)
+	// 	std::cout << it->first << ": " << it->second << std::endl;
 	clientIt->headers_all_recieved = true;
 }
