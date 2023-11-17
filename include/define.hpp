@@ -1,8 +1,12 @@
 #ifndef DEFINE_HPP
 # define DEFINE_HPP
 
+#include <vector>
+#include <string>
 class Server;
 class Client;
+
+# define SERVER "webserv"
 
 /*                  server default configuration                */
 # define DEFAULT_CONF_PATH				"config/default.conf"
@@ -39,4 +43,5 @@ typedef std::vector<Client>  CLIENTVECT;
 typedef std::vector<Server> SERVVECT;
 typedef std::vector<Client>::iterator  CLIENTIT;
 typedef std::vector<Server>::iterator SERVIT;
+typedef std::vector<std::string> STRINGVECT;
 #endif

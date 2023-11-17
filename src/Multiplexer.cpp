@@ -124,8 +124,8 @@ void	Multiplexer::connectionListener()
 						catch (const RequestParsingException& e)
 						{
               setErrorTemplate(*clientIt, e.what());
-							dropClient(clientIt);
-							continue;
+							// dropClient(clientIt);
+							// continue;
 						}
 					}
 				}

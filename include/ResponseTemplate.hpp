@@ -12,6 +12,7 @@ public:
   std::string connenction;     // keep-alive OR closed
   std::string contentType;
   std::string contentLenght;
+  std::string responsFilePath;
 };
 
 #endif
