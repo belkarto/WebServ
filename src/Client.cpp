@@ -7,6 +7,7 @@ Client::Client()
 	request_line_received = false;
 	request_all_processed = false;
 	response_all_sent = false;
+  response_template_set = false;
 }
 
 void    Client::resetState()

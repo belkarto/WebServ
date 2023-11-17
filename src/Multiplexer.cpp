@@ -123,7 +123,7 @@ void	Multiplexer::connectionListener()
 						}
 						catch (const RequestParsingException& e)
 						{
-							std::cout << e.what() << std::endl;
+              setErrorTemplate(*clientIt, e.what());
 							dropClient(clientIt);
 							continue;
 						}

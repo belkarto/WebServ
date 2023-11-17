@@ -1,5 +1,13 @@
 #include "../include/Multiplexer.hpp"
-#include <algorithm>
+#include <sstream>
+
+void Multiplexer::setErrorTemplate(Client client,const std::string error)
+{
+  std::stringstream ss(error);
+  client.error = true;
+  ss >> client.errData.statuCode;
+  std::cout << client.errData.statuCode << std::endl;
+}
 
 SERVIT Multiplexer::getMatchingServer(std::string &serverName, int socketFd) {
   SERVIT it;
@@ -21,10 +29,14 @@ SERVIT Multiplexer::getMatchingServer(std::string &serverName, int socketFd) {
 
 void Multiplexer::sendResponseToClient(Client clientData) {
   (void)clientData;
-  SERVIT it =
-      getMatchingServer(clientData.fields["host"], clientData.listen_socket);
-  std::cout << *it->server_name.begin() << std::endl;
-  std::cout << it->root << std::endl;
-  std::cout << "requested server" << clientData.fields["host"] << std::endl;
-  exit(1);
+  if (!clientData.response_template_set) {
+    SERVIT it = getMatchingServer(clientData.fields["host"], clientData.listen_socket);
+    std::cout << *it->server_name.begin() << std::endl;
+    std::cout << it->root << std::endl;
+    std::cout << "requested server" << clientData.fields["host"] << std::endl;
+    clientData.response_template_set = true;
+    exit(1);
+  } else {
+    // start sending response
+  }
 }
