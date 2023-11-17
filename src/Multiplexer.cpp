@@ -123,7 +123,8 @@ void	Multiplexer::connectionListener()
 						}
 						catch (const RequestParsingException& e)
 						{
-              setErrorTemplate(*clientIt, e.what());
+              setErrorTemplate(clientIt, e.what());
+              // clientIt->request_all_processed = true;
 							// dropClient(clientIt);
 							// continue;
 						}

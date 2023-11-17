@@ -1,13 +1,12 @@
 #include "../include/Multiplexer.hpp"
 #include <sstream>
 
-void Multiplexer::setErrorTemplate(Client client,const std::string error)
+void Multiplexer::setErrorTemplate(CLIENTIT& client,const std::string error)
 {
   std::stringstream ss(error);
-  client.error = true;
-  ss >> client.errData.statuCode;
-  client.request_all_processed = true;
-  std::cout << "===>" << client.errData.statuCode << std::endl;
+  client->error = true;
+  ss >> client->errData.statuCode;
+  client->request_all_processed = true;
 }
 
 SERVIT Multiplexer::getMatchingServer(std::string &serverName, int socketFd) {
@@ -31,7 +30,6 @@ SERVIT Multiplexer::getMatchingServer(std::string &serverName, int socketFd) {
 void Multiplexer::setErrTemp(Server &server, Client &client)
 {
   (void)server;
-  std::cout << __func__ << " ******" << std::endl;
   client.ResTemplate.server = SERVER;
   client.ResTemplate.ContentEncoding = "chunked";
 }

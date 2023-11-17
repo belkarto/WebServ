@@ -1,6 +1,7 @@
 #ifndef MULTIPLEXER_HPP
 # define MULTIPLEXER_HPP
 
+#include "define.hpp"
 #include "webserv.hpp"
 #include "Server.hpp"
 #include "Client.hpp"
@@ -37,7 +38,7 @@ class Multiplexer
 		static std::map<std::string, std::string>	mime_types;
     //------------ respons functions -------------------------------//
     void  sendResponseToClient(Client clientData);
-    void  setErrorTemplate(Client client, const std::string);
+    void  setErrorTemplate(CLIENTIT& , const std::string);
     SERVIT getMatchingServer(std::string &str, int socketFd);
     //------------------ error ------------------------------------// 
     void setErrTemp(Server &, Client &);
