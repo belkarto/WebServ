@@ -7,6 +7,7 @@
 typedef struct
 {
   int statuCode;
+  std::string errorHeader;
 } ErrTemplate;
 
 class Client

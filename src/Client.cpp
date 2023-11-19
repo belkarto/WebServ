@@ -8,6 +8,7 @@ Client::Client()
 	request_all_processed = false;
 	response_all_sent = false;
   response_template_set = false;
+  error = false;
 }
 
 void    Client::resetState()
@@ -30,7 +31,6 @@ void	Client::setTransferEncoding(std::string &encoding)
 
 void	Client::setContentType(std::string &content_type)
 {
-	std::cout << "here" << std::endl;
 	std::map<std::string, std::string>::iterator	it, ite;
 
 	std::transform(content_type.begin(), content_type.end(), content_type.begin(), tolower);
@@ -40,7 +40,6 @@ void	Client::setContentType(std::string &content_type)
 		it++;
 	if (it == ite)
 		throw RequestParsingException("400 Bad Request");
-	std::cout << "here2" << std::endl;
 	fields.insert(std::make_pair("Content-Type", content_type));
 	/*
 		in case Content-Type wasnt specified 

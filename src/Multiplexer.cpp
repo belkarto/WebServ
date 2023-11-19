@@ -97,7 +97,9 @@ void	Multiplexer::connectionListener()
 
 	while (Running)
 	{
-		dropInactiveClients();
+    // TODO:
+    //segv in this line in drop client 
+		// dropInactiveClients();
 		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 0)
 		{
 			perror("epoll_wait()");
@@ -135,7 +137,7 @@ void	Multiplexer::connectionListener()
 				{
 					if (clientIt->request_all_processed)
 					{
-						sendResponseToClient(*clientIt);
+						sendResponseToClient(clientIt);
 						if (clientIt->response_all_sent)
 							clientIt->resetState();
 					}

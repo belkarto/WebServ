@@ -39,10 +39,10 @@ class Multiplexer
 		static void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(std::string &field);
 		static std::map<std::string, std::string>	mime_types;
     //------------ respons functions -------------------------------//
-    void  sendResponseToClient(Client clientData);
+    void  sendResponseToClient(CLIENTIT &);
     void  setErrorTemplate(CLIENTIT& , const std::string);
-    SERVIT getMatchingServer(std::string &str, int socketFd);
+    SERVIT getMatchingServer(std::string &, int);
     //------------------ error ------------------------------------// 
-    void setErrTemp(Server &, Client &);
+    void setErrTemp(Server &, CLIENTIT &);
 };
 #endif

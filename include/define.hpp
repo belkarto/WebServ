@@ -7,6 +7,7 @@ class Server;
 class Client;
 
 # define SERVER "webserv"
+# define DEF_ERR_PATH "www/error_pages/"
 
 /*                  server default configuration                */
 # define DEFAULT_CONF_PATH				"config/default.conf"
@@ -45,4 +46,5 @@ typedef std::vector<Server> SERVVECT;
 typedef std::vector<Client>::iterator  CLIENTIT;
 typedef std::vector<Server>::iterator SERVIT;
 typedef std::vector<std::string> STRINGVECT;
+typedef std::vector<int> INTVECT;
 #endif
