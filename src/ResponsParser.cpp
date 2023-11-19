@@ -52,12 +52,28 @@ static std::string getErrorFile(Server &server, int errorPageCode) {
 }
 
 void Multiplexer::setErrTemp(Server &server, CLIENTIT &client) {
-  (void)server;
   client->ResTemplate.server = SERVER;
   client->ResTemplate.ContentEncoding = "chunked";
   client->ResTemplate.connenction = "close";
   client->ResTemplate.responsFilePath =
       getErrorFile(server, client->errData.statuCode);
+}
+
+static void sendingHeaders(CLIENTIT client)
+{
+  send(client->connect_socket, client->ResTemplate.ResponsStatus.c_str(), client->ResTemplate.ResponsStatus.length(), 0);
+}
+
+static void sendingResponse(CLIENTIT &client)
+{
+  if (!client->ResTemplate.headersSent)
+  {
+    sendingHeaders(client);
+    client->ResTemplate.headersSent = true;
+  }
+  else {
+  
+  }
 }
 
 void Multiplexer::sendResponseToClient(CLIENTIT &clientData) {
@@ -71,7 +87,7 @@ void Multiplexer::sendResponseToClient(CLIENTIT &clientData) {
     std::cout << clientData->error << " " << clientData->ResTemplate.server
               << " " << clientData->ResTemplate.ContentEncoding << " ->  " << clientData->ResTemplate.responsFilePath << std::endl;
   } else {
-    exit(33);
+    sendingResponse(clientData);
     // start sending response
   }
 }

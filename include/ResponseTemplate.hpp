@@ -5,6 +5,7 @@
 
 class ResponseTemplate {
 public:
+  bool headersSent;
   std::string ResponsStatus;   // Ex: 200 OK // if errno of open ==> ENOENT not
                                // found | EACCES permission denied
   std::string server;          // webServ *server name*
