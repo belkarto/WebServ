@@ -150,6 +150,10 @@ void Multiplexer::sendResponseToClient(CLIENTIT &clientData) {
     clientData->response_template_set = true;
     clientData->ResTemplate.headersSent = false;
   } else {
+    if (!clientData->error)
+    {
+      //set response in case of valid request and all redirictions....
+    }
     sendingRespons(clientData);
   }
 }
