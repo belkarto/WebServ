@@ -4,6 +4,7 @@
 #include "Multiplexer.hpp"
 #include "ResponseTemplate.hpp"
 #include "define.hpp"
+#include <fstream>
 
 typedef struct {
   int statuCode;
@@ -29,6 +30,8 @@ public:
   bool error;
   ErrTemplate errData;
   ResponseTemplate ResTemplate;
+  std::ifstream *ResponseFile;
+  size_t fileSize;
 
   Client();
   void resetState();

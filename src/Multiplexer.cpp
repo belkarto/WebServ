@@ -99,7 +99,7 @@ void	Multiplexer::connectionListener()
 	{
     // TODO:
     //segv in this line in drop client 
-		dropInactiveClients();
+		// dropInactiveClients();
 		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 0)
 		{
 			perror("epoll_wait()");
@@ -127,9 +127,6 @@ void	Multiplexer::connectionListener()
 						catch (const RequestParsingException& e)
 						{
               setErrorTemplate(clientIt, e.what());
-              // clientIt->request_all_processed = true;
-							// dropClient(clientIt);
-							// continue;
 						}
 					}
 				}
