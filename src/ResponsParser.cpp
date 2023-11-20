@@ -1,5 +1,6 @@
 #include "../include/Multiplexer.hpp"
 #include <algorithm>
+#include <fstream>
 #include <sstream>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -52,13 +53,13 @@ static std::string getErrorFile(Server &server, int errorPageCode) {
   return path;
 }
 
-void Multiplexer::setErrTemp(Server &server, CLIENTIT &client) {
+void setErrTemp(CLIENTIT &client) {
   client->ResTemplate.ResponsStatus = client->errData.errorHeader;
   client->ResTemplate.server = SERVER;
   client->ResTemplate.ContentEncoding = "chunked";
   client->ResTemplate.connenction = "close";
   client->ResTemplate.responsFilePath =
-      getErrorFile(server, client->errData.statuCode);
+      getErrorFile(*client->serverIt, client->errData.statuCode);
 }
 
 static void sendingHeaders(CLIENTIT client) {
@@ -74,11 +75,53 @@ static void sendingHeaders(CLIENTIT client) {
   send(client->connect_socket, "\nContent-Length: ", 17, 0);
   send(client->connect_socket, client->ResTemplate.contentLenght.c_str(),
        client->ResTemplate.contentLenght.length(), 0);
-
 }
 
-static void sendingResponse(CLIENTIT &client) {
+static void setTemplateTo404(CLIENTIT &client) {
+  std::string path;
+  client->ResTemplate.ResponsStatus.clear();
+  client->ResTemplate.ResponsStatus = "404 Not found";
+  client->ResTemplate.contentType = "text/html";
+  path = getErrorFile(*client->serverIt, 404);
+  if (!path.empty()) {
+    std::ifstream file(path.c_str());
+    std::stringstream ss;
+    client->ResTemplate.responsFilePath = path;
+    client->ResTemplate.ResponsStatus = "404 Not found";
+    ss << getFileSize(&file);
+    ss >> client->ResTemplate.contentLenght;
+    file.close();
+  } else {
+    client->ResTemplate.responsFilePath.clear();
+    client->ResTemplate.contentLenght = "194";
+  }
+}
+
+std::string Multiplexer::getFileType(std::string fileName)
+{
+  size_t pos;
+  pos = fileName.find_last_of('.');
+  std::map<std::string, std::string>::iterator it;
+  it = this->mime_types.find(fileName.substr(pos));
+}
+
+static void checkFilePath(CLIENTIT &client) {
+  if (client->ResTemplate.responsFilePath.empty() ||
+      access(client->ResTemplate.responsFilePath.c_str(), R_OK) != 0)
+    setTemplateTo404(client);
+  else {
+    std::ifstream file(client->ResTemplate.responsFilePath.c_str());
+    std::stringstream ss;
+    ss << getFileSize(&file);
+    ss >> client->ResTemplate.contentLenght;
+    file.close();
+    std::cout << Multiplexer::getFileType(client->ResTemplate.responsFilePath) << std::endl;
+  }
+}
+
+void sendingRespons(CLIENTIT &client) {
   if (!client->ResTemplate.headersSent) {
+    checkFilePath(client);
     sendingHeaders(client);
     client->ResTemplate.headersSent = true;
   } else {
@@ -87,17 +130,17 @@ static void sendingResponse(CLIENTIT &client) {
 
 void Multiplexer::sendResponseToClient(CLIENTIT &clientData) {
   if (!clientData->response_template_set) {
-    SERVIT it = getMatchingServer(clientData->fields["host"],
-                                  clientData->listen_socket);
+    clientData->serverIt = getMatchingServer(clientData->fields["host"],
+                                             clientData->listen_socket);
     if (clientData->error)
-      setErrTemp(*it, clientData);
+      setErrTemp(clientData);
 
     clientData->response_template_set = true;
     std::cout << clientData->error << " " << clientData->ResTemplate.server
               << " " << clientData->ResTemplate.ContentEncoding << " ->  "
               << clientData->ResTemplate.responsFilePath << std::endl;
   } else {
-    sendingResponse(clientData);
+    sendingRespons(clientData);
     // start sending response
   }
 }

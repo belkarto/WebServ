@@ -48,4 +48,6 @@ typedef std::vector<Client>::iterator  CLIENTIT;
 typedef std::vector<Server>::iterator SERVIT;
 typedef std::vector<std::string> STRINGVECT;
 typedef std::vector<int> INTVECT;
+/*                404 error page in case no default found */ 
+#define NOT_FOUND "<!DOCTYPE html>\n<html>\n<head>\n<title>404 - Page Not Found</title>\n</head>\n<body>\n<h1>404 - Page Not Found</h1>\n<p>We're sorry, but the page you requested could not be found.</p>\n</body>\n</html>"
 #endif

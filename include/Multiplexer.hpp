@@ -42,7 +42,7 @@ class Multiplexer
     void  sendResponseToClient(CLIENTIT &);
     void  setErrorTemplate(CLIENTIT& , const std::string);
     SERVIT getMatchingServer(std::string &, int);
+    static std::string getFileType(std::string fileName);
     //------------------ error ------------------------------------// 
-    void setErrTemp(Server &, CLIENTIT &);
 };
 #endif
