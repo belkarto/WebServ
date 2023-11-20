@@ -1,6 +1,7 @@
 #include "../include/Multiplexer.hpp"
 #include <algorithm>
 #include <sstream>
+#include <sys/socket.h>
 #include <unistd.h>
 
 void Multiplexer::setErrorTemplate(CLIENTIT &client, const std::string error) {
@@ -52,6 +53,7 @@ static std::string getErrorFile(Server &server, int errorPageCode) {
 }
 
 void Multiplexer::setErrTemp(Server &server, CLIENTIT &client) {
+  client->ResTemplate.ResponsStatus = client->errData.errorHeader;
   client->ResTemplate.server = SERVER;
   client->ResTemplate.ContentEncoding = "chunked";
   client->ResTemplate.connenction = "close";
@@ -59,20 +61,27 @@ void Multiplexer::setErrTemp(Server &server, CLIENTIT &client) {
       getErrorFile(server, client->errData.statuCode);
 }
 
-static void sendingHeaders(CLIENTIT client)
-{
-  send(client->connect_socket, client->ResTemplate.ResponsStatus.c_str(), client->ResTemplate.ResponsStatus.length(), 0);
+static void sendingHeaders(CLIENTIT client) {
+  send(client->connect_socket, PROTOCOL_VERS, 9, 0);
+  send(client->connect_socket, client->ResTemplate.ResponsStatus.c_str(),
+       client->ResTemplate.ResponsStatus.length(), 0);
+  send(client->connect_socket, "\nServer: ", 9, 0);
+  send(client->connect_socket, client->ResTemplate.server.c_str(),
+       client->ResTemplate.server.length(), 0);
+  send(client->connect_socket, "\nContent-Type: ", 15, 0);
+  send(client->connect_socket, client->ResTemplate.contentType.c_str(),
+       client->ResTemplate.contentType.length(), 0);
+  send(client->connect_socket, "\nContent-Length: ", 17, 0);
+  send(client->connect_socket, client->ResTemplate.contentLenght.c_str(),
+       client->ResTemplate.contentLenght.length(), 0);
+
 }
 
-static void sendingResponse(CLIENTIT &client)
-{
-  if (!client->ResTemplate.headersSent)
-  {
+static void sendingResponse(CLIENTIT &client) {
+  if (!client->ResTemplate.headersSent) {
     sendingHeaders(client);
     client->ResTemplate.headersSent = true;
-  }
-  else {
-  
+  } else {
   }
 }
 
@@ -85,7 +94,8 @@ void Multiplexer::sendResponseToClient(CLIENTIT &clientData) {
 
     clientData->response_template_set = true;
     std::cout << clientData->error << " " << clientData->ResTemplate.server
-              << " " << clientData->ResTemplate.ContentEncoding << " ->  " << clientData->ResTemplate.responsFilePath << std::endl;
+              << " " << clientData->ResTemplate.ContentEncoding << " ->  "
+              << clientData->ResTemplate.responsFilePath << std::endl;
   } else {
     sendingResponse(clientData);
     // start sending response
