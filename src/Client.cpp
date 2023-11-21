@@ -14,7 +14,6 @@ Client::Client()
 
 void    Client::resetState()
 {
-  std::cout << "client reset" << std::endl;
   headers = "";
 	headers_all_recieved = false;
 	request_line_received = false;

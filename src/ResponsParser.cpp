@@ -83,13 +83,15 @@ static void setTemplateTo404(CLIENTIT &client) {
   client->ResTemplate.ResponsStatus.clear();
   client->ResTemplate.ResponsStatus = "404 Not found";
   client->ResTemplate.contentType = "text/html";
+  client->ResTemplate.server = SERVER;
   path = getErrorFile(*client->serverIt, 404);
   if (!path.empty()) {
     std::ifstream file(path.c_str());
     std::stringstream ss;
     client->ResTemplate.responsFilePath = path;
     ss << getFileSize(&file);
-    ss >> client->ResTemplate.contentLenght;
+    ss >> client->fileSize;
+    client->ResTemplate.contentLenght = ss.str();
     file.close();
   } else {
     client->ResTemplate.responsFilePath.clear();
@@ -122,7 +124,6 @@ void Multiplexer::checkFilePath(CLIENTIT &client) {
 }
 
 void Multiplexer::sendingRespons(CLIENTIT &client) {
-  std::cout << "sending Response" << std::endl;
   if (!client->ResTemplate.headersSent) {
     checkFilePath(client);
     sendingHeaders(client);
