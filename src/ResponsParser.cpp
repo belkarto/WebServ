@@ -1,8 +1,4 @@
 #include "../include/Multiplexer.hpp"
-#include <algorithm>
-#include <fstream>
-#include <sstream>
-#include <sys/socket.h>
 #include <unistd.h>
 
 void Multiplexer::setErrorTemplate(CLIENTIT &client, const std::string error) {
@@ -109,15 +105,23 @@ std::string Multiplexer::getFileType(std::string fileName) {
   return it->second;
 }
 
+bool isDir(std::string &uri) {
+  std::string::iterator it;
+  if (uri.find_last_of('/') != 0 && uri.find_last_of('/') == uri.length())
+    return true;
+  return false;
+}
+
 void Multiplexer::checkFilePath(CLIENTIT &client) {
-  std::cout << "in check file = " << client->ResTemplate.responsFilePath << std::endl;
   if (client->ResTemplate.responsFilePath.empty() ||
-      access(client->ResTemplate.responsFilePath.c_str(), R_OK) != 0)
-  {
-    std::cout << __func__ << std::endl;
+      access(client->ResTemplate.responsFilePath.c_str(), F_OK) != 0) {
     setTemplateTo404(client);
-  }
-  else {
+  } else {
+    if (isDir(client->ResTemplate.responsFilePath))
+    {
+      exit(12);
+      return ;
+    }
     std::ifstream file(client->ResTemplate.responsFilePath.c_str());
     std::stringstream ss;
     ss << getFileSize(&file);
@@ -131,7 +135,7 @@ void Multiplexer::checkFilePath(CLIENTIT &client) {
 
 void Multiplexer::sendingRespons(CLIENTIT &client) {
   char buffer[BUFFER_SIZE];
-  int  readed;
+  int readed;
 
   if (!client->ResTemplate.headersSent) {
     checkFilePath(client);
@@ -139,11 +143,8 @@ void Multiplexer::sendingRespons(CLIENTIT &client) {
     client->ResTemplate.headersSent = true;
     client->ResponseFile =
         new std::ifstream(client->ResTemplate.responsFilePath.c_str());
-  }
-  else 
-  {
-    if (client->fileSize == 0)
-    {
+  } else {
+    if (client->fileSize == 0) {
       client->ResponseFile->close();
       client->response_all_sent = true;
       return;
@@ -155,29 +156,28 @@ void Multiplexer::sendingRespons(CLIENTIT &client) {
   }
 }
 
-bool isDir(std::string &uri)
-{
-  std::string::iterator it;
-  if (uri.find_last_of('/') != 0  && uri.find_last_of('/') == uri.length())
-    return true;
-  return false;
-}
 
-void getFilePath(CLIENTIT &client)
-{
-  std::cout << __func__ << " called" << std::endl;
-  //TODO:
-  //check rediriction and set the right path
-  if (client->serverIt->location.empty())
-    client->ResTemplate.responsFilePath = client->serverIt->root + client->fields[URI];
-  else
-  {
+void getFilePath(CLIENTIT &client) {
+  client->ResTemplate.responsFilePath =
+      client->serverIt->root + client->fields[URI];
+  if (!client->serverIt->location.empty()) {
     std::vector<Location>::iterator it = client->serverIt->location.begin();
-    for (;it != client->serverIt->location.end(); ++it)
-    {
-      if (client->fields[URI].compare(0, it->uri.length(), it->uri) == 0)
-      {
+    for (; it != client->serverIt->location.end(); ++it) {
+      if (client->fields[URI].compare(0, it->uri.length(), it->uri) == 0) {
         client->ResTemplate.responsFilePath = it->root + client->fields[URI];
+        return;
+      }
+    }
+  }
+  if (client->fields[URI] == "/")
+  {
+    std::string tmp;
+    for(STRINGVECT::iterator it = client->serverIt->index.begin() ; it != client->serverIt->index.end(); ++it)
+    {
+      tmp = client->ResTemplate.responsFilePath + *it;
+      if (access(tmp.c_str(), F_OK | R_OK) == 0)
+      {
+        client->ResTemplate.responsFilePath = tmp;
         return;
       }
     }
@@ -185,18 +185,13 @@ void getFilePath(CLIENTIT &client)
 }
 
 void Multiplexer::setResponseTemplate(CLIENTIT &client) {
-    // if (isDir(client->fields[URI]))
-    //   std::cout << "request directory" << std::endl;
-    // else
-    // {
-      getFilePath(client);
-      checkFilePath(client);
-      client->ResTemplate.ResponsStatus = "200 OK";
-    // }
+  getFilePath(client);
+  checkFilePath(client);
+  client->ResTemplate.ResponsStatus = "200 OK";
 }
 
 void Multiplexer::sendResponseToClient(CLIENTIT &clientData) {
-  static int visit = 0;
+  static int tracker = 0;
   if (!clientData->response_template_set) {
     clientData->serverIt = getMatchingServer(clientData->fields["host"],
                                              clientData->listen_socket);
@@ -204,10 +199,10 @@ void Multiplexer::sendResponseToClient(CLIENTIT &clientData) {
       setErrTemp(clientData);
     else
       setResponseTemplate(clientData);
-    std::cout << "after setting template "<< clientData->ResTemplate.responsFilePath << std::endl;
     clientData->response_template_set = true;
+    std::cout << "request number " << ++tracker << std::endl;
+    std::cout << clientData->ResTemplate.responsFilePath << std::endl;
   } else {
-    std::cout << visit++ <<" befor sending = " << clientData->ResTemplate.responsFilePath << std::endl;
     sendingRespons(clientData);
   }
 }
