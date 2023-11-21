@@ -117,6 +117,7 @@ void	Multiplexer::connectionListener()
 					if (clientIt->headers_all_recieved)
 					{
 						// TODO:
+            // in case of POST request get the request body
 					}
 					else
 					{

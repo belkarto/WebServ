@@ -9,11 +9,20 @@ Client::Client()
 	response_all_sent = false;
   response_template_set = false;
   error = false;
+  this->ResTemplate.headersSent = false;
 }
 
 void    Client::resetState()
 {
-
+  std::cout << "client reset" << std::endl;
+  headers = "";
+	headers_all_recieved = false;
+	request_line_received = false;
+	request_all_processed = false;
+	response_all_sent = false;
+  response_template_set = false;
+  error = false;
+  this->ResTemplate.headersSent = false;
 }
 
 void	Client::setTransferEncoding(std::string &encoding)

@@ -42,8 +42,9 @@ public:
   void setErrorTemplate(CLIENTIT &, const std::string);
   void sendingRespons(CLIENTIT &);
   SERVIT getMatchingServer(std::string &, int);
-  void checkFilePath(CLIENTIT &client);
-  std::string getFileType(std::string fileName);
+  void checkFilePath(CLIENTIT &);
+  std::string getFileType(std::string);
+  void  setResponseTemplate(CLIENTIT &);
   //------------------ error ------------------------------------//
 };
 #endif

@@ -122,13 +122,16 @@ void Multiplexer::checkFilePath(CLIENTIT &client) {
 }
 
 void Multiplexer::sendingRespons(CLIENTIT &client) {
+  std::cout << "sending Response" << std::endl;
   if (!client->ResTemplate.headersSent) {
     checkFilePath(client);
     sendingHeaders(client);
     client->ResTemplate.headersSent = true;
-    client->ResponseFile = new std::ifstream(client->ResTemplate.responsFilePath.c_str());
+    client->ResponseFile =
+        new std::ifstream(client->ResTemplate.responsFilePath.c_str());
   } else {
-    if (client->fileSize == 0) {
+    if (client->fileSize <= 0) {
+      client->ResponseFile->close();
       client->response_all_sent = true;
       return;
     }
@@ -141,19 +144,21 @@ void Multiplexer::sendingRespons(CLIENTIT &client) {
   }
 }
 
+void Multiplexer::setResponseTemplate(CLIENTIT &client)
+{
+  std::cout << client->fields["uri"] <<std::endl;
+}
+
 void Multiplexer::sendResponseToClient(CLIENTIT &clientData) {
   if (!clientData->response_template_set) {
     clientData->serverIt = getMatchingServer(clientData->fields["host"],
                                              clientData->listen_socket);
     if (clientData->error)
       setErrTemp(clientData);
+    else
+      setResponseTemplate(clientData);
     clientData->response_template_set = true;
-    clientData->ResTemplate.headersSent = false;
   } else {
-    if (!clientData->error)
-    {
-      //set response in case of valid request and all redirictions....
-    }
     sendingRespons(clientData);
   }
 }
