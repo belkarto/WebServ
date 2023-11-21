@@ -74,4 +74,6 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 	// for (; it != clientIt->fields.end(); it++)
 	// 	std::cout << it->first << ": " << it->second << std::endl;
 	clientIt->headers_all_recieved = true;
+  if (clientIt->fields["method"] != "POST")
+    clientIt->request_all_processed = true;
 }

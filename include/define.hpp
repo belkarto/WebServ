@@ -8,7 +8,9 @@ class Client;
 
 # define SERVER "webserv"
 # define DEF_ERR_PATH "www/error_pages/"
+# define DEF_FILE_TYPE "text/plain"
 # define PROTOCOL_VERS "HTTP/1.1 "
+# define URI "request_target" 
 
 /*                  server default configuration                */
 # define DEFAULT_CONF_PATH				"config/default.conf"

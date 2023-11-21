@@ -182,7 +182,6 @@ void	Multiplexer::getClientRequest(CLIENTIT& clientIt)
 		if (!clientIt->headers.empty())
 			parseRequestHeaders(clientIt);
 		delete[] clientIt->header_buffer;
-    clientIt->request_all_processed = true;
 	}
 }
 
