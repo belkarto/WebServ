@@ -39,6 +39,9 @@ class Client;
 # define BACKLOG                    500
 # define MIMETYPE_PATH              "./config/mimes.txt"
 
+/*                  Response                                    */
+
+
 /*                  typedef                                     */
 typedef std::vector<Client>  CLIENTVECT;
 typedef std::vector<Server> SERVVECT;

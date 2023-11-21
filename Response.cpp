@@ -1,7 +1,6 @@
-#include "../include/Multiplexer.hpp"
-#include <sstream>
+#include "Response.hpp"
 
-void Multiplexer::setErrorTemplate(CLIENTIT& client,const std::string error)
+void Multiplexer::setErrorTemplate(CLIENTIT &client, const std::string error)
 {
   std::stringstream ss(error);
   client->error = true;
@@ -9,13 +8,17 @@ void Multiplexer::setErrorTemplate(CLIENTIT& client,const std::string error)
   client->request_all_processed = true;
 }
 
-SERVIT Multiplexer::getMatchingServer(std::string &serverName, int socketFd) {
+SERVIT Multiplexer::getMatchingServer(std::string &serverName, int socketFd)
+{
   SERVIT it;
   bool firstOccurence = true;
   for (SERVIT iter = this->servers.begin(); iter != this->servers.end();
-       ++iter) {
-    if (socketFd == iter->listen_socket) {
-      if (firstOccurence) {
+       ++iter)
+  {
+    if (socketFd == iter->listen_socket)
+    {
+      if (firstOccurence)
+      {
         it = iter;
         firstOccurence = !firstOccurence;
       }
@@ -34,14 +37,18 @@ void Multiplexer::setErrTemp(Server &server, Client &client)
   client.ResTemplate.ContentEncoding = "chunked";
 }
 
-void Multiplexer::sendResponseToClient(Client clientData) {
-  if (!clientData.response_template_set) {
+void Multiplexer::sendResponseToClient(Client clientData)
+{
+  if (!clientData.response_template_set)
+  {
     SERVIT it = getMatchingServer(clientData.fields["host"], clientData.listen_socket);
     if (clientData.error)
       setErrTemp(*it, clientData);
     clientData.response_template_set = true;
     exit(1);
-  } else {
+  }
+  else
+  {
     // start sending response
   }
 }

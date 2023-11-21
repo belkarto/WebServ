@@ -69,9 +69,23 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 	if (clientIt->fields["method"] == "POST" && clientIt->fields.find("Content-Length") == clientIt->fields.end() 
 		&& clientIt->fields.find("Transfer-Encoding") == clientIt->fields.end())
 		throw RequestParsingException("400 Bad Request");
-	// std::map<std::string, std::string>::iterator	it;
-	// it = clientIt->fields.begin();
-	// for (; it != clientIt->fields.end(); it++)
-	// 	std::cout << it->first << ": " << it->second << std::endl;
 	clientIt->headers_all_recieved = true;
+	if (clientIt->fields["method"] != "POST")
+		clientIt->request_all_processed = true;
+	setServerByHost(clientIt);
+}
+
+
+void	Multiplexer::setServerByHost(CLIENTIT& clientIt)
+{
+	SERVIT	serverIt;
+
+	serverIt = servers.begin();
+	for (; serverIt != servers.end(); serverIt++)
+	{
+		if (clientIt->listen_socket == serverIt->listen_socket
+			&& find(serverIt->server_name.begin(), serverIt->server_name.end(), clientIt->fields["Host"]) 
+			!= serverIt->server_name.end())
+			clientIt->serverIt = serverIt;
+	}
 }

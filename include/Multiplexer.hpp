@@ -2,10 +2,10 @@
 # define MULTIPLEXER_HPP
 
 #include "define.hpp"
+#include "Response.hpp"
 #include "webserv.hpp"
 #include "Server.hpp"
 #include "Client.hpp"
-
 
 class Multiplexer
 {
@@ -28,6 +28,7 @@ class Multiplexer
 		void		parseRequestLine(CLIENTIT& clientIt);
 		void		parseRequestHeaders(CLIENTIT& clientIt);
 		void		reviewHeaders(CLIENTIT& clientIt);
+		void		setServerByHost(CLIENTIT& clientIt);
 		void		sendResponseHeaders(CLIENTIT& clientIt);
 		void		sendResponse(CLIENTIT& clientIt);
 		void		dropInactiveClients();
@@ -38,11 +39,5 @@ class Multiplexer
 		static const char*				fields[HEADERS_FIELDS_SIZE];
 		static void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(std::string &field);
 		static std::map<std::string, std::string>	mime_types;
-    //------------ respons functions -------------------------------//
-    void  sendResponseToClient(Client clientData);
-    void  setErrorTemplate(CLIENTIT& , const std::string);
-    SERVIT getMatchingServer(std::string &str, int socketFd);
-    //------------------ error ------------------------------------// 
-    void setErrTemp(Server &, Client &);
 };
 #endif

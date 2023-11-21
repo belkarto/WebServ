@@ -1,19 +1,15 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
-#include "Multiplexer.hpp"
-#include "ResponseTemplate.hpp"
-
-typedef struct
-{
-  int statuCode;
-} ErrTemplate;
+# include "Multiplexer.hpp"
+//# include "Response.hpp"
 
 class Client
 {
     public:
         int                                 connect_socket;
         int                                 listen_socket;
+        SERVIT                              serverIt;
         char*                               header_buffer;
         std::string                         headers; 
         time_t                              header_timeout;
@@ -25,18 +21,17 @@ class Client
         time_t                              last_activity;
         int                                 keepalive_requests;
         std::map<std::string, std::string>  fields;
-        bool            error;
-        ErrTemplate     errData;
-        ResponseTemplate ResTemplate;
+        Response		      				response;                          
+
 
         Client();
-        void								resetState();
-        void								setProtocolVersion(std::string &protocol_version);
-		    void								setMethod(std::string &method);
-		    void								setHost(std::string &host);
-        void								setContentType(std::string &content_type);
-		    void								setContentLength(std::string &content_length);
-		    void								setConnection(std::string &connection);
-        void								setTransferEncoding(std::string &encoding);
+        void	resetState();
+        void	setProtocolVersion(std::string &protocol_version);
+		void	setMethod(std::string &method);
+		void	setHost(std::string &host);
+        void	setContentType(std::string &content_type);
+		void	setContentLength(std::string &content_length);
+		void	setConnection(std::string &connection);
+        void	setTransferEncoding(std::string &encoding);
 };
 #endif
