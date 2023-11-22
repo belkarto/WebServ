@@ -9,7 +9,7 @@ Client::Client()
 	response_all_sent = false;
   response_template_set = false;
   error = false;
-  this->ResTemplate.headersSent = false;
+  ResTemplate.reset();
 }
 
 void    Client::resetState()

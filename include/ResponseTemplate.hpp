@@ -2,18 +2,31 @@
 #define RESPONSE_TEMPLATE_HPP
 
 #include <string>
+#include <dirent.h>
+
+typedef struct {
+  std::string fileName;
+} autoindexData;
 
 class ResponseTemplate {
 public:
+  ResponseTemplate();
+
   bool headersSent;
-  std::string ResponsStatus;   // Ex: 200 OK // if errno of open ==> ENOENT not
-                               // found | EACCES permission denied
-  std::string server;          // webServ *server name*
-  std::string ContentEncoding; // always will be set to chunked
-  std::string connenction;     // keep-alive OR closed
+  bool dirResponse;
+  bool dirReasHeaderSent;
+  DIR *dir;
+  std::string ResponsStatus;
+  std::string ContentEncoding;
+  std::string connenction;
   std::string contentType;
+  std::string transferEncoding;
   std::string contentLenght;
   std::string responsFilePath;
+
+  void sendTopHead(int);
+  void sendDirBody(int);
+  void reset();
 };
 
 #endif

@@ -181,8 +181,8 @@ void	Multiplexer::getClientRequest(CLIENTIT& clientIt)
 			parseRequestLine(clientIt);
 		if (!clientIt->headers.empty())
 			parseRequestHeaders(clientIt);
-		delete[] clientIt->header_buffer;
 	}
+		delete[] clientIt->header_buffer;
 }
 
 void	Multiplexer::dropInactiveClients()

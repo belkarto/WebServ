@@ -1,6 +1,6 @@
 #================================= Files to compile ===================================
 SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer  Exception RequestParser \
-						ResponsParser
+						ResponsParser ResponseTemplate
 LIB_FILES = signal split trim  addr_resolver ft_stoll ft_stoi socket_addr_ntop displayConfig epoll_add \
 						getFileSize
 # #======================================================================================
@@ -31,7 +31,7 @@ CC			= c++
 
 OBJF		= .cache_exists
 
-FLAGS		=  -Wall -Wextra -Werror -std=c++98 -Iinclude 
+FLAGS		=  -Wall -Wextra -Werror -std=c++98 -Iinclude -g
 #-g -fsanitize=address
 
 # #======================================================================================
@@ -50,15 +50,15 @@ all : header $(NAME)
 $(OBJ_DIR)%.o	: $(SRC_DIR)%.cpp | $(OBJF)
 	@$(CC) $(FLAGS) -c $< -o $@
 	@printf "$(GRAY)\r- Compiling src...⌛$(NO_COLOR)"
-	@sleep 0.03
+	@sleep 0.01
 	@printf "$(GRAY)\r- Compiling src...⏳$(NO_COLOR)"
-	@sleep 0.03
+	@sleep 0.01
 $(OBJ_DIR)%.o	: $(LIB_DIR)%.cpp | $(OBJF)
 	@$(CC) $(FLAGS) -c $< -o $@
 	@printf "$(GRAY)\r- Compiling lib...⌛$(NO_COLOR)"
-	@sleep 0.03
+	@sleep 0.01
 	@printf "$(GRAY)\r- Compiling lib...⏳$(NO_COLOR)"
-	@sleep 0.03
+	@sleep 0.01
 # #=======================================================
 
 # #=== rule that compile the final program ===
