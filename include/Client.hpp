@@ -5,10 +5,10 @@
 #include "ResponseTemplate.hpp"
 #include "define.hpp"
 
-typedef struct {
-  int statuCode;
-  std::string errorHeader;
-} ErrTemplate;
+// typedef struct {
+//   int statuCode;
+//   std::string errorHeader;
+// } ErrTemplate;
 
 class Client {
 public:
@@ -26,7 +26,7 @@ public:
 	time_t                              last_activity;
 	int                                 keepalive_requests;
 	Response		      				response;     
-    LOC_VECT_IT		                    locatIt;                   
+  	LOC_VECT_IT		                    locatIt;                   
 	std::map<std::string, std::string>  fields;
 
   Client();

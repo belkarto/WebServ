@@ -18,7 +18,7 @@ void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
 		{
 			last = header.begin() + sep;
 			if (std::find_if(header.begin(), last, isspace) != last)
-				throw RequestParsingException("400 Bad Request");
+				throw RequestParsingException(STATUS_400);
 			ss << header;
 			getline(ss, key, ':');
 			getline(ss, value);
@@ -28,7 +28,7 @@ void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
 				((*clientIt).*(Multiplexer::fields_setters)[std::ptrdiff_t(it - headers_fields.begin())])(value);
 		}
 		else
-			throw RequestParsingException("400 Bad Request");
+			throw RequestParsingException(STATUS_400);
 		ss.clear();
 		offset = pos + 2;
 	}
@@ -47,11 +47,11 @@ void	Multiplexer::parseRequestLine(CLIENTIT& clientIt)
 	delim = "\r\n";
 	pos = clientIt->headers.find(delim);
 	if (clientIt->headers.length() == CLIENT_HEADER_BUFFER_SIZE && pos == std::string::npos)
-		throw RequestParsingException("400 Bad Request");
+		throw RequestParsingException(STATUS_400);
 	ss << clientIt->headers.substr(0, pos);	// request line
 	ss >> method >> request_target >> protocol_version >> blank;	// method uri protocol_version\r\n
 	if (method.empty() || request_target.empty() || protocol_version.empty() || !blank.empty())
-		throw RequestParsingException("400 Bad Request");
+		throw RequestParsingException(STATUS_400);
 	clientIt->fields["request_target"] = request_target;
 	clientIt->setMethod(method);
 	clientIt->setProtocolVersion(protocol_version);
@@ -62,13 +62,13 @@ void	Multiplexer::parseRequestLine(CLIENTIT& clientIt)
 void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 {
 	if (clientIt->fields.find("Host") == clientIt->fields.end())
-		throw RequestParsingException("400 Bad Request");
+		throw RequestParsingException(STATUS_400);
 	if (clientIt->fields.find("Content-Length") != clientIt->fields.end() 
 		&& clientIt->fields.find("Transfer-Encoding") != clientIt->fields.end())
-		throw RequestParsingException("400 Bad Request");
+		throw RequestParsingException(STATUS_400);
 	if (clientIt->fields["method"] == "POST" && clientIt->fields.find("Content-Length") == clientIt->fields.end() 
 		&& clientIt->fields.find("Transfer-Encoding") == clientIt->fields.end())
-		throw RequestParsingException("400 Bad Request");
+		throw RequestParsingException(STATUS_400);
 	clientIt->headers_all_recieved = true;
 	if (clientIt->fields["method"] != "POST")
 		clientIt->request_all_processed = true;

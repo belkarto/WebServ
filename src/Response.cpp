@@ -2,11 +2,11 @@
 
 void    Response::setErrorResponse(CLIENTIT& clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
 	int													code;
 	std::stringstream									ss;
 	std::map<std::vector<int>, std::string>::iterator	pageIt;		
 
+    std::cout << __FUNCTION__ << std::endl;
 	ss << status;
 	ss >> code;
 	if ((pageIt = clientIt->serverIt->findErrorPage(code)) != clientIt->serverIt->error_page.end())
@@ -38,9 +38,9 @@ void	Response::handleErrorPages(CLIENTIT& clientIt)
 {
 	if (access(filePath.c_str(), F_OK))
 	{
-		if (status == "404 Not Found")
+		if (status == STATUS_400)
 			return (handleDefaultErrorPages(clientIt));
-		status = "404 Not Found";
+		status = STATUS_400;
 		this->setErrorResponse(clientIt);
 	}
 	else
@@ -59,15 +59,7 @@ void	Response::handleDefaultErrorPages(CLIENTIT& clientIt)
 
 	ss << status;
 	ss >> code;
-	filePath = ERROR_PAGE_DEFAULT_LOCAT + code + ERROR_PAGE_SUFFIX;
-	if (!access(filePath.c_str(), F_OK) && !access(filePath.c_str(), R_OK))
-	{
-		// TODO: serve Content from file
-	}
-	else
-	{
-		// TODO: serve content from defined error
-	}
+	// TODO: serve default errror pages
 	(void) clientIt;
 }
 
@@ -82,9 +74,9 @@ void	Response::handleDirectory(CLIENTIT& clientIt)
 	{
 		if (!handleAutoIndex(clientIt))
 		{
-			if (status == "403 Forbidden")
+			if (status == STATUS_403)
 				return (handleDefaultErrorPages(clientIt));
-			status = "403 Forbidden";
+			status = STATUS_403;
 			this->setErrorResponse(clientIt);
 		}
 	}
@@ -100,17 +92,17 @@ void	Response::handleFile(CLIENTIT& clientIt)
 		}
 		else // permission not granted
 		{
-			if (status == "403 Forbidden")
+			if (status == STATUS_403)
 				return (handleDefaultErrorPages(clientIt));
-			status = "403 Forbidden";
+			status = STATUS_403;
 			this->setErrorResponse(clientIt);
 		}
 	}
 	else // file doesnt exist
 	{
-		if (status == "404 Not Found")
+		if (status == STATUS_400)
 			return (handleDefaultErrorPages(clientIt));
-		status = "404 Not Found";
+		status = STATUS_400;
 		this->setErrorResponse(clientIt);
 	}
 }
@@ -133,12 +125,12 @@ bool	Response::handleIndexPages(CLIENTIT& clientIt)
 			}
 			else // permission not granted
 			{
-				if (status == "403 Forbidden")
+				if (status == STATUS_403)
 				{
 					handleDefaultErrorPages(clientIt);
 					return true;
 				}
-				status = "403 Forbidden";
+				status = STATUS_403;
 				this->setErrorResponse(clientIt);
 			}
 			return true;

@@ -54,6 +54,7 @@
 # define STATUS_503 "503 Service Unavailable"
 # define STATUS_504 "504 Gateway Timeout"
 # define STATUS_505 "505 HTTP Version Not Supported"
+
 /*                  server default configuration                */
 # define DEFAULT_CONF_PATH			    "config/default.conf"
 # define DEFAULT_HOST 					"localhost"
@@ -86,10 +87,5 @@
 # define BACKLOG                    500
 # define MIMETYPE_PATH              "./config/mimes.txt"
 
-/*                404 error page in case no default found */ 
-#define NOT_FOUND "<!DOCTYPE html>\n<html>\n<head>\n<title>404 - Page Not Found</title>\n</head>\n<body>\n<h1>404 - Page Not Found</h1>\n<p>We're sorry, but the page you requested could not be found.</p>\n</body>\n</html>"
-/*                  Response                                    */
-# define ERROR_PAGE_DEFAULT_LOCAT	"www/default_pages/" 
-# define ERROR_PAGE_SUFFIX              "_default.html"
-
+/*                default error pages							*/
 #endif
