@@ -230,6 +230,7 @@ void Multiplexer::setResponseTemplate(CLIENTIT &client) {
 void Multiplexer::sendResponseToClient(CLIENTIT &clientData) {
   static int tracker = 0;
   if (!clientData->response_template_set) {
+    std::cout << clientData->fields[URI] << std::endl;
     clientData->serverIt = getMatchingServer(clientData->fields["host"],
                                              clientData->listen_socket);
     if (clientData->error)

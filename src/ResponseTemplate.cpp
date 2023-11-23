@@ -9,6 +9,15 @@ ResponseTemplate::ResponseTemplate() {
 }
 
 void ResponseTemplate::reset() {
+  responsFilePath.clear();
+  ResponsStatus.clear();
+  ContentEncoding.clear();
+  connenction.clear();
+  contentType.clear();
+  transferEncoding.clear();
+  contentLenght.clear();
+  responsFilePath.clear();
+  dirReasHeaderSent = false;
   headersSent = false;
   dirResponse = false;
 }
@@ -30,16 +39,13 @@ void ResponseTemplate::sendTopHead(int connectionFd) {
   dirReasHeaderSent = true;
 }
 
-void ResponseTemplate::sendDirBody(int connectionFd)
-{
+void ResponseTemplate::sendDirBody(int connectionFd) {
   struct dirent *entry;
   std::string holder;
   std::stringstream ss;
   std::string len;
-  if (dir)
-  {
-    while((entry = readdir(dir)) != NULL)
-    {
+  if (dir) {
+    while ((entry = readdir(dir)) != NULL) {
       holder += "<a href=\"";
       holder.append(entry->d_name);
       holder.append("\">").append(entry->d_name).append("</a>\n");
@@ -48,17 +54,18 @@ void ResponseTemplate::sendDirBody(int connectionFd)
     ss << holder.length();
     ss >> len;
     len += "\r\n";
-    send(connectionFd,len.c_str(), len.length(), 0);
-    send(connectionFd,holder.c_str(), holder.length(), 0);
+    send(connectionFd, len.c_str(), len.length(), 0);
+    send(connectionFd, holder.c_str(), holder.length(), 0);
   }
-  if (entry == NULL)
-  {
+  if (entry == NULL) {
     holder.clear();
     holder = "</pre>\n<hr>\n</body>\n</html>";
+    ss.clear();
     ss << holder.length();
     ss >> len;
-    send(connectionFd,len.c_str(), len.length(), 0);
-    send(connectionFd,holder.c_str(), holder.length(), 0);
-    send(connectionFd, "\r\n0\r\n\r\n", 5, 0);
+    len += "\r\n";
+    send(connectionFd, len.c_str(), len.length(), 0);
+    send(connectionFd, holder.c_str(), holder.length(), 0);
+    send(connectionFd, "\r\n\r\n", 4, 0);
   }
 }
