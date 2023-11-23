@@ -13,7 +13,7 @@ class Response
 		std::string	filePath;
 		std::string	location;
 		STRINGVECT	*index;
-      	bool		autoindex;
+    bool		    autoindex;
 
       void	setErrorResponse(CLIENTIT& clientIt);
       void	setGetResponse(CLIENTIT& clientIt);

@@ -38,10 +38,20 @@ void	Response::handleCustomErrorPages(CLIENTIT& clientIt)
 {
 	if (!clientIt->locatIt->redirect.empty())
 		handleURLRedirection(clientIt);
-	else if (is_directory(filePath.c_str()))
-		handleDirectory(clientIt);
+	if (access(filePath.c_str(), F_OK))
+	{
+		if (status == "404 Not Found")
+			return (handleDefaultErrorPages(clientIt));
+		status = "404 Not Found";
+		this->setErrorResponse(clientIt);
+	}
 	else
-		handleFile(clientIt);
+	{
+		if (is_directory(filePath.c_str()))
+			handleDirectory(clientIt);
+		else
+			handleFile(clientIt);
+	}
 }
 
 void	Response::handleDefaultErrorPages(CLIENTIT& clientIt)
