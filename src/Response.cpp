@@ -17,27 +17,25 @@ void    Response::setErrorResponse(CLIENTIT& clientIt)
 			index = &(clientIt->locatIt->index);		// common directives
 			autoindex = clientIt->locatIt->autoindex;	// to server and location
 			filePath = clientIt->locatIt->root + pageIt->second;
-			handleCustomErrorPages(clientIt);
+	        if (!clientIt->locatIt->redirect.empty())
+		        handleURLRedirection(clientIt);
+            else 
+		        handleErrorPages(clientIt);
 		}
 		else
 		{
 			index = &(clientIt->serverIt->index);
 			autoindex = clientIt->serverIt->autoindex;
 			filePath = clientIt->serverIt->root + pageIt->second;
-			if (is_directory(filePath.c_str()))
-				handleDirectory(clientIt);
-			else
-				handleFile(clientIt);
+			handleErrorPages(clientIt);
 		}
 	}
 	else
 		handleDefaultErrorPages(clientIt);
 }
 
-void	Response::handleCustomErrorPages(CLIENTIT& clientIt)
+void	Response::handleErrorPages(CLIENTIT& clientIt)
 {
-	if (!clientIt->locatIt->redirect.empty())
-		handleURLRedirection(clientIt);
 	if (access(filePath.c_str(), F_OK))
 	{
 		if (status == "404 Not Found")
