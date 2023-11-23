@@ -83,23 +83,9 @@ void	ConfigParser::parseMethod()
 
 void	ConfigParser::parseRedirect()
 {
-	int code;
-
-	if (directive_components.size() != 2)
+	if (directive_components.size() != 1)
 		throw ConfigFileParsingException("invalid number of arguments in redirect directive");
-	try
-	{
-		code = ft_stoi(directive_components[0].c_str());
-		// redirect code falls in 3xx range
-		if (code < 300 || code >= 400)
-			throw ConfigFileParsingException("invalid value in redirect directive");
-		_servers.back().location.back().redirect.first = code;
-		_servers.back().location.back().redirect.second = directive_components[1];
-	}
-	catch (std::exception &e)
-	{
-		throw ConfigFileParsingException("invalid value in redirect directive");
-	}
+	_servers.back().location.back().redirect = directive_components.back();
 }
 
 void	ConfigParser::parseLocationIndex()

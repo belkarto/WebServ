@@ -2,8 +2,8 @@
 # define SERVER_HPP
 
 #include "define.hpp"
-#include "webserv.hpp"
 #include "Client.hpp"
+#include "webserv.hpp"
 
 typedef struct Location
 {
@@ -11,7 +11,7 @@ typedef struct Location
 	std::string									root;
 	STRINGVECT			              			index;
 	STRINGVECT			              			method;
-	std::pair<int, std::string>					redirect;
+	std::string									redirect;
 	bool										autoindex;
 	std::pair<std::string, std::string>			cgi;
 	std::string									upload_store;
@@ -36,5 +36,8 @@ class Server
 		void	emplaceBackLocation();
 		void	initServer();
 		void	acceptConnection(Client &client);
+		void	findLocation(CLIENTIT &clientIt, std::string &uri);
+		std::map<std::vector<int>, std::string>::iterator	findErrorPage(int code);
+		
 };
 #endif

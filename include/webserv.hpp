@@ -12,6 +12,7 @@
 # include <arpa/inet.h>
 # include <string.h>
 # include <fcntl.h>
+# include <sys/stat.h>
 # include <fstream>
 # include <sstream>
 # include <utility>
@@ -48,7 +49,15 @@ void	        	epoll_add(int epfd, int fd);
 void	        	epoll_add2(int epfd, int fd);
 void	        	epoll_delete(int epfd, int fd);
 std::streamsize		getFileSize(std::ifstream *file);
+bool				is_directory(const char* path);
 
 /*                  debug                                       */
 void        		showServers(std::vector<Server> &servers);
+
+/*                  typedef                                       */
+typedef std::vector<Client>  			CLIENTVECT;
+typedef std::vector<Server> 			SERVVECT;
+typedef std::vector<Client>::iterator	CLIENTIT;
+typedef std::vector<Server>::iterator	SERVIT;
+typedef std::vector<std::string>		STRINGVECT;
 #endif

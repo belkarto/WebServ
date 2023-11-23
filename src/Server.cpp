@@ -4,7 +4,7 @@ Server::Server()
 {
     root 					= DEFAULT_ROOT;
     client_max_body_size	= DEFAULT_CLIENT_MAX_BODY_SIZE;
-    autoindex 				= DEFAULT_AUTOINDEX;
+    // autoindex 				= DEFAULT_AUTOINDEX;
     addr_resolver(&bind_addr, DEFAULT_HOST, DEFAULT_PORT);
     index.push_back(DEFAULT_INDEX);
 }
@@ -17,13 +17,13 @@ void	Server::emplaceBackLocation()
 	location.root 		= this->root;
     location.index 		= this->index;
     location.autoindex 	= this->autoindex;
-	location.method.push_back("GET");
 	this->location.push_back(location);
 }
 
 void    Server::initServer()
 {
-	int					reuse = 0;
+	int	reuse;
+
 	if ((listen_socket = socket(bind_addr->ai_family, bind_addr->ai_socktype, bind_addr->ai_protocol)) < 0)
 	{
 		perror("socket()");
@@ -36,7 +36,7 @@ void    Server::initServer()
 		perror("setsockopt()");
 		exit(EXIT_FAILURE);
 	}
-
+	
 	if (bind(listen_socket, bind_addr->ai_addr, bind_addr->ai_addrlen))
 	{
 		perror("bind()");
@@ -60,4 +60,26 @@ void	Server::acceptConnection(Client &client)
 		exit(EXIT_FAILURE);
 	}
 	client.listen_socket = this->listen_socket;
+}
+
+std::map<std::vector<int>, std::string>::iterator	Server::findErrorPage(int code)
+{
+	std::map<std::vector<int>, std::string>::iterator	it,ite;
+
+	it = this->error_page.begin();
+	ite = this->error_page.end();
+	for (; it != ite && find(it->first.begin(), it->first.end(), code) == it->first.end(); it++ );
+	return it;
+}
+
+void	Server::findLocation(CLIENTIT &clientIt, std::string &uri)
+{
+	std::vector<struct Location>::iterator	it;
+
+	it = location.begin();
+	clientIt->locatIt = location.end();
+	for (; it != location.end(); it++)
+		if (!(uri.find(it->uri)) && (clientIt->locatIt == location.end() 
+			|| it->uri.length() > clientIt->locatIt->uri.length()))
+				clientIt->locatIt = it;
 }

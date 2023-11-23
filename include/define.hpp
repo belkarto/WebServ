@@ -1,18 +1,13 @@
 #ifndef DEFINE_HPP
 # define DEFINE_HPP
 
-#include <vector>
-#include <string>
-class Server;
-class Client;
-
 # define SERVER "webserv"
 
 /*                  server default configuration                */
 # define DEFAULT_CONF_PATH				"config/default.conf"
 # define DEFAULT_HOST 					"localhost"
 # define DEFAULT_PORT					"1337"
-# define DEFAULT_ROOT					"./html"
+# define DEFAULT_ROOT					"./www"
 # define DEFAULT_INDEX					"index.html"
 # define DEFAULT_AUTOINDEX				false
 # define DEFAULT_CLIENT_MAX_BODY_SIZE	1048576	// 1M
@@ -40,12 +35,7 @@ class Client;
 # define MIMETYPE_PATH              "./config/mimes.txt"
 
 /*                  Response                                    */
+# define ERROR_PAGE_DEFAULT_LOCAT	"www/default_pages/" 
+# define ERROR_PAGE_SUFFIX              "_default.html"
 
-
-/*                  typedef                                     */
-typedef std::vector<Client>  CLIENTVECT;
-typedef std::vector<Server> SERVVECT;
-typedef std::vector<Client>::iterator  CLIENTIT;
-typedef std::vector<Server>::iterator SERVIT;
-typedef std::vector<std::string> STRINGVECT;
 #endif

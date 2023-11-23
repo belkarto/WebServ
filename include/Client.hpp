@@ -21,7 +21,8 @@ class Client
         time_t                              last_activity;
         int                                 keepalive_requests;
         std::map<std::string, std::string>  fields;
-        Response		      				response;                          
+        Response		      				response;     
+        std::vector<struct Location>::iterator		locatIt;                   
 
 
         Client();

@@ -2,7 +2,7 @@
 SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer  Exception RequestParser \
 			Response
 LIB_FILES = signal split trim  addr_resolver ft_stoll ft_stoi socket_addr_ntop displayConfig epoll_add \
-						getFileSize
+						getFileSize	is_directory
 # #======================================================================================
 
 # #====================================== Colors ========================================
