@@ -176,7 +176,7 @@ void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 	{
 		clientIt->response.status = e.what();
 		clientIt->response.setErrorResponse(clientIt);
-		dropClient(clientIt);
+		// dropClient(clientIt);
 	}
 }
 

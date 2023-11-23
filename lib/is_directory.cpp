@@ -3,8 +3,6 @@
 bool	is_directory(const char* path)
 {
 	struct stat	statbuf;
-	if (access(path, R_OK))
-		return false;
 	if (stat(path, &statbuf) < 0)
 	{
 		perror("stat()");
