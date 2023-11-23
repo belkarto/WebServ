@@ -1,6 +1,13 @@
+<<<<<<< HEAD:src/ResponsParser.cpp
 #include "../include/Multiplexer.hpp"
 
 void Multiplexer::setErrorTemplate(CLIENTIT &client, const std::string error) {
+=======
+#include "Response.hpp"
+
+void Multiplexer::setErrorTemplate(CLIENTIT &client, const std::string error)
+{
+>>>>>>> isalhi:Response.cpp
   std::stringstream ss(error);
   client->errData.errorHeader = error;
   client->error = true;
@@ -8,13 +15,17 @@ void Multiplexer::setErrorTemplate(CLIENTIT &client, const std::string error) {
   client->request_all_processed = true;
 }
 
-SERVIT Multiplexer::getMatchingServer(std::string &serverName, int socketFd) {
+SERVIT Multiplexer::getMatchingServer(std::string &serverName, int socketFd)
+{
   SERVIT it;
   bool firstOccurence = true;
   for (SERVIT iter = this->servers.begin(); iter != this->servers.end();
-       ++iter) {
-    if (socketFd == iter->listen_socket) {
-      if (firstOccurence) {
+       ++iter)
+  {
+    if (socketFd == iter->listen_socket)
+    {
+      if (firstOccurence)
+      {
         it = iter;
         firstOccurence = !firstOccurence;
       }
@@ -48,6 +59,7 @@ static std::string getErrorFile(Server &server, int errorPageCode) {
   return path;
 }
 
+<<<<<<< HEAD:src/ResponsParser.cpp
 void setErrTemp(CLIENTIT &client) {
   client->ResTemplate.ResponsStatus = client->errData.errorHeader;
   client->ResTemplate.ContentEncoding = "chunked";
@@ -242,5 +254,20 @@ void Multiplexer::sendResponseToClient(CLIENTIT &clientData) {
     std::cout << clientData->ResTemplate.responsFilePath << std::endl;
   } else {
     sendingRespons(clientData);
+=======
+void Multiplexer::sendResponseToClient(Client clientData)
+{
+  if (!clientData.response_template_set)
+  {
+    SERVIT it = getMatchingServer(clientData.fields["host"], clientData.listen_socket);
+    if (clientData.error)
+      setErrTemp(*it, clientData);
+    clientData.response_template_set = true;
+    exit(1);
+  }
+  else
+  {
+    // start sending response
+>>>>>>> isalhi:Response.cpp
   }
 }

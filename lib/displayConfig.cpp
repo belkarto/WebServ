@@ -33,7 +33,7 @@ void    printLocation(Location location)
 	std::cout << " ;" << std::endl;
 
 	std::cout << " 		redirect ";
-	std::cout << location.redirect.first << " " << location.redirect.second << " ;" << std::endl;
+	std::cout << location.redirect << " ;" << std::endl;
 
 	std::cout << "	}" << std::endl;
 }

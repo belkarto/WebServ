@@ -34,7 +34,7 @@ Multiplexer::Multiplexer(SERVVECT &servers) : servers(servers)
 
 Multiplexer::~Multiplexer()
 {
-	SERVIT	serverIt;
+	SERVIT serverIt;
 
 	serverIt = servers.begin();
 	for (; serverIt != servers.end(); serverIt++)
@@ -44,11 +44,11 @@ Multiplexer::~Multiplexer()
 	}
 }
 
-void	Multiplexer::registerServers()
+void Multiplexer::registerServers()
 {
-	std::map<std::string, int>				sockfds;
-	std::map<std::string, int>::iterator	it2;
-	SERVIT			it;
+	std::map<std::string, int> sockfds;
+	std::map<std::string, int>::iterator it2;
+	SERVIT it;
 
 	it = servers.begin();
 	for (; it != servers.end(); it++)
@@ -64,41 +64,41 @@ void	Multiplexer::registerServers()
 	}
 }
 
-void	Multiplexer::registerClient(SERVIT& serverIt)
+void Multiplexer::registerClient(SERVIT &serverIt)
 {
 	Client client;
 	serverIt->acceptConnection(client);
+	client.serverIt = serverIt;
 	epoll_add2(epfd, client.connect_socket);
 	clients.push_back(client);
 }
 
-void	Multiplexer::dropClient(CLIENTIT& clientIt)
+void Multiplexer::dropClient(CLIENTIT &clientIt)
 {
 	close(clientIt->connect_socket);
 	clients.erase(clientIt);
 }
 
-
-void	Multiplexer::sendResponseHeaders(CLIENTIT& clientIt)
+void Multiplexer::sendResponseHeaders(CLIENTIT &clientIt)
 {
 	(void)clientIt;
 }
 
-void	Multiplexer::sendResponse(CLIENTIT& clientIt)
+void Multiplexer::sendResponse(CLIENTIT &clientIt)
 {
 	(void)clientIt;
 }
 
-void	Multiplexer::connectionListener()
+void Multiplexer::connectionListener()
 {
-	int			i;
-	SERVIT		serverIt;
-	CLIENTIT	clientIt;
+	int i;
+	SERVIT serverIt;
+	CLIENTIT clientIt;
 
 	while (Running)
 	{
-    // TODO:
-    //segv in this line in drop client 
+        // TODO:
+        //segv in this line in drop client 
 		// dropInactiveClients();
 		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 0)
 		{
@@ -117,25 +117,17 @@ void	Multiplexer::connectionListener()
 					if (clientIt->headers_all_recieved)
 					{
 						// TODO:
-            // in case of POST request get the request body
+                        // in case of POST request get the request body
 					}
-					else
-					{
-						try
-						{
-							getClientRequest(clientIt);	
-						}
-						catch (const RequestParsingException& e)
-						{
-              setErrorTemplate(clientIt, e.what());
-						}
+					else {
+						getClientRequest(clientIt);
 					}
 				}
 				if ((events[i].events & EPOLLOUT))
 				{
 					if (clientIt->request_all_processed)
 					{
-						sendResponseToClient(clientIt);
+						// sendResponseToClient(clientIt);
 						if (clientIt->response_all_sent)
 							clientIt->resetState();
 					}
@@ -145,10 +137,9 @@ void	Multiplexer::connectionListener()
 	}
 }
 
-
-SERVIT	Multiplexer::findListenSocket(int socket, SERVVECT &sockets)
+SERVIT Multiplexer::findListenSocket(int socket, SERVVECT &sockets)
 {
-	SERVIT	serverIt;
+	SERVIT serverIt;
 
 	serverIt = sockets.begin();
 	while (serverIt != sockets.end() && serverIt->listen_socket != socket)
@@ -156,9 +147,9 @@ SERVIT	Multiplexer::findListenSocket(int socket, SERVVECT &sockets)
 	return serverIt;
 }
 
-CLIENTIT	Multiplexer::findConnectSocket(int socket, CLIENTVECT &sockets)
+CLIENTIT Multiplexer::findConnectSocket(int socket, CLIENTVECT &sockets)
 {
-	CLIENTIT	clientIt;
+	CLIENTIT clientIt;
 
 	clientIt = sockets.begin();
 	while (clientIt != sockets.end() && clientIt->connect_socket != socket)
@@ -166,29 +157,38 @@ CLIENTIT	Multiplexer::findConnectSocket(int socket, CLIENTVECT &sockets)
 	return clientIt;
 }
 
-void	Multiplexer::getClientRequest(CLIENTIT& clientIt)
+void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 {
-	ssize_t				r;
-
-	clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
-	r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
-	if (r < 1)
-		return (dropClient(clientIt));
-	else
-	{ 
-		clientIt->headers.append(clientIt->header_buffer, r);
-		if (!clientIt->request_line_received)
-			parseRequestLine(clientIt);
-		if (!clientIt->headers.empty())
-			parseRequestHeaders(clientIt);
+	ssize_t 	r;
+	
+	try
+	{
+		clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
+		r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
+		if (r < 1)
+			return (dropClient(clientIt));
+		else
+		{
+			clientIt->headers.append(clientIt->header_buffer, r);
+			if (!clientIt->request_line_received)
+				parseRequestLine(clientIt);
+			if (!clientIt->headers.empty())
+				parseRequestHeaders(clientIt);
+		}
 	}
-		delete[] clientIt->header_buffer;
+	catch(const std::exception& e)
+	{
+		clientIt->response.status = e.what();
+		clientIt->response.setErrorResponse(clientIt);
+		// dropClient(clientIt);
+	}
+	delete[] clientIt->header_buffer;
 }
 
-void	Multiplexer::dropInactiveClients()
+void Multiplexer::dropInactiveClients()
 {
-	CLIENTIT	it;
-	time_t		elapsed;
+	CLIENTIT it;
+	time_t elapsed;
 
 	it = clients.begin();
 	for (; it != clients.end(); it++)
@@ -198,14 +198,14 @@ void	Multiplexer::dropInactiveClients()
 			dropClient(it);
 	}
 }
-void	Multiplexer::loadMimeTypes()
+void Multiplexer::loadMimeTypes()
 {
-	std::string			line, key, value;
-	std::stringstream	ss;
-	std::ifstream		infile(MIMETYPE_PATH);
+	std::string line, key, value;
+	std::stringstream ss;
+	std::ifstream infile(MIMETYPE_PATH);
 
 	if (!infile.is_open())
-		return ;
+		return;
 	while (getline(infile, line))
 	{
 		ss << line;

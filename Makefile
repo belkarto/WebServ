@@ -1,8 +1,12 @@
 #================================= Files to compile ===================================
 SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer  Exception RequestParser \
-						ResponsParser ResponseTemplate
-LIB_FILES = signal split trim  addr_resolver ft_stoll ft_stoi socket_addr_ntop displayConfig epoll_add \
-						getFileSize
+ ResponseTemplate Response
+#<<<<<<< HEAD
+# ResponsParser
+#=======
+#>>>>>>> isalhi
+LIB_FILES 	= signal split trim  addr_resolver ft_stoll ft_stoi socket_addr_ntop displayConfig epoll_add \
+						getFileSize	is_directory
 # #======================================================================================
 
 # #====================================== Colors ========================================
@@ -39,9 +43,9 @@ FLAGS		=  -Wall -Wextra -Werror -std=c++98 -Iinclude -g
 
 # # ===Better not to touch ===#
 SRC 		= 	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(SRC_FILES)))
-S_LIB 	= 	$(addprefix $(LIB_DIR), $(addsuffix .cpp, $(LIB_FILES)))
+S_LIB 		= 	$(addprefix $(LIB_DIR), $(addsuffix .cpp, $(LIB_FILES)))
 OBJ 		= 	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_FILES)))
-OBJ_LIB = 	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(LIB_FILES)))
+OBJ_LIB 	= 	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(LIB_FILES)))
 # #===========================#
 
 all : header $(NAME)

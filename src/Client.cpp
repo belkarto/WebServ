@@ -7,9 +7,9 @@ Client::Client()
 	request_line_received = false;
 	request_all_processed = false;
 	response_all_sent = false;
-  response_template_set = false;
-  error = false;
-  ResTemplate.reset();
+    response_template_set = false;
+    // error = false;
+    // ResTemplate.reset();
 }
 
 void    Client::resetState()
@@ -20,8 +20,8 @@ void    Client::resetState()
 	request_all_processed = false;
 	response_all_sent = false;
   response_template_set = false;
-  error = false;
-  this->ResTemplate.headersSent = false;
+  // error = false;
+  // this->ResTemplate.headersSent = false;
 }
 
 void	Client::setTransferEncoding(std::string &encoding)

@@ -1,11 +1,6 @@
 #ifndef DEFINE_HPP
 # define DEFINE_HPP
 
-#include <vector>
-#include <string>
-class Server;
-class Client;
-
 # define SERVER "webserv"
 # define DEF_ERR_PATH "www/error_pages/"
 # define DEF_FILE_TYPE "text/plain"
@@ -60,12 +55,12 @@ class Client;
 # define STATUS_504 "504 Gateway Timeout"
 # define STATUS_505 "505 HTTP Version Not Supported"
 /*                  server default configuration                */
-# define DEFAULT_CONF_PATH				    "config/default.conf"
-# define DEFAULT_HOST 					      "localhost"
-# define DEFAULT_PORT					        "1337"
-# define DEFAULT_ROOT					        "./html"
-# define DEFAULT_INDEX					      "index.html"
-# define DEFAULT_AUTOINDEX				    false
+# define DEFAULT_CONF_PATH			    "config/default.conf"
+# define DEFAULT_HOST 					"localhost"
+# define DEFAULT_PORT					"1337"
+# define DEFAULT_ROOT					"./www"
+# define DEFAULT_INDEX					"index.html"
+# define DEFAULT_AUTOINDEX				false
 # define DEFAULT_CLIENT_MAX_BODY_SIZE	1048576	// 1M
 
 # define MAX_REQUEST_SIZE 107374182400  
@@ -91,13 +86,10 @@ class Client;
 # define BACKLOG                    500
 # define MIMETYPE_PATH              "./config/mimes.txt"
 
-/*                  typedef                                     */
-typedef std::vector<Client>  CLIENTVECT;
-typedef std::vector<Server> SERVVECT;
-typedef std::vector<Client>::iterator  CLIENTIT;
-typedef std::vector<Server>::iterator SERVIT;
-typedef std::vector<std::string> STRINGVECT;
-typedef std::vector<int> INTVECT;
 /*                404 error page in case no default found */ 
 #define NOT_FOUND "<!DOCTYPE html>\n<html>\n<head>\n<title>404 - Page Not Found</title>\n</head>\n<body>\n<h1>404 - Page Not Found</h1>\n<p>We're sorry, but the page you requested could not be found.</p>\n</body>\n</html>"
+/*                  Response                                    */
+# define ERROR_PAGE_DEFAULT_LOCAT	"www/default_pages/" 
+# define ERROR_PAGE_SUFFIX              "_default.html"
+
 #endif
