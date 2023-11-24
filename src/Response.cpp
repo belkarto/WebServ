@@ -3,7 +3,6 @@
 
 void    Response::setErrorResponse(CLIENTIT& clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
     int													code;
     std::stringstream									ss;
     std::map<std::vector<int>, std::string>::iterator	pageIt;		

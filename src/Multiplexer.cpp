@@ -97,6 +97,7 @@ void Multiplexer::sendResponseHeaders(CLIENTIT &clientIt)
 
 void Multiplexer::sendResponse(CLIENTIT &clientIt)
 {
+    std::cout << __func__ << std::endl;
 	(void)clientIt;
 }
 
@@ -138,6 +139,7 @@ void Multiplexer::connectionListener()
 				{
 					if (clientIt->request_all_processed)
 					{
+                        this->sendResponse(clientIt);
 						// sendResponseToClient(clientIt);
 						if (clientIt->response_all_sent)
 							clientIt->resetState();
