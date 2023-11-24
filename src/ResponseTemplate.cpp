@@ -3,6 +3,21 @@
 #include <sstream>
 #include <sys/socket.h>
 
+/* DEFAULT ERROR PAGES */
+std::string ResponseTemplate::getErrorPage(int errorCode) {
+  std::string finalResponse;
+  std::map<int, std::string>::iterator it;
+
+  finalResponse = "<html>" CRLF "<head><title>";
+  it = this->errorPages.find(errorCode);
+  finalResponse.append(it->second)
+      .append("</title></head>" CRLF "<body>" CRLF "<center><h1>")
+      .append(it->second)
+      .append("</h1></center>" CRLF);
+
+  return finalResponse;
+}
+
 ResponseTemplate::ResponseTemplate() {
   headersSent = false;
   dirResponse = false;

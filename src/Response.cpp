@@ -1,4 +1,5 @@
-#include "Client.hpp"
+// #include "Client.hpp"
+#include "../include/Multiplexer.hpp"
 
 Response::Response(void)
 {
@@ -32,9 +33,9 @@ void	Response::resetState()
 
 void    Response::setErrorResponse(CLIENTIT& clientIt)
 {
-	int													code;
-	std::stringstream									ss;
-	std::map<std::vector<int>, std::string>::iterator	pageIt;		
+    int code;
+    std::stringstream ss;
+    std::map<std::vector<int>, std::string>::iterator pageIt;
 
 	// in case of error we close connection
 	std::cout << __FUNCTION__ << std::endl;
@@ -87,25 +88,24 @@ void	Response::handlePage(CLIENTIT& clientIt)
 	}
 }
 
-void	Response::handleDefaultErrorPages(CLIENTIT& clientIt)
+void Response::handleDefaultErrorPages(CLIENTIT &clientIt)
 {
-	std::cout << __FUNCTION__ << std::endl;
-	std::stringstream	ss;
-	std::string			code;
+    std::stringstream ss;
+    std::string code;
 
-	ss << status;
-	ss >> code;
-	// TODO: serve default error pages
-	(void) clientIt;
+    ss << status;
+    ss >> code;
+    // TODO: serve default errror pages
+    (void)clientIt;
 }
 
-void	Response::handleURLRedirection(CLIENTIT& clientIt)
+void Response::handleURLRedirection(CLIENTIT &clientIt)
 {
-	std::cout << __FUNCTION__ << std::endl;
 	location = clientIt->locatIt->redirect;
+    (void)clientIt;
 }
 
-void	Response::handleDirectory(CLIENTIT& clientIt)
+void Response::handleDirectory(CLIENTIT &clientIt)
 {
 	std::cout << __FUNCTION__ << std::endl;
 	if (!handleIndexPages(clientIt))
@@ -120,7 +120,7 @@ void	Response::handleDirectory(CLIENTIT& clientIt)
 	}
 }
 
-void	Response::handleFile(CLIENTIT& clientIt)
+void Response::handleFile(CLIENTIT &clientIt)
 {
 	std::cout << __FUNCTION__ << std::endl;
 	if (!access(filePath.c_str(), F_OK)) // file exists
@@ -144,9 +144,9 @@ void	Response::handleFile(CLIENTIT& clientIt)
 	}
 }
 
-bool	Response::handleIndexPages(CLIENTIT& clientIt)
+bool Response::handleIndexPages(CLIENTIT &clientIt)
 {
-	std::vector<std::string>::iterator	it;
+    std::vector<std::string>::iterator it;
 
 	std::cout << __FUNCTION__  << std::endl;
 	if (index->empty())
@@ -172,9 +172,10 @@ bool	Response::handleIndexPages(CLIENTIT& clientIt)
 		}
 	} // if file doesnt exit continue searching for another index page
 	return false;
+    (void)clientIt;
 }
 
-bool	Response::handleAutoIndex(CLIENTIT& clientIt)
+bool Response::handleAutoIndex(CLIENTIT &clientIt)
 {
 	std::cout << __FUNCTION__ << std::endl;
 	if (!autoindex)
@@ -240,16 +241,15 @@ void	Response::sendBody(CLIENTIT& clientIt)
 
 void    Response::setGetResponse(CLIENTIT& clientIt)
 {
-	(void) clientIt;
+    (void)clientIt;
 }
 
-void    Response::setPostResponse(CLIENTIT& clientIt)
+void Response::setPostResponse(CLIENTIT &clientIt)
 {
-	(void) clientIt;
+    (void)clientIt;
 }
 
-void    Response::setDeleteResponse(CLIENTIT& clientIt)
+void Response::setDeleteResponse(CLIENTIT &clientIt)
 {
-	(void) clientIt;
+    (void)clientIt;
 }
-

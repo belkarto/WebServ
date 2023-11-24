@@ -1,6 +1,16 @@
-#include "Multiplexer.hpp"
+#include "../include/Multiplexer.hpp"
 
 std::map<std::string, std::string> Multiplexer::mime_types;
+
+const char *Multiplexer::defErrorPagesStrings[NUM_DEF_ERROR] = {
+    STATUS_100, STATUS_101, STATUS_200, STATUS_201, STATUS_202, STATUS_203,
+    STATUS_204, STATUS_205, STATUS_206, STATUS_300, STATUS_301, STATUS_302,
+    STATUS_303, STATUS_304, STATUS_305, STATUS_306, STATUS_307, STATUS_400,
+    STATUS_401, STATUS_402, STATUS_403, STATUS_404, STATUS_405, STATUS_406,
+    STATUS_407, STATUS_408, STATUS_409, STATUS_410, STATUS_411, STATUS_412,
+    STATUS_413, STATUS_414, STATUS_415, STATUS_416, STATUS_417, STATUS_500,
+    STATUS_501, STATUS_502, STATUS_503, STATUS_504, STATUS_505
+};
 
 const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {
 	"host",
@@ -28,6 +38,7 @@ Multiplexer::Multiplexer(SERVVECT &servers) : servers(servers)
 	}
 	headers_fields.assign(fields, fields + HEADERS_FIELDS_SIZE);
 	this->loadMimeTypes();
+    this->loadDefErrorPages();
 	this->registerServers();
 	this->connectionListener();
 }
@@ -86,6 +97,7 @@ void Multiplexer::sendResponseHeaders(CLIENTIT &clientIt)
 
 void Multiplexer::sendResponse(CLIENTIT &clientIt)
 {
+    std::cout << __func__ << std::endl;
 	(void)clientIt;
 }
 
@@ -223,3 +235,16 @@ void Multiplexer::loadMimeTypes()
 	}
 }
 
+void Multiplexer::loadDefErrorPages()
+{
+    std::stringstream ss;
+    int errPageIndex = 0;
+
+    for (int i = 0; i < NUM_DEF_ERROR; i++)
+    {
+        ss.str(defErrorPagesStrings[i]);
+        ss >> errPageIndex;
+        this->defErrorPages[errPageIndex] = defErrorPagesStrings[i];
+        ss.clear();
+    }
+}
