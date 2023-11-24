@@ -1,12 +1,13 @@
 // #include "Client.hpp"
 #include "../include/Multiplexer.hpp"
 
-void    Response::setErrorResponse(CLIENTIT& clientIt)
+void Response::setErrorResponse(CLIENTIT &clientIt)
 {
-    int													code;
-    std::stringstream									ss;
-    std::map<std::vector<int>, std::string>::iterator	pageIt;		
+    int code;
+    std::stringstream ss;
+    std::map<std::vector<int>, std::string>::iterator pageIt;
 
+    std::cout << __FUNCTION__ << std::endl;
     ss << status;
     ss >> code;
     if ((pageIt = clientIt->serverIt->findErrorPage(code)) != clientIt->serverIt->error_page.end())
@@ -14,12 +15,12 @@ void    Response::setErrorResponse(CLIENTIT& clientIt)
         clientIt->serverIt->findLocation(clientIt, pageIt->second);
         if (clientIt->locatIt != clientIt->serverIt->location.end())
         {
-            index = &(clientIt->locatIt->index);		// common directives
-            autoindex = clientIt->locatIt->autoindex;	// to server and location
+            index = &(clientIt->locatIt->index);      // common directives
+            autoindex = clientIt->locatIt->autoindex; // to server and location
             filePath = clientIt->locatIt->root + pageIt->second;
             if (!clientIt->locatIt->redirect.empty())
                 handleURLRedirection(clientIt);
-            else 
+            else
                 handleErrorPages(clientIt);
         }
         else
@@ -31,16 +32,16 @@ void    Response::setErrorResponse(CLIENTIT& clientIt)
         }
     }
     else
-    handleDefaultErrorPages(clientIt);
+        handleDefaultErrorPages(clientIt);
 }
 
-void	Response::handleErrorPages(CLIENTIT& clientIt)
+void Response::handleErrorPages(CLIENTIT &clientIt)
 {
     if (access(filePath.c_str(), F_OK))
     {
-        if (status == "404 Not Found")
+        if (status == STATUS_400)
             return (handleDefaultErrorPages(clientIt));
-        status = "404 Not Found";
+        status = STATUS_400;
         this->setErrorResponse(clientIt);
     }
     else
@@ -52,45 +53,37 @@ void	Response::handleErrorPages(CLIENTIT& clientIt)
     }
 }
 
-void	Response::handleDefaultErrorPages(CLIENTIT& clientIt)
+void Response::handleDefaultErrorPages(CLIENTIT &clientIt)
 {
-    std::stringstream	ss;
-    std::string			code;
+    std::stringstream ss;
+    std::string code;
 
     ss << status;
     ss >> code;
-    filePath = ERROR_PAGE_DEFAULT_LOCAT + code + ERROR_PAGE_SUFFIX;
-    if (!access(filePath.c_str(), F_OK) && !access(filePath.c_str(), R_OK))
-    {
-        // TODO: serve Content from file
-    }
-    else
-    {
-        // TODO: serve content from defined error
-    }
-    (void) clientIt;
+    // TODO: serve default errror pages
+    (void)clientIt;
 }
 
-void	Response::handleURLRedirection(CLIENTIT& clientIt)
+void Response::handleURLRedirection(CLIENTIT &clientIt)
 {
     location = clientIt->locatIt->redirect;
 }
 
-void	Response::handleDirectory(CLIENTIT& clientIt)
+void Response::handleDirectory(CLIENTIT &clientIt)
 {
     if (!handleIndexPages(clientIt))
     {
         if (!handleAutoIndex(clientIt))
         {
-            if (status == "403 Forbidden")
+            if (status == STATUS_403)
                 return (handleDefaultErrorPages(clientIt));
-            status = "403 Forbidden";
+            status = STATUS_403;
             this->setErrorResponse(clientIt);
         }
     }
 }
 
-void	Response::handleFile(CLIENTIT& clientIt)
+void Response::handleFile(CLIENTIT &clientIt)
 {
     if (!access(filePath.c_str(), F_OK)) // file exists
     {
@@ -100,26 +93,26 @@ void	Response::handleFile(CLIENTIT& clientIt)
         }
         else // permission not granted
         {
-            if (status == "403 Forbidden")
+            if (status == STATUS_403)
                 return (handleDefaultErrorPages(clientIt));
-            status = "403 Forbidden";
+            status = STATUS_403;
             this->setErrorResponse(clientIt);
         }
     }
     else // file doesnt exist
     {
-        if (status == "404 Not Found")
+        if (status == STATUS_400)
             return (handleDefaultErrorPages(clientIt));
-        status = "404 Not Found";
+        status = STATUS_400;
         this->setErrorResponse(clientIt);
     }
 }
 
-bool	Response::handleIndexPages(CLIENTIT& clientIt)
+bool Response::handleIndexPages(CLIENTIT &clientIt)
 {
-    std::vector<std::string>::iterator	it;
+    std::vector<std::string>::iterator it;
 
-    (void) clientIt;
+    (void)clientIt;
     if (index->empty())
         return false;
     it = index->begin();
@@ -133,12 +126,12 @@ bool	Response::handleIndexPages(CLIENTIT& clientIt)
             }
             else // permission not granted
             {
-                if (status == "403 Forbidden")
+                if (status == STATUS_403)
                 {
                     handleDefaultErrorPages(clientIt);
                     return true;
                 }
-                status = "403 Forbidden";
+                status = STATUS_403;
                 this->setErrorResponse(clientIt);
             }
             return true;
@@ -148,28 +141,26 @@ bool	Response::handleIndexPages(CLIENTIT& clientIt)
     return false;
 }
 
-bool	Response::handleAutoIndex(CLIENTIT& clientIt)
+bool Response::handleAutoIndex(CLIENTIT &clientIt)
 {
-    (void) clientIt;
+    (void)clientIt;
     if (!autoindex)
         return false;
-    //TODO: serve autoindex
+    // TODO: serve autoindex
     return true;
 }
 
-
-void    Response::setGetResponse(CLIENTIT& clientIt)
+void Response::setGetResponse(CLIENTIT &clientIt)
 {
-    (void) clientIt;
+    (void)clientIt;
 }
 
-void    Response::setPostResponse(CLIENTIT& clientIt)
+void Response::setPostResponse(CLIENTIT &clientIt)
 {
-    (void) clientIt;
+    (void)clientIt;
 }
 
-void    Response::setDeleteResponse(CLIENTIT& clientIt)
+void Response::setDeleteResponse(CLIENTIT &clientIt)
 {
-    (void) clientIt;
+    (void)clientIt;
 }
-
