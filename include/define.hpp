@@ -88,4 +88,5 @@
 # define MIMETYPE_PATH              "./config/mimes.txt"
 
 /*                default error pages							*/
+# define CRLF   "\r\n"
 #endif

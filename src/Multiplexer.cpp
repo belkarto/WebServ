@@ -127,9 +127,15 @@ void Multiplexer::connectionListener()
 				{
 					if (clientIt->request_all_processed)
 					{
-						// sendResponseToClient(clientIt);
 						if (clientIt->response_all_sent)
-							clientIt->resetState();
+						{
+							if (clientIt->response.connection == "close")
+								dropClient(clientIt);
+							else
+								clientIt->resetState();
+						}
+						else if (clientIt->start_responding)
+							clientIt->response.sendBody(clientIt);
 					}
 				}
 			}
@@ -176,11 +182,11 @@ void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 				parseRequestHeaders(clientIt);
 		}
 	}
-	catch(const std::exception& e)
+	catch(RequestParsingException& e)
 	{
+		clientIt->request_all_processed = true;
 		clientIt->response.status = e.what();
 		clientIt->response.setErrorResponse(clientIt);
-		// dropClient(clientIt);
 	}
 	delete[] clientIt->header_buffer;
 }
@@ -198,6 +204,7 @@ void Multiplexer::dropInactiveClients()
 			dropClient(it);
 	}
 }
+
 void Multiplexer::loadMimeTypes()
 {
 	std::string line, key, value;
@@ -215,3 +222,4 @@ void Multiplexer::loadMimeTypes()
 		ss.str("");
 	}
 }
+

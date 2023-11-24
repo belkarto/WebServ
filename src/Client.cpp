@@ -7,6 +7,7 @@ Client::Client()
 	request_line_received = false;
 	request_all_processed = false;
 	response_all_sent = false;
+	start_responding = false;
     response_template_set = false;
     // error = false;
     // ResTemplate.reset();
@@ -14,14 +15,16 @@ Client::Client()
 
 void    Client::resetState()
 {
-  headers = "";
+  	headers = "";
 	headers_all_recieved = false;
 	request_line_received = false;
 	request_all_processed = false;
 	response_all_sent = false;
-  response_template_set = false;
-  // error = false;
-  // this->ResTemplate.headersSent = false;
+	start_responding = false;
+  	response_template_set = false;
+	response.resetState();
+	// error = false;
+	// this->ResTemplate.headersSent = false;
 }
 
 void	Client::setTransferEncoding(std::string &encoding)
@@ -154,4 +157,22 @@ void	Client::setMethod(std::string &method)
 	else if (it == methods.end())
 		throw  RequestParsingException(STATUS_400);
 	fields["method"] = method;
+}
+
+std::string	Client::getMimeType(std::string &filepath)
+{
+	size_t											pos;
+	std::string										extension;
+	std::map<std::string, std::string>::iterator	mimetypeIt;
+
+	if ((pos = filepath.find_last_of('.')) != std::string::npos)
+	{
+		extension = filepath.substr(pos);
+		mimetypeIt = Multiplexer::mime_types.find(extension);
+		if (mimetypeIt != Multiplexer::mime_types.end())
+			return mimetypeIt->second;
+		return	"application/octet-stream";
+	}
+	return "application/octet-stream";
+	
 }
