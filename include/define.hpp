@@ -6,7 +6,8 @@
 # define DEF_FILE_TYPE "text/plain"
 # define PROTOCOL_VERS "HTTP/1.1 "
 # define URI "request_target" 
-
+# define NUM_DEF_ERROR 41
+# define CRLF "\r\n"
 /*                       status codes                           */
 //====== 1XX =====//
 # define STATUS_100 "100 Continue"

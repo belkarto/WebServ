@@ -23,8 +23,9 @@
 # include <exception>
 # include <cstdlib>
 # include <climits>
-# include "define.hpp"
 # include <sys/epoll.h>
+# include <dirent.h>
+# include "define.hpp"
 # include "Exception.hpp"
 
 class Server;

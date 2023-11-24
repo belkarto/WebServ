@@ -32,12 +32,15 @@ public:
 	void		sendResponse(CLIENTIT& clientIt);
 	void		dropInactiveClients();
 	void		loadMimeTypes();
+    void        loadDefErrorPages();
 	SERVIT		findListenSocket(int socket, SERVVECT &sockets);
 	CLIENTIT	findConnectSocket(int socket, CLIENTVECT &sockets);
 
 	static const char*				fields[HEADERS_FIELDS_SIZE];
 	static void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(std::string &field);
+    static const char *defErrorPagesStrings[NUM_DEF_ERROR];
 	static std::map<std::string, std::string>	mime_types;
+    std::map<int, std::string>  defErrorPages;
 
   //------------ respons functions -------------------------------//
   void sendResponseToClient(CLIENTIT &);

@@ -1,8 +1,8 @@
 #ifndef RESPONSE_TEMPLATE_HPP
 #define RESPONSE_TEMPLATE_HPP
 
+#include "Multiplexer.hpp"
 #include <string>
-#include <dirent.h>
 
 typedef struct {
   std::string fileName;
@@ -23,10 +23,13 @@ public:
   std::string transferEncoding;
   std::string contentLenght;
   std::string responsFilePath;
+  std::map<int, std::string> errorPages;
 
   void sendTopHead(int);
   void sendDirBody(int);
   void reset();
+
+  std::string getErrorPage(int errorCode);
 };
 
 #endif
