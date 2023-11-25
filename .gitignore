@@ -50,6 +50,7 @@
 *.dmg
 *.app
 
+
 .vscode
 
 modules.order
@@ -58,3 +59,4 @@ Mkfile.old
 dkms.conf
 webserv
 .nfs*
+.cache
