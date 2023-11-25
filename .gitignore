@@ -60,3 +60,4 @@ dkms.conf
 webserv
 .nfs*
 .cache
+compile_commands.json

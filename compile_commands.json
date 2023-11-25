@@ -1,7 +1,7 @@
 [
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -13,13 +13,13 @@
       "objs/main.o",
       "src/main.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/src/main.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/main.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/src/main.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/main.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -31,13 +31,13 @@
       "objs/Client.o",
       "src/Client.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/src/Client.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/Client.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/src/Client.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/Client.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -49,13 +49,13 @@
       "objs/Server.o",
       "src/Server.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/src/Server.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/Server.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/src/Server.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/Server.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -67,13 +67,13 @@
       "objs/ConfigParser.o",
       "src/ConfigParser.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/src/ConfigParser.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/ConfigParser.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/src/ConfigParser.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/ConfigParser.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -85,13 +85,13 @@
       "objs/ServerParser.o",
       "src/ServerParser.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/src/ServerParser.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/ServerParser.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/src/ServerParser.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/ServerParser.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -103,13 +103,13 @@
       "objs/LocationParser.o",
       "src/LocationParser.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/src/LocationParser.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/LocationParser.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/src/LocationParser.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/LocationParser.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -121,13 +121,13 @@
       "objs/Multiplexer.o",
       "src/Multiplexer.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/src/Multiplexer.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/Multiplexer.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/src/Multiplexer.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/Multiplexer.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -139,13 +139,13 @@
       "objs/Exception.o",
       "src/Exception.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/src/Exception.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/Exception.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/src/Exception.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/Exception.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -157,13 +157,13 @@
       "objs/RequestParser.o",
       "src/RequestParser.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/src/RequestParser.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/RequestParser.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/src/RequestParser.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/RequestParser.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -175,13 +175,13 @@
       "objs/ResponseTemplate.o",
       "src/ResponseTemplate.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/src/ResponseTemplate.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/ResponseTemplate.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/src/ResponseTemplate.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/ResponseTemplate.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -193,13 +193,13 @@
       "objs/Response.o",
       "src/Response.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/src/Response.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/Response.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/src/Response.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/Response.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -211,13 +211,13 @@
       "objs/signal.o",
       "lib/signal.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/lib/signal.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/signal.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/lib/signal.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/signal.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -229,13 +229,13 @@
       "objs/split.o",
       "lib/split.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/lib/split.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/split.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/lib/split.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/split.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -247,13 +247,13 @@
       "objs/trim.o",
       "lib/trim.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/lib/trim.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/trim.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/lib/trim.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/trim.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -265,13 +265,13 @@
       "objs/addr_resolver.o",
       "lib/addr_resolver.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/lib/addr_resolver.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/addr_resolver.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/lib/addr_resolver.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/addr_resolver.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -283,13 +283,13 @@
       "objs/ft_stoll.o",
       "lib/ft_stoll.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/lib/ft_stoll.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/ft_stoll.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/lib/ft_stoll.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/ft_stoll.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -301,13 +301,13 @@
       "objs/ft_stoi.o",
       "lib/ft_stoi.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/lib/ft_stoi.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/ft_stoi.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/lib/ft_stoi.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/ft_stoi.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -319,13 +319,13 @@
       "objs/socket_addr_ntop.o",
       "lib/socket_addr_ntop.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/lib/socket_addr_ntop.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/socket_addr_ntop.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/lib/socket_addr_ntop.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/socket_addr_ntop.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -337,13 +337,13 @@
       "objs/displayConfig.o",
       "lib/displayConfig.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/lib/displayConfig.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/displayConfig.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/lib/displayConfig.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/displayConfig.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -355,13 +355,13 @@
       "objs/epoll_add.o",
       "lib/epoll_add.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/lib/epoll_add.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/epoll_add.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/lib/epoll_add.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/epoll_add.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -373,13 +373,13 @@
       "objs/getFileSize.o",
       "lib/getFileSize.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/lib/getFileSize.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/getFileSize.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/lib/getFileSize.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/getFileSize.o"
   },
   {
     "arguments": [
-      "/sbin/c++",
+      "/usr/bin/c++",
       "-Wall",
       "-Wextra",
       "-Werror",
@@ -391,8 +391,8 @@
       "objs/is_directory.o",
       "lib/is_directory.cpp"
     ],
-    "directory": "/home/belkarto/.my_projects/WebServ",
-    "file": "/home/belkarto/.my_projects/WebServ/lib/is_directory.cpp",
-    "output": "/home/belkarto/.my_projects/WebServ/objs/is_directory.o"
+    "directory": "/nfs/homes/belkarto/Desktop/WebServ",
+    "file": "/nfs/homes/belkarto/Desktop/WebServ/lib/is_directory.cpp",
+    "output": "/nfs/homes/belkarto/Desktop/WebServ/objs/is_directory.o"
   }
 ]
