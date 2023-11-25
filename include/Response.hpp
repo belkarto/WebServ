@@ -25,6 +25,7 @@ class Response
     /*		error handling				*/
     void	setErrorResponse(CLIENTIT& clientIt);
     void	handleDefaultErrorPages(CLIENTIT& clientIt);
+    std::string getErrorPage(int errorCode);
 	/*		Get method					*/
     void	setGetResponse(CLIENTIT& clientIt);
 	/*		POST method					*/

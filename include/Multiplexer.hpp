@@ -40,7 +40,7 @@ class Multiplexer
     static void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(std::string &field);
     static const char                        *defErrorPagesStrings[NUM_DEF_ERROR];
     static std::map<std::string, std::string> mime_types;
-    std::map<int, std::string>                defErrorPages;
+    static std::map<int, std::string>         defErrorPages;
 
     //------------ respons functions -------------------------------//
     void        sendResponseToClient(CLIENTIT &);

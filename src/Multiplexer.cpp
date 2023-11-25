@@ -1,6 +1,7 @@
 #include "../include/Multiplexer.hpp"
 
 std::map<std::string, std::string> Multiplexer::mime_types;
+std::map<int, std::string> Multiplexer::defErrorPages;
 
 const char *Multiplexer::defErrorPagesStrings[NUM_DEF_ERROR] = {
     STATUS_100, STATUS_101, STATUS_200, STATUS_201, STATUS_202, STATUS_203,

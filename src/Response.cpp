@@ -253,3 +253,17 @@ void Response::setDeleteResponse(CLIENTIT &clientIt)
 {
     (void)clientIt;
 }
+
+std::string Response::getErrorPage(int errorCode) {
+  std::string finalResponse;
+  std::map<int, std::string>::iterator it;
+
+  finalResponse = "<html>" CRLF "<head><title>";
+  it = Multiplexer::defErrorPages.find(errorCode);
+  finalResponse.append(it->second)
+      .append("</title></head>" CRLF "<body>" CRLF "<center><h1>")
+      .append(it->second)
+      .append("</h1></center>" CRLF);
+
+  return finalResponse;
+}
