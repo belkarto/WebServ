@@ -23,7 +23,6 @@ void	Response::sendHeaders(CLIENTIT& clientIt)
 {
     std::cout << __FUNCTION__ << std::endl;
 	std::string	headers;
-    std::string requestedIndex;
 
 	headers = "";
 	headers += "HTTP/1.1 ";
@@ -43,14 +42,7 @@ void	Response::sendHeaders(CLIENTIT& clientIt)
     if (!special_response.empty())
     {
         clientIt->response_all_sent = true;
-        send(clientIt->connect_socket, special_response.c_str(), special_response.length(), 0);
-    }
-    if (!transferEncoding.empty())
-    {
-        requestedIndex = "<html>\n<head>\n<title>Index of " + filePath
-                        + "</title>\n</head>\n<body>\n<h1>Index of " + filePath
-                        + "</h1>\n<hr>\n<pre>\r\n";
-        send(clientIt->connect_socket, requestedIndex.c_str(), requestedIndex.length(), 0);
+        send(clientIt->connect_socket, &special_response[0], special_response.length(), 0);
     }
 }
 
@@ -69,23 +61,31 @@ void	Response::sendResponseBuffer(CLIENTIT& clientIt)
 	chunk_data = "";
     if (!transferEncoding.empty())
     {
+		chunk_data = "<html>\n<head>\n<title>Index of " + filePath
+                        + "</title>\n</head>\n<body>\n<h1>Index of " + filePath
+                        + "</h1>\n<hr>\n<pre>\r\n";
         while ((entry = readdir(directory)) != NULL)
         {
             chunk_data.append("<a href=\"");
             chunk_data.append(entry->d_name);
             chunk_data.append("\">");
+			chunk_data.append(entry->d_name);
+			chunk_data.append("</a>\n");
         }
 		chunk_data.append("</pre>\n<hr>\n</body>\n</html>");
         ss << std::hex << chunk_data.length();
 		ss >> chunk_size;
-		std::cout << std::endl << chunk_data << std::endl;
-		std::cout << std::endl << chunk_size << std::endl;
 		send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
 		send(clientIt->connect_socket, CRLF, 2, 0);
 		send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
 		send(clientIt->connect_socket, CRLF, 2, 0);
-		delim = "0\r\n\r\n";
-		send(clientIt->connect_socket, &delim, delim.length(), 0);
+		/**/
+		chunk_data = "";
+		chunk_size = "0";
+		send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
+		send(clientIt->connect_socket, CRLF, 2, 0);
+		send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
+		send(clientIt->connect_socket, CRLF, 2, 0);
 		clientIt->response_all_sent = true;
     }
     else
