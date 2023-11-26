@@ -26,14 +26,14 @@ public:
 	std::map<std::string, std::string>  fields;
 
   Client();
-  void        resetState();
-  void        setProtocolVersion(std::string &protocol_version);
-  void        setMethod(std::string &method);
-  void        setHost(std::string &host);
-  void        setContentType(std::string &content_type);
-  void        setContentLength(std::string &content_length);
-  void        setConnection(std::string &connection);
-  void        setTransferEncoding(std::string &encoding);
+  void        	resetState();
+  void        	setProtocolVersion(std::string &protocol_version);
+  void        	setMethod(std::string &method);
+  void        	setHost(std::string &host);
+  void        	setContentType(std::string &content_type);
+  void        	setContentLength(std::string &content_length);
+  void        	setConnection(std::string &connection);
+  void        	setTransferEncoding(std::string &encoding);
   std::string	getMimeType(std::string &filepath);
 };
 #endif

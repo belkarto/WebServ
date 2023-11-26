@@ -1,4 +1,3 @@
-// #include "Client.hpp"
 #include "../include/Multiplexer.hpp"
 
 Response::Response(void)
@@ -31,55 +30,46 @@ void	Response::resetState()
 	readbytes 		= 0;
 }
 
-void    Response::setErrorResponse(CLIENTIT& clientIt)
+void    Response::setGetResponse(CLIENTIT& clientIt)
 {
-    int code;
-    std::stringstream ss;
-    std::map<std::vector<int>, std::string>::iterator pageIt;
+	std::string	uri;
 
-	// in case of error we close connection
 	std::cout << __FUNCTION__ << std::endl;
-	connection = "close";
-	ss << status;
-	ss >> code;
-	if ((pageIt = clientIt->serverIt->findErrorPage(code)) != clientIt->serverIt->error_page.end())
+	uri = clientIt->fields["request_target"];
+	clientIt->serverIt->findLocation(clientIt, uri);
+	if (clientIt->locatIt != clientIt->serverIt->location.end())
 	{
-		clientIt->serverIt->findLocation(clientIt, pageIt->second);
-		if (clientIt->locatIt != clientIt->serverIt->location.end())
-		{
-			index = &(clientIt->locatIt->index);		// common directives
-			autoindex = clientIt->locatIt->autoindex;	// to server and location
-			root = clientIt->locatIt->root;				//
-			filePath = clientIt->locatIt->root + pageIt->second;
-	        if (!clientIt->locatIt->redirect.empty())
-		        handleURLRedirection(clientIt);
-            else 
-		        handlePage(clientIt);
-		}
-		else
-		{
-			index = &(clientIt->serverIt->index);
-			autoindex = clientIt->serverIt->autoindex;
-			root = clientIt->serverIt->root;
-			filePath = clientIt->serverIt->root + pageIt->second;
-			handlePage(clientIt);
-		}
+		index = &(clientIt->locatIt->index);		// common directives
+		autoindex = clientIt->locatIt->autoindex;	// to server and location
+		root = clientIt->locatIt->root;				//
 	}
 	else
-		handleDefaultErrorPages(clientIt);
+	{
+		index = &(clientIt->serverIt->index);
+		autoindex = clientIt->serverIt->autoindex;
+		root = clientIt->serverIt->root;
+	}
+	std::cout << "uri: " << uri <<  std::endl;
+	filePath = root + uri;
+	std::cout << "filePath: " << filePath << std::endl;
+	parseFilePath(clientIt);
 }
 
-void	Response::handlePage(CLIENTIT& clientIt)
+void	Response::parseFilePath(CLIENTIT& clientIt)
 {
-	std::cout << __FUNCTION__ << std::endl;
 	if (access(filePath.c_str(), F_OK))
 	{
-		if (status == STATUS_404)
-			return (handleDefaultErrorPages(clientIt));
+		this->resetState();
 		status = STATUS_404;
 		this->setErrorResponse(clientIt);
 	}
-	else
+	else if (access(filePath.c_str(), R_OK))
+	{
+		this->resetState();
+		status = STATUS_403;
+		this->setErrorResponse(clientIt);	
+	}
+	else 
 	{
 		if (is_directory(filePath.c_str()))
 			handleDirectory(clientIt);
@@ -88,90 +78,56 @@ void	Response::handlePage(CLIENTIT& clientIt)
 	}
 }
 
-void Response::handleDefaultErrorPages(CLIENTIT &clientIt)
-{
-    std::stringstream ss;
-    std::string code;
-
-    ss << status;
-    ss >> code;
-    // TODO: serve default errror pages
-    (void)clientIt;
-}
-
-void Response::handleURLRedirection(CLIENTIT &clientIt)
-{
-	location = clientIt->locatIt->redirect;
-    (void)clientIt;
-}
-
-void Response::handleDirectory(CLIENTIT &clientIt)
+void	Response::handleDirectory(CLIENTIT& clientIt)
 {
 	std::cout << __FUNCTION__ << std::endl;
 	if (!handleIndexPages(clientIt))
 	{
 		if (!handleAutoIndex(clientIt))
 		{
-			if (status == STATUS_403)
-				return (handleDefaultErrorPages(clientIt));
+			this->resetState();
 			status = STATUS_403;
 			this->setErrorResponse(clientIt);
 		}
 	}
 }
 
-void Response::handleFile(CLIENTIT &clientIt)
+void	Response::handleFile(CLIENTIT& clientIt)
 {
 	std::cout << __FUNCTION__ << std::endl;
-	if (!access(filePath.c_str(), F_OK)) // file exists
-	{
-		if (!access(filePath.c_str(), R_OK)) // read permission granted
-			generateResponse(clientIt);
-		else // permission not granted
-		{
-			if (status == STATUS_403)
-				return (handleDefaultErrorPages(clientIt));
-			status = STATUS_403;
-			this->setErrorResponse(clientIt);
-		}
-	}
-	else // file doesnt exist
-	{
-		if (status == STATUS_404)
-			return (handleDefaultErrorPages(clientIt));
-		status = STATUS_404;
-		this->setErrorResponse(clientIt);
-	}
+	status = STATUS_200;
+	generateResponse(clientIt);
 }
 
-bool Response::handleIndexPages(CLIENTIT &clientIt)
+bool	Response::handleIndexPages(CLIENTIT& clientIt)
 {
-    std::vector<std::string>::iterator it;
+	std::cout << __FUNCTION__ << std::endl;
+	
+	std::vector<std::string>::iterator	it;
 
-	std::cout << __FUNCTION__  << std::endl;
-	if (index->empty())
+	if (!index || index->empty())
 		return false;
-	for (it = index->begin(); it != index->end(); it++)
+	it = index->begin();
+	for (; it != index->end(); it++)
 	{
-		filePath = root + *it;
-		if (!access(filePath.c_str(), F_OK)) // file exists
+		filePath += *it;
+		if (!access(filePath.c_str(), F_OK))
 		{
-			if (!access(filePath.c_str(), R_OK)) // read permission granted
-				generateResponse(clientIt);
-			else // permission not granted
+			if (!access(filePath.c_str(), R_OK))
+				handleFile(clientIt);
+			else
 			{
-				if (status == STATUS_403)
-				{
-					handleDefaultErrorPages(clientIt);
-					return true;
-				}
 				status = STATUS_403;
 				this->setErrorResponse(clientIt);
 			}
 			return true;
 		}
-	} // if file doesnt exit continue searching for another index page
+	}
 	return false;
+}
+
+void Response::handleURLRedirection(CLIENTIT &clientIt)
+{
     (void)clientIt;
 }
 
@@ -181,19 +137,16 @@ bool Response::handleAutoIndex(CLIENTIT &clientIt)
 	if (!autoindex)
 		return false;
 	//TODO: serve autoindex
-	(void) clientIt;
 	return true;
+	(void) clientIt;
 }
 
 
 void	Response::generateResponse(CLIENTIT& clientIt)
 {
-	std::cout << __FUNCTION__ << std::endl;
 	std::stringstream	ss;
 
 	clientIt->start_responding = true;
-	std::cout << "PATH: " << filePath << std::endl;
-	std::cout << status << std::endl;
 	fileContent = new std::ifstream(filePath.c_str());
 	file_size = getFileSize(fileContent);
 	ss << file_size;
@@ -204,7 +157,6 @@ void	Response::generateResponse(CLIENTIT& clientIt)
 
 void	Response::sendHeaders(CLIENTIT& clientIt)
 {
-	std::cout << __FUNCTION__ << std::endl;
 	std::string	headers;
 
 	headers = "";
@@ -214,21 +166,17 @@ void	Response::sendHeaders(CLIENTIT& clientIt)
 	headers += "Content-Length: " + contentLength + CRLF;
 	headers += "Connection: " + connection + CRLF;
 	headers += CRLF;
-
-	std::cout << headers << std::endl;
 	send(clientIt->connect_socket, headers.c_str(), headers.length(), 0);
 }
 
 void	Response::sendBody(CLIENTIT& clientIt)
 {
-	std::cout << __FUNCTION__ << std::endl;
-	const size_t	chunk = 1024;
-	char	 		buffer[chunk];
+	char	 		buffer[CLIENT_RESPONSE_BUFFER_SIZE];
 	std::streamsize	rd;
 
 	if (readbytes < file_size)
 	{
-		fileContent->read(buffer, chunk);
+		fileContent->read(buffer, CLIENT_RESPONSE_BUFFER_SIZE);
 		rd = fileContent->gcount();
 		readbytes += rd;
 		send(clientIt->connect_socket, &buffer, rd, 0);
@@ -237,11 +185,10 @@ void	Response::sendBody(CLIENTIT& clientIt)
 		clientIt->response_all_sent = true;
 }
 
-
-
-void    Response::setGetResponse(CLIENTIT& clientIt)
+void    Response::setErrorResponse(CLIENTIT& clientIt)
 {
-    (void)clientIt;
+	(void)clientIt;
+	std::cout << __FUNCTION__ << std::endl;
 }
 
 void Response::setPostResponse(CLIENTIT &clientIt)

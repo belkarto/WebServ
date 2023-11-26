@@ -34,7 +34,7 @@ class Response
 	void	setDeleteResponse(CLIENTIT& clientIt);
 
     /*  common methods  */
-    void	handlePage(CLIENTIT& clientIt);
+    void	parseFilePath(CLIENTIT& clientIt);
     void	handleURLRedirection(CLIENTIT& clientIt);
     void	handleDirectory(CLIENTIT& clientIt);
     void	handleFile(CLIENTIT& clientIt);
