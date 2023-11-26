@@ -1,6 +1,6 @@
 #================================= Files to compile ===================================
 SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer  Exception RequestParser \
- ResponseTemplate Response
+ ResponseTemplate Response ResponseUtils ResponseGenerators
 #<<<<<<< HEAD
 # ResponsParser
 #=======
@@ -35,8 +35,8 @@ CC			= c++
 
 OBJF		= .cache_exists
 
-FLAGS		=  -Wall -Wextra -Werror -std=c++98 -Iinclude -g
-#-g -fsanitize=address
+FLAGS		=  -Wall -Wextra -Werror -std=c++98 -Iinclude -g \
+-g -fsanitize=address
 
 # #======================================================================================
 

@@ -92,16 +92,6 @@ void Multiplexer::dropClient(CLIENTIT &clientIt)
 	clients.erase(clientIt);
 }
 
-void Multiplexer::sendResponseHeaders(CLIENTIT &clientIt)
-{
-	(void)clientIt;
-}
-
-void Multiplexer::sendResponse(CLIENTIT &clientIt)
-{
-    std::cout << __func__ << std::endl;
-	(void)clientIt;
-}
 
 void Multiplexer::connectionListener()
 {
@@ -133,29 +123,36 @@ void Multiplexer::connectionListener()
 						// TODO:
                         // in case of POST request get the request body
 					}
-					else {
+					else
 						getClientRequest(clientIt);
-					}
 				}
 				if ((events[i].events & EPOLLOUT))
-				{
-					if (clientIt->request_all_processed)
-					{
-						if (clientIt->response_all_sent)
-						{
-							if (clientIt->response.connection == "close")
-								dropClient(clientIt);
-							else
-								clientIt->resetState();
-						}
-						else if (clientIt->start_responding)
-							clientIt->response.sendBody(clientIt);
-					}
-				}
+					handleResponse(clientIt);
 			}
 		}
 	}
 }
+
+void Multiplexer::handleResponse(CLIENTIT &clientIt)
+{
+	if (clientIt->request_all_processed)
+	{
+		if (clientIt->response_all_sent)
+			clientIt->resetState();
+		else if (!clientIt->start_responding)
+		{
+			if (clientIt->fields["method"] == "GET")
+				clientIt->response.setGetResponse(clientIt);
+			else if (clientIt->fields["method"] == "POST")
+				clientIt->response.setPostResponse(clientIt);
+			else if (clientIt->fields["method"] == "DELETE")
+				clientIt->response.setDeleteResponse(clientIt);
+		}
+		else
+			clientIt->response.sendResponseBuffer(clientIt);
+	}
+}
+
 
 SERVIT Multiplexer::findListenSocket(int socket, SERVVECT &sockets)
 {

@@ -71,11 +71,8 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 		throw RequestParsingException(STATUS_400);
 	clientIt->headers_all_recieved = true;
 	setServerByHost(clientIt);
-	if (clientIt->fields["method"] != "POST")
-	{
+	if (clientIt->fields["method"] != "POST")	// POST has to read the client's request body
 		clientIt->request_all_processed = true;
-		clientIt->response.setGetResponse(clientIt);
-	}
 }
 
 

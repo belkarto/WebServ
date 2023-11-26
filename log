@@ -1,0 +1,19 @@
+listen on 127.0.0.1:2001
+listen on 127.0.0.1:2000
+setGetResponse
+uri: /html/
+filePath: /nfs/sgoinfre/goinfre/Perso/isalhi/WebServ/www/html/
+parseFilePath
+handleDirectory
+handleIndexPages
+handleAutoIndex
+generateResponse
+sendHeaders
+sendResponseBuffer
+
+<a href="."><a href=".."><a href="example.html"><a href="index.html"><a href="400.html"></pre>
+<hr>
+</body>
+</html>
+
+73
