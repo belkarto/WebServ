@@ -1,6 +1,6 @@
 #================================= Files to compile ===================================
 SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer  Exception RequestParser \
- ResponseTemplate Response
+ ResponseTemplate Response Request
 #<<<<<<< HEAD
 # ResponsParser
 #=======

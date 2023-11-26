@@ -1,4 +1,4 @@
-#include "Multiplexer.hpp"
+#include "../include/Multiplexer.hpp"
 
 std::map<std::string, std::string> Multiplexer::mime_types;
 std::map<int, std::string> Multiplexer::defErrorPages;
@@ -131,6 +131,7 @@ void Multiplexer::connectionListener()
 					{
 						// TODO:
                         // in case of POST request get the request body
+                        clientIt->request.getPostRequest();
 					}
 					else {
 						getClientRequest(clientIt);
