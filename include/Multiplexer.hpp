@@ -15,7 +15,7 @@ class Multiplexer
     int                      epfd;
     int                      num_events;
     struct epoll_event       events[MAX_EVENTS];
-    std::vector<std::string> headers_fields;
+    std::vector<std::string> headers_fields;  
 
   public:
     Multiplexer(SERVVECT &servers);
@@ -29,8 +29,7 @@ class Multiplexer
     void     parseRequestHeaders(CLIENTIT &clientIt);
     void     reviewHeaders(CLIENTIT &clientIt);
     void     setServerByHost(CLIENTIT &clientIt);
-    void     sendResponseHeaders(CLIENTIT &clientIt);
-    void     sendResponse(CLIENTIT &clientIt);
+    void     handleResponse(CLIENTIT &clientIt);
     void     dropInactiveClients();
     void     loadMimeTypes();
     void     loadDefErrorPages();

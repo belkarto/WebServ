@@ -77,14 +77,15 @@
 #define NUM_LOCAT_DIREC 7
 
 /*                  Multiplexer                                  */
-#define Running                   true
-#define HEADERS_FIELDS_SIZE       5
-#define MAX_EVENTS                1024
-#define BUFFER_SIZE               1024
-#define CLIENT_HEADER_BUFFER_SIZE 1024
-#define CLIENT_HEADER_timeout     30
-#define KEEPALIVE_CONNECTIONS     500
-#define KEEPALIVE_TIMEOUT         60
-#define BACKLOG                   500
-#define MIMETYPE_PATH             "./config/mimes.txt"
+#define Running                     true
+#define HEADERS_FIELDS_SIZE         5
+#define MAX_EVENTS                  1024
+#define BUFFER_SIZE                 1024
+#define CLIENT_HEADER_BUFFER_SIZE   1024
+#define CLIENT_RESPONSE_BUFFER_SIZE 1024
+#define CLIENT_HEADER_timeout       30
+#define KEEPALIVE_CONNECTIONS       500
+#define KEEPALIVE_TIMEOUT           60
+#define BACKLOG                     500
+#define MIMETYPE_PATH               "./config/mimes.txt"
 #endif

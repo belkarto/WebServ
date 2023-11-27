@@ -1,111 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <title>WebServ</title>
-  <style>
-    body,
-    h1 {
-      margin: 0;
-      padding: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Web Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            text-align: center;
+        }
 
-    header {
-      background-color: #600f6f;
-      text-align: center;
-      padding: 30px 0;
-      color: #fff;
-    }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+        }
 
-    .header-content {
-      max-width: 800px;
-      margin: 0 auto;
-    }
+        main {
+            margin-top: 20px;
+        }
 
-    h1 {
-      font-size: 36px;
-    }
-
-    .upload-button-container {
-      text-align: center;
-      background-color: #f79328;
-      padding: 20px 0;
-    }
-
-    .upload-button {
-      padding: 10px 20px;
-      background-color: #fff;
-      color: #e74c3c;
-      border: none;
-      cursor: pointer;
-    }
-
-    input[type="file"] {
-      display: none;
-    }
-
-    .image-container {
-      position: absolute;
-      top: 160px;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: url('./sun.jpg');
-      background-size: cover;
-      background-position: center;
-    }
-  </style>
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>
-  <header>
-    <div class="header-content">
-      <h1>WebServe</h1>
-    </div>
-    <div class="upload-button-container">
-      <label for="file-upload" class="upload-button">Upload File</label>
-      <input type="file" id="file-upload" style="display: none;">
-    </div>
-  </header>
-  <div class="image-container"></div>
-  <!-- <script> -->
-  <!--   const uploadButton = document.querySelector('.upload-button'); -->
-  <!--   const fileInput = document.querySelector('#file-upload'); -->
-  <!---->
-  <!--   uploadButton.addEventListener('click', function () { -->
-  <!--     fileInput.click();  -->
-  <!--   }); -->
-  <!---->
-  <!--   fileInput.addEventListener('change', function () { -->
-  <!--     const file = fileInput.files[0]; -->
-  <!--     if (file) { -->
-  <!--       const formData = new FormData(); -->
-  <!--       formData.append('file', file); -->
-  <!---->
-  <!--       // Send a POST request to your server to handle the file upload -->
-  <!--       fetch('./upload', { -->
-  <!--         method: 'POST', -->
-  <!--         body: formData -->
-  <!--       }) -->
-  <!--         .then(response => { -->
-  <!--           // Handle the response from your server -->
-  <!--           console.log(response) -->
-  <!--           console.log(formData) -->
-  <!--           if (response.ok) { -->
-  <!--             console.log('File uploaded successfully'); -->
-  <!--             // You can display a success message or perform other actions here -->
-  <!--           } else { -->
-  <!--             console.error('File upload failed'); -->
-  <!--             // Handle the error or display an error message -->
-  <!--           } -->
-  <!--         }) -->
-  <!--         .catch(error => { -->
-  <!--           console.error('Error: ' + error); -->
-  <!--           // Handle the error or display an error message -->
-  <!--         }); -->
-  <!--     } -->
-  <!--   }); -->
-  <!-- </script> -->
+    <header>
+        <h1>Welcome to My Simple Web Page</h1>
+    </header>
+
+    <main>
+        <p>This is a basic example of a web page using HTML and CSS.</p>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Simple Web Page</p>
+    </footer>
 </body>
 
 </html>

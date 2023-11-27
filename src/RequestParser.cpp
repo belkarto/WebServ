@@ -70,9 +70,9 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 		&& clientIt->fields.find("Transfer-Encoding") == clientIt->fields.end())
 		throw RequestParsingException(STATUS_400);
 	clientIt->headers_all_recieved = true;
-	if (clientIt->fields["method"] != "POST")
-		clientIt->request_all_processed = true;
 	setServerByHost(clientIt);
+	if (clientIt->fields["method"] != "POST")	// POST has to read the client's request body
+		clientIt->request_all_processed = true;
 }
 
 
