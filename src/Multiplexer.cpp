@@ -122,7 +122,7 @@ void Multiplexer::connectionListener()
 					{
 						// TODO:
                         // in case of POST request get the request body
-                        clientIt->request.getPostRequest();
+                        clientIt->request.getPostRequest(clientIt);
 					}
 					else
 						getClientRequest(clientIt);

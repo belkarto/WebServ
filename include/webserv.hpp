@@ -61,6 +61,7 @@ typedef std::vector<Server> 			    	SERVVECT;
 typedef std::vector<Client>::iterator	    	CLIENTIT;
 typedef std::vector<Server>::iterator	    	SERVIT;
 typedef std::vector<std::string>		   	    STRINGVECT;
+typedef std::vector<std::string>::iterator	    STRINGVECTIT;
 typedef std::vector<int>                        INTVECT;
 typedef std::vector<struct Location>::iterator	LOC_VECT_IT;
 #endif
