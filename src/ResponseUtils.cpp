@@ -7,7 +7,7 @@ void	Response::parseFilePath(CLIENTIT& clientIt)
 	if (access(filePath.c_str(), F_OK)) // file not found
 	{
 		if (status == STATUS_404)
-			return (handleDefaultPage(clientIt));
+			return (handleDefaultErrorPage(clientIt));
 		this->resetState();
 		status = STATUS_404;
 		this->setErrorResponse(clientIt);
@@ -15,7 +15,7 @@ void	Response::parseFilePath(CLIENTIT& clientIt)
 	else if (access(filePath.c_str(), R_OK)) // permission denied
 	{
 		if (status == STATUS_403)
-			return (handleDefaultPage(clientIt));
+			return (handleDefaultErrorPage(clientIt));
 		this->resetState();
 		status = STATUS_403;
 		this->setErrorResponse(clientIt);	
@@ -38,9 +38,8 @@ void	Response::handleDirectory(CLIENTIT& clientIt)
 	{
 		if (!handleAutoIndex(clientIt))
 		{
-			// failure in both index pages and autoindex
-			if (status == STATUS_403)
-				return (handleDefaultPage(clientIt));
+			if (status == STATUS_403) // failure in both index pages and autoindex
+				return (handleDefaultErrorPage(clientIt));
 			this->resetState();
 			status = STATUS_403;
 			this->setErrorResponse(clientIt);
@@ -62,14 +61,13 @@ bool	Response::handleIndexPages(CLIENTIT& clientIt)
 		filePath += *it;
 		if (!access(filePath.c_str(), F_OK))
 		{
-            std::cout << "index: " << filePath << std::endl;
 			if (!access(filePath.c_str(), R_OK))
 				handleFile(clientIt);
 			else
 			{
 				if (status == STATUS_403)
 				{
-					handleDefaultPage(clientIt);
+					handleDefaultErrorPage(clientIt);
 					return true;
 				}
 				status = STATUS_403;
@@ -84,8 +82,20 @@ bool	Response::handleIndexPages(CLIENTIT& clientIt)
 void	Response::handleFile(CLIENTIT& clientIt)
 {
 	std::cout << __FUNCTION__ << std::endl;
+
 	status = STATUS_200;
-	generateResponse(clientIt);
+	fileContent = new std::ifstream(filePath.c_str());
+	if (!fileContent)
+	{
+		if (status == STATUS_500)
+			handleDefaultErrorPage(clientIt);
+		status = STATUS_500;
+		setErrorResponse(clientIt);
+	}
+	response_size = getFileSize(fileContent);
+	contentLength = toString(response_size);
+	contentType = clientIt->getMimeType(filePath);
+	sendHeaders(clientIt);
 }
 
 void Response::handleExternalRedirection(CLIENTIT &clientIt)
@@ -93,13 +103,17 @@ void Response::handleExternalRedirection(CLIENTIT &clientIt)
 	std::cout << __FUNCTION__ << std::endl;
 
 	status = STATUS_302;
-    code = 302;
-    // in case the function got called from setGetResponse => location will be empty
-    // else => location = errorPageURI
-    if (location.empty())
+    if (location.empty()) // if location snt empty => location = errorPageURI
    	    location = clientIt->locatIt->redirect;
-    special_response = getErrorPage(code);
-	generateResponse(clientIt);
+    special_response = "<html>" CRLF "<head><title>";
+    special_response.append(STATUS_302)
+					.append("</title></head>" CRLF "<body>" CRLF "<center><h1>")
+					.append(STATUS_302)
+					.append("</h1></center>" CRLF "</body></html>" CRLF);
+	contentLength = toString(special_response.length());
+	sendHeaders(clientIt);
+	send(clientIt->connect_socket, &special_response[0], special_response.length(), 0);
+	clientIt->response_all_sent = true;
 }
 
 bool Response::handleAutoIndex(CLIENTIT &clientIt)
@@ -108,15 +122,26 @@ bool Response::handleAutoIndex(CLIENTIT &clientIt)
 
 	if (!autoindex)
 		return false;
-	//TODO: serve autoindex
+	status = STATUS_200;
     directory = opendir(filePath.c_str());
+	if (!directory)
+	{
+		if (status == STATUS_500)
+			handleDefaultErrorPage(clientIt);
+		status = STATUS_500;
+		setErrorResponse(clientIt);
+	}
     transferEncoding = "chunked";
-    generateResponse(clientIt);
+	sendHeaders(clientIt);
 	return true;
 }
 
-void	Response::handleDefaultPage(CLIENTIT &clientIt)
+void	Response::handleDefaultErrorPage(CLIENTIT &clientIt)
 {
+	connection = "close";
     special_response = getErrorPage(code);
-    generateResponse(clientIt);
+	contentLength = toString(special_response.length());
+	sendHeaders(clientIt);
+	send(clientIt->connect_socket, &special_response[0], special_response.length(), 0);
+	clientIt->response_all_sent = true;
 }

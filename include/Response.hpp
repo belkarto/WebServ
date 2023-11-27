@@ -41,15 +41,15 @@ class Response
 
     /*  common methods  */
     std::string getErrorPage(int errorCode);
-    void		handleDefaultPage(CLIENTIT &clientIt);
+    void		handleDefaultErrorPage(CLIENTIT &clientIt);
     void		parseFilePath(CLIENTIT& clientIt);
     void		handleExternalRedirection(CLIENTIT& clientIt);
     void		handleDirectory(CLIENTIT& clientIt);
     void		handleFile(CLIENTIT& clientIt);
     bool		handleIndexPages(CLIENTIT& clientIt);
     bool		handleAutoIndex(CLIENTIT& clientIt);
-	void		generateResponse(CLIENTIT& clientIt);
 	void		sendHeaders(CLIENTIT& clientIt);
 	void		sendResponseBuffer(CLIENTIT& clientIt);
+	void		sendAutoIndexBuffer(CLIENTIT& clientIt);
 };
 #endif
