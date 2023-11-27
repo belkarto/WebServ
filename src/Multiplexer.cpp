@@ -138,7 +138,11 @@ void Multiplexer::handleResponse(CLIENTIT &clientIt)
 	if (clientIt->request_all_processed)
 	{
 		if (clientIt->response_all_sent)
+		{
+			if (clientIt->response.connection == "close")
+				dropClient(clientIt);
 			clientIt->resetState();
+		}
 		else if (!clientIt->start_responding)
 		{
 			if (clientIt->fields["method"] == "GET")

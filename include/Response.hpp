@@ -28,6 +28,7 @@ class Response
 
 
 	Response(void);
+	~Response();
 	void	resetState();
 
     /*		error handling				*/

@@ -1,6 +1,5 @@
 #include "Multiplexer.hpp"
 
-
 void	Response::sendHeaders(CLIENTIT& clientIt)
 {
     std::cout << __FUNCTION__ << std::endl;
@@ -43,7 +42,10 @@ void	Response::sendResponseBuffer(CLIENTIT& clientIt)
             send(clientIt->connect_socket, &buffer, rd, 0);
         }
         else
+		{
+			delete fileContent;
             clientIt->response_all_sent = true;
+		}
     }
 }
 
@@ -73,18 +75,16 @@ void		Response::sendAutoIndexBuffer(CLIENTIT& clientIt)
 		chunk_data.append("</pre>\n<hr>\n</body>\n</html>");
     ss << std::hex << chunk_data.length();
 	ss >> chunk_size;
+	chunk_data += CRLF;
+	chunk_size += CRLF;
 	send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
-	send(clientIt->connect_socket, CRLF, 2, 0);
 	send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
-	send(clientIt->connect_socket, CRLF, 2, 0);
 	if (!entry)
 	{
-		chunk_data = "";
-		chunk_size = "0";
+		chunk_data = CRLF;
+		chunk_size = "0" + chunk_data;
 		send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
-		send(clientIt->connect_socket, CRLF, 2, 0);
 		send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
-		send(clientIt->connect_socket, CRLF, 2, 0);
 		clientIt->response_all_sent = true;
 	}
 }

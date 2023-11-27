@@ -176,3 +176,10 @@ std::string	Client::getMimeType(std::string &filepath)
 	return "application/octet-stream";
 	
 }
+
+void	Client::setUri(std::string &uri)
+{
+	if (uri[0] != '/')
+		throw  RequestParsingException(STATUS_400);
+	fields["request_target"] = uri;
+}

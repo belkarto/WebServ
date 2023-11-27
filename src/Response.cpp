@@ -44,6 +44,11 @@ void	Response::resetState()
 	readbytes 		= 0;
 }
 
+Response::~Response()
+{
+
+}
+
 void    Response::setGetResponse(CLIENTIT& clientIt)
 {
 	std::cout << __FUNCTION__ << std::endl;
