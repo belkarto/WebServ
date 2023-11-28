@@ -52,7 +52,7 @@ class Response
 	void		sendResponseBuffer(CLIENTIT& clientIt);
 	void		sendAutoIndexBuffer(CLIENTIT& clientIt);
 	void		handleDelete(CLIENTIT& clientIt);
-	void		deleteFile(CLIENTIT& clientIt);
+	bool		deleteFile(CLIENTIT& clientIt, const char* path);
     std::string getErrorPage(int errorCode);
 };
 #endif

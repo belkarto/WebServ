@@ -157,42 +157,8 @@ void	Response::handleDelete(CLIENTIT& clientIt)
 		this->setErrorResponse(clientIt);
 	}
 	else
-		deleteFile(clientIt);
-}
-
-void	Response::deleteFile(CLIENTIT& clientIt)
-{
-	struct stat			statbuf;
-	DIR 				*directory;
-	struct dirent		*entry;
-	int					rt;
-	const char			*path;
-
-	path = filePath.c_str();
-	stat(path, &statbuf);
-	if (S_ISDIR(statbuf.st_mode))
 	{
-		directory = opendir(path);
-		if (!directory)
-			return ;
-		while ((entry = readdir(directory)) != NULL)
-		{
-			if (!strcmp(entry->d_name, "..") || !strcmp(entry->d_name, "."))
-				continue ;
-			filePath = entry->d_name;
-			std::cout << "path: " << filePath << std::endl;
-			deleteFile(clientIt);
-		}
-		std::remove(path);
-	}
-	else
-	{
-		if ((rt = std::remove(path)) < 0)
-		{
-			status = STATUS_403;
-			setErrorResponse(clientIt);
-		}
-		else
+		if (deleteFile(clientIt, filePath.c_str()))
 		{
 			status = STATUS_204;
 			contentLength = contentType = "";
@@ -200,5 +166,50 @@ void	Response::deleteFile(CLIENTIT& clientIt)
 			send(clientIt->connect_socket, &special_response[0], special_response.length(), 0);
 			clientIt->response_all_sent = true;
 		}
+		else
+			setErrorResponse(clientIt);
 	}
+}
+
+bool	Response::deleteFile(CLIENTIT& clientIt, const char *path)
+{
+	struct stat			statbuf;
+	DIR 				*dir;
+	struct dirent		*entry;
+	int					rt;
+	std::string			newPath;
+
+	std::cout << "filePath: " << path << std::endl;
+	if (stat(path, &statbuf) < 0)
+	{
+		perror("stat():");
+		exit(1);
+	}
+	if (S_ISDIR(statbuf.st_mode))
+	{
+		dir = opendir(path);
+		if (!dir)
+			return true;
+		while ((entry = readdir(dir)) != NULL)
+		{
+			if (!strcmp(entry->d_name, "..") || !strcmp(entry->d_name, "."))
+				continue ;
+			newPath.append(path);
+			newPath.append("/");
+			newPath.append(entry->d_name);
+			return (deleteFile(clientIt, newPath.c_str()));
+		}
+		std::remove(path);
+	}
+	else
+	{
+		if ((rt = std::remove(path)) < 0)
+		{
+			perror("remove():");
+			status = STATUS_403;
+			return false;
+		}
+		return true;
+	}
+	return true;
 }
