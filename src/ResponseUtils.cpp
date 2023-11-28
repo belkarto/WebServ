@@ -158,7 +158,7 @@ void	Response::parsePostFilePath(CLIENTIT& clientIt)
 		status = STATUS_404;
 		this->setErrorResponse(clientIt);
 	}
-	else if (access(filePath.c_str(), W_OK)) // permission denied
+	else if (access(filePath.c_str(), W_OK) || *(--filePath.end()) == '/') // permission denied
 	{
 		if (status == STATUS_403)
 			return (handleDefaultErrorPage(clientIt));

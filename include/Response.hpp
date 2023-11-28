@@ -22,6 +22,7 @@ class Response
 	int					code;
 	std::string			special_response; 
     std::ifstream   	*fileContent;
+    std::ofstream   	*outFile;
 	DIR 				*directory;
 	std::streamsize		response_size;
 	std::streamsize		readbytes;
