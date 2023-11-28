@@ -9,13 +9,12 @@ void	Response::sendHeaders(CLIENTIT& clientIt)
 	clientIt->start_responding = true;
 	headers = "HTTP/1.1 ";
 	headers += status + CRLF;
-	headers += "Content-Type: " + contentType + CRLF;
+	if (!contentType.empty())
+		headers += "Content-Type: " + contentType + CRLF;
     if (!transferEncoding.empty())
         headers += "Transfer-Encoding: " + transferEncoding + CRLF;
-    else
-	{
+    else if (!contentLength.empty())
 	    headers += "Content-Length: " + contentLength + CRLF;
-	}
 	if (!location.empty())
 		headers += "Location: " + location + CRLF;
 	headers += "Connection: " + connection + CRLF;
@@ -85,6 +84,7 @@ void		Response::sendAutoIndexBuffer(CLIENTIT& clientIt)
 		chunk_size = "0" + chunk_data;
 		send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
 		send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
+		closedir(directory);
 		clientIt->response_all_sent = true;
 	}
 }

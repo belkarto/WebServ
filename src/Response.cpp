@@ -59,6 +59,12 @@ void    Response::setGetResponse(CLIENTIT& clientIt)
 	clientIt->serverIt->findLocation(clientIt, uri);
 	if (clientIt->locatIt != clientIt->serverIt->location.end())
 	{
+		if (find(clientIt->locatIt->method.begin(), clientIt->locatIt->method.end(), "GET")
+			 == clientIt->locatIt->method.end())
+		{
+			status = STATUS_405;
+			return (setErrorResponse(clientIt));
+		}
 		index = &(clientIt->locatIt->index);		// common directives
 		autoindex = clientIt->locatIt->autoindex;	// to server and location
 		root = clientIt->locatIt->root;				//
@@ -72,8 +78,6 @@ void    Response::setGetResponse(CLIENTIT& clientIt)
 		root = clientIt->serverIt->root;
 	}
 	filePath = root + uri;
-	std::cout << "uri: " << uri <<  std::endl;
-	std::cout << "filePath: " << filePath << std::endl;
 	parseFilePath(clientIt);
 }
 
@@ -81,7 +85,7 @@ void    Response::setGetResponse(CLIENTIT& clientIt)
 void    Response::setErrorResponse(CLIENTIT& clientIt)
 {
 	std::cout << __FUNCTION__ << std::endl;
-	std::cout << status << std::endl;
+
 	std::stringstream									ss;
 	std::map<std::vector<int>, std::string>::iterator	pageIt;
 
@@ -113,6 +117,32 @@ void Response::setPostResponse(CLIENTIT &clientIt)
 
 void Response::setDeleteResponse(CLIENTIT &clientIt)
 {
-    (void)clientIt;
-}
+	std::cout << __FUNCTION__ << std::endl;
 
+	std::string	uri;
+
+    uri = clientIt->fields["request_target"];
+	clientIt->serverIt->findLocation(clientIt, uri);
+	if (clientIt->locatIt != clientIt->serverIt->location.end())
+	{
+		if (find(clientIt->locatIt->method.begin(), clientIt->locatIt->method.end(), "DELETE")
+			 == clientIt->locatIt->method.end())
+		{
+			status = STATUS_405;
+			return (setErrorResponse(clientIt));
+		}
+		index = &(clientIt->locatIt->index);		// common directives
+		autoindex = clientIt->locatIt->autoindex;	// to server and location
+		root = clientIt->locatIt->root;				//
+		if (!clientIt->locatIt->redirect.empty())
+			return (handleExternalRedirection(clientIt));
+	}
+	else
+	{
+		index = &(clientIt->serverIt->index);
+		autoindex = clientIt->serverIt->autoindex;
+		root = clientIt->serverIt->root;
+	}
+	filePath = root + uri;
+	handleDelete(clientIt);
+}

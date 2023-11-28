@@ -65,6 +65,7 @@ void	ConfigParser::parseMethod()
 	methods.push_back("POST");
 	methods.push_back("DELETE");
 	it = directive_components.begin();
+	_servers.back().location.back().method.clear();
 	for (; it != directive_components.end(); it++)
 	{
 		if (std::find(methods.begin(), methods.end(), *it) == methods.end())

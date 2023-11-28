@@ -41,7 +41,6 @@ class Response
 	void	setDeleteResponse(CLIENTIT& clientIt);
 
     /*  common methods  */
-    std::string getErrorPage(int errorCode);
     void		handleDefaultErrorPage(CLIENTIT &clientIt);
     void		parseFilePath(CLIENTIT& clientIt);
     void		handleExternalRedirection(CLIENTIT& clientIt);
@@ -52,5 +51,8 @@ class Response
 	void		sendHeaders(CLIENTIT& clientIt);
 	void		sendResponseBuffer(CLIENTIT& clientIt);
 	void		sendAutoIndexBuffer(CLIENTIT& clientIt);
+	void		handleDelete(CLIENTIT& clientIt);
+	void		deleteFile(CLIENTIT& clientIt);
+    std::string getErrorPage(int errorCode);
 };
 #endif

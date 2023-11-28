@@ -25,6 +25,7 @@
 # include <climits>
 # include <sys/epoll.h>
 # include <dirent.h>
+# include <cstdio>
 # include "define.hpp"
 # include "Exception.hpp"
 
