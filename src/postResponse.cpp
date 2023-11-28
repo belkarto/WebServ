@@ -27,12 +27,14 @@ void Response::setPostResponse(CLIENTIT &clientIt)
 
     std::map<std::string, std::string>::iterator it = clientIt->fields.begin();
 
-    std::cout << "start sending request \n-----------------------------------------------\n" << std::endl << std::endl;
+    std::cout << "\n-----------------------------------------------\n" << std::endl << std::endl;
     for (; it != clientIt->fields.end(); it++)
     {
         std::cout << it->first << " " << it->second << std::endl;
     }
-    filePath.append("/" + clientIt->generateFileName(clientIt->fields["Content-Type"]));
+    std::cout << "\n-----------------------------------------------\n" << std::endl << std::endl;
+    std::cout << "file ----> " << filePath << "\n" << std::endl;
+    parsePostFilePath(clientIt);
+    // filePath.append("/" + clientIt->generateFileName(clientIt->fields["Content-Type"]));
     std::cout << "file ----> " << filePath << std::endl;
-    exit(1);
 }

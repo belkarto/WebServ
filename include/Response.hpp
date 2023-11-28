@@ -51,5 +51,6 @@ class Response
 	void		sendHeaders(CLIENTIT& clientIt);
 	void		sendResponseBuffer(CLIENTIT& clientIt);
 	void		sendAutoIndexBuffer(CLIENTIT& clientIt);
+    void		parsePostFilePath(CLIENTIT& clientIt);
 };
 #endif
