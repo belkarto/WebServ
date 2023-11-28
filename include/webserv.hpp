@@ -64,4 +64,15 @@ typedef std::vector<std::string>		   	    STRINGVECT;
 typedef std::vector<std::string>::iterator	    STRINGVECTIT;
 typedef std::vector<int>                        INTVECT;
 typedef std::vector<struct Location>::iterator	LOC_VECT_IT;
+
+/*                  template            */
+template <typename T>
+std::string	toString(T number) 
+{
+	std::stringstream	convert;
+
+	convert << number;
+	return convert.str();
+}
+
 #endif

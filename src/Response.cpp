@@ -25,8 +25,8 @@ Response::Response(void)
 void	Response::resetState()
 {
 	status 			= "";   
-	connection 		= "";
-	contentType 	= "";
+	connection 		= "keep-alive";
+	contentType 	= "text/html";
 	contentLength 	= "";
 	transferEncoding = "";
 	location 		= "";
@@ -75,11 +75,6 @@ void    Response::setGetResponse(CLIENTIT& clientIt)
 
 void    Response::setErrorResponse(CLIENTIT& clientIt)
 {
-
-	/*
-		This causes an internal redirect to the specified uri with the client request method changed to “GET” 
-		(for all methods other than “GET” and “HEAD”).
-	*/
 	std::cout << __FUNCTION__ << std::endl;
 	std::cout << status << std::endl;
 	std::stringstream									ss;
@@ -88,12 +83,10 @@ void    Response::setErrorResponse(CLIENTIT& clientIt)
 	ss << status;
 	ss >> code;
 	pageIt = clientIt->serverIt->findErrorPage(code);
-	if (pageIt != clientIt->serverIt->error_page.end())
+	if (pageIt != clientIt->serverIt->error_page.end()) // error page defined in config
 	{
-		// error page defined;
-		if (pageIt->second[0] == '/')
+		if (pageIt->second[0] == '/') // internal redirection
 		{
-			// internal redirection
 			clientIt->fields["request_target"] = pageIt->second;
 			setGetResponse(clientIt);
 		}
@@ -104,7 +97,7 @@ void    Response::setErrorResponse(CLIENTIT& clientIt)
 		}
 	}
 	else
-		handleDefaultPage(clientIt);
+		handleDefaultErrorPage(clientIt);
 }
 
 
