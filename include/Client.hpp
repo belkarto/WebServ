@@ -23,7 +23,6 @@ class Client
     time_t                             last_activity;
     int                                keepalive_requests;
     Response                           response;
-    Request                            request;
     LOC_VECT_IT                        locatIt;
     std::map<std::string, std::string> fields;
 
@@ -37,5 +36,7 @@ class Client
   void        	setConnection(std::string &connection);
   void        	setTransferEncoding(std::string &encoding);
   std::string	getMimeType(std::string &filepath);
+  std::string   getFileExtantion(std::string &);
+  std::string   generateFileName(std::string &);
 };
 #endif

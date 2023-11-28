@@ -176,3 +176,34 @@ std::string	Client::getMimeType(std::string &filepath)
 	return "application/octet-stream";
 	
 }
+
+std::string	Client::getFileExtantion(std::string &contentType)
+{
+	std::string										extension;
+	std::map<std::string, std::string>::iterator	mimetypeIt = Multiplexer::mime_types.begin();
+
+    for (; mimetypeIt != Multiplexer::mime_types.end(); mimetypeIt++)
+    {
+        if (mimetypeIt->second == contentType)
+            return mimetypeIt->first;
+    }
+	return ".txt";
+	
+}
+
+std::string Client::generateFileName(std::string &contentType)
+{
+    std::time_t currentTime = std::time(NULL);
+    std::tm *localTime = std::localtime(&currentTime);
+
+    //format the current time
+    std::ostringstream ss;
+    ss << std::setfill('0') << std::setw(4) << 1900 + localTime->tm_year;
+    ss <<  std::setw(2) << 1  + localTime->tm_mon;
+    ss <<  std::setw(2) << localTime->tm_mday;
+    ss <<  std::setw(2) << localTime->tm_hour;
+    ss <<  std::setw(2) << localTime->tm_min;
+    ss <<  std::setw(2) << localTime->tm_sec;
+
+    return (ss.str() + getFileExtantion(contentType));
+}

@@ -3,7 +3,6 @@
 
 #include "define.hpp"
 #include "Response.hpp"
-#include "Request.hpp"
 #include "webserv.hpp"
 #include "Server.hpp"
 #include "Client.hpp"

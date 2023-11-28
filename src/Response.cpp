@@ -100,12 +100,6 @@ void    Response::setErrorResponse(CLIENTIT& clientIt)
 		handleDefaultErrorPage(clientIt);
 }
 
-
-void Response::setPostResponse(CLIENTIT &clientIt)
-{
-    (void)clientIt;
-}
-
 void Response::setDeleteResponse(CLIENTIT &clientIt)
 {
     (void)clientIt;
