@@ -146,6 +146,12 @@ void	Response::handleDefaultErrorPage(CLIENTIT &clientIt)
 	clientIt->response_all_sent = true;
 }
 
+void		Response::handleCgi(CLIENTIT& clientIt)
+{
+	//TODO:
+	(void) clientIt;
+}
+
 void	Response::handleDelete(CLIENTIT& clientIt)
 {
 	int ecode;
@@ -201,6 +207,7 @@ int	remove_all(const char *path, int &ecode)
 			new_path.append(entry->d_name);
 			remove_all(new_path.c_str(), ecode);
 		}
+		closedir(dir);
 		if (remove(path) < 0)
 			return (setEcode(ecode));
 	}
