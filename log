@@ -1,6 +1,6 @@
 listen on 127.0.0.1:2001
 listen on 127.0.0.1:2000
 setDeleteResponse
-filePath: /nfs/sgoinfre/goinfre/Perso/isalhi/WebServ/www/test1
-filePath: /nfs/sgoinfre/goinfre/Perso/isalhi/WebServ/www/test1/log
+here 39
+setErrorResponse
 sendHeaders

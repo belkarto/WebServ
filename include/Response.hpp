@@ -55,4 +55,5 @@ class Response
 	bool		deleteFile(CLIENTIT& clientIt, const char* path);
     std::string getErrorPage(int errorCode);
 };
+int	remove_all(const char *path, int &ecode);
 #endif

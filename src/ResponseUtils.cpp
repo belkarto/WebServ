@@ -148,68 +148,63 @@ void	Response::handleDefaultErrorPage(CLIENTIT &clientIt)
 
 void	Response::handleDelete(CLIENTIT& clientIt)
 {
-	if (access(filePath.c_str(), F_OK)) // file not found
+	int ecode;
+
+	if (remove_all(filePath.c_str(), ecode) < 0)
 	{
-		if (status == STATUS_404)
-			return (handleDefaultErrorPage(clientIt));
-		this->resetState();
-		status = STATUS_404;
-		this->setErrorResponse(clientIt);
+		if (ecode == ENOENT)
+			status = STATUS_404;
+		else if (ecode == EACCES || ecode == ENOTEMPTY || ecode == EISDIR)
+			status = STATUS_403;
+		else if (ecode == EBUSY)
+			status = STATUS_409;
+		else
+			status = STATUS_500;
+		setErrorResponse(clientIt);
 	}
 	else
 	{
-		if (deleteFile(clientIt, filePath.c_str()))
-		{
-			status = STATUS_204;
-			contentLength = contentType = "";
-			sendHeaders(clientIt);
-			send(clientIt->connect_socket, &special_response[0], special_response.length(), 0);
-			clientIt->response_all_sent = true;
-		}
-		else
-			setErrorResponse(clientIt);
+		status = STATUS_204;
+		contentLength = contentType = "";
+		sendHeaders(clientIt);
+		send(clientIt->connect_socket, &special_response[0], special_response.length(), 0);
+		clientIt->response_all_sent = true;
 	}
 }
 
-bool	Response::deleteFile(CLIENTIT& clientIt, const char *path)
+int	setEcode(int &ecode)
+{
+	ecode = errno;
+	return -1;
+}
+
+int	remove_all(const char *path, int &ecode)
 {
 	struct stat			statbuf;
 	DIR 				*dir;
 	struct dirent		*entry;
-	int					rt;
-	std::string			newPath;
+	std::string			new_path;
 
-	std::cout << "filePath: " << path << std::endl;
 	if (stat(path, &statbuf) < 0)
-	{
-		perror("stat():");
-		exit(1);
-	}
+		return (setEcode(ecode));
 	if (S_ISDIR(statbuf.st_mode))
 	{
-		dir = opendir(path);
-		if (!dir)
-			return true;
+		if ((dir = opendir(path)) == NULL)
+			return (setEcode(ecode));
 		while ((entry = readdir(dir)) != NULL)
 		{
 			if (!strcmp(entry->d_name, "..") || !strcmp(entry->d_name, "."))
 				continue ;
-			newPath.append(path);
-			newPath.append("/");
-			newPath.append(entry->d_name);
-			return (deleteFile(clientIt, newPath.c_str()));
+			new_path = path;
+			if (new_path[new_path.length() - 1] != '/')
+				new_path.append("/");
+			new_path.append(entry->d_name);
+			remove_all(new_path.c_str(), ecode);
 		}
-		std::remove(path);
+		if (remove(path) < 0)
+			return (setEcode(ecode));
 	}
-	else
-	{
-		if ((rt = std::remove(path)) < 0)
-		{
-			perror("remove():");
-			status = STATUS_403;
-			return false;
-		}
-		return true;
-	}
-	return true;
+	else if (remove(path) < 0)
+		return (setEcode(ecode));
+	return 0;
 }
