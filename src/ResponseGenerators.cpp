@@ -30,36 +30,36 @@ void	Response::sendResponseBuffer(CLIENTIT& clientIt)
 	std::streamsize		rd;
 
     if (!transferEncoding.empty())
-		sendAutoIndexBuffer(clientIt);
+	{
+		if (fd < 0)
+			sendAutoIndexBuffer(clientIt);
+		else
+			sendPipeBuffer(clientIt);
+	}
     else
     {
-		if (fd < 0)
+		if (readbytes < response_size)
+        {
+
+			fileContent->read(buffer, CLIENT_RESPONSE_BUFFER_SIZE);
+			rd = fileContent->gcount();
+            readbytes += rd;
+            send(clientIt->connect_socket, &buffer, rd, 0);
+        }
+        else
 		{
-			if (readbytes < response_size)
-        	{
-	
-				fileContent->read(buffer, CLIENT_RESPONSE_BUFFER_SIZE);
-				rd = fileContent->gcount();
-        	    readbytes += rd;
-        	    send(clientIt->connect_socket, &buffer, rd, 0);
-        	}
-        	else
-			{
-				delete fileContent;
-        	    clientIt->response_all_sent = true;
-			}
-		}
-		else
-		{
-			if ((rd = read(fd, buffer, CLIENT_RESPONSE_BUFFER_SIZE)) <= 0)
-			{
-				close(fd);
-				clientIt->response_all_sent = true;
-			}
-			else
-				send(clientIt->connect_socket, &buffer, rd, 0);
+			delete fileContent;
+            clientIt->response_all_sent = true;
 		}
     }
+}
+
+void	Response::sendAutoIndexBuffer(CLIENTIT& clientIt)
+{
+	char				buffer[CLIENT_RESPONSE_BUFFER_SIZE];
+	std::streamsize		rd;
+
+	if ((rd = read(fd, buffer, CLIENT_RESPONSE_BUFFER_SIZE - 2)))
 }
 
 void		Response::sendAutoIndexBuffer(CLIENTIT& clientIt)

@@ -116,7 +116,7 @@ void	Response::handleFile(CLIENTIT& clientIt)
 		contentLength = toString(response_size);
 	}
 	else
-		response_size = getFileSize(fd);
+		transferEncoding = "chunked";
 	contentType = clientIt->getMimeType(filePath);
 	sendHeaders(clientIt);
 }

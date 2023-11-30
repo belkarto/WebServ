@@ -53,6 +53,7 @@ class Response
 	void		sendHeaders(CLIENTIT& clientIt);
 	void		sendResponseBuffer(CLIENTIT& clientIt);
 	void		sendAutoIndexBuffer(CLIENTIT& clientIt);
+	void		sendPipeBuffer(CLIENTIT& clientIt);
 	void		handleDelete(CLIENTIT& clientIt);
 	void		handleCgi(void);
     std::string getErrorPage(int errorCode);
