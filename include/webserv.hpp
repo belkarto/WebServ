@@ -28,16 +28,17 @@
 # include <cstdio>
 # include "define.hpp"
 # include "Exception.hpp"
+# include <sys/wait.h>
 
 class Server;
 class Client;
 class Multiplexer;
 
 /*					main										*/
-void				webServManager(const char *config_path);
+void				webServManager(const char *config_path, char **env);
 
 /*                  lib                                         */
-void            split(std::vector<std::string>& fields, std::stringstream& ss);
+void            	split(std::vector<std::string>& fields, std::stringstream& ss);
 void                split(std::vector<std::string>& params, std::string str);
 void	            trim(std::string &str);
 long long	    	ft_stoll(const char* str);
@@ -51,6 +52,7 @@ void	        	epoll_add(int epfd, int fd);
 void	        	epoll_add2(int epfd, int fd);
 void	        	epoll_delete(int epfd, int fd);
 std::streamsize		getFileSize(std::ifstream *file);
+std::streamsize		getFileSize(int fd);
 bool				is_directory(const char* path);
 
 /*                  debug                                       */

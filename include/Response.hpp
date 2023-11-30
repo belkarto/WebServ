@@ -16,11 +16,13 @@ class Response
 
 	std::string	    	filePath;
 	std::string			root;
+	std::string			cgiExecutable;
 	STRINGVECT	    	*index;
     bool		    	autoindex;
 
 	int					code;
-	std::string			special_response; 
+	std::string			special_response;
+	int					fd;
     std::ifstream   	*fileContent;
 	DIR 				*directory;
 	std::streamsize		response_size;
@@ -52,7 +54,7 @@ class Response
 	void		sendResponseBuffer(CLIENTIT& clientIt);
 	void		sendAutoIndexBuffer(CLIENTIT& clientIt);
 	void		handleDelete(CLIENTIT& clientIt);
-	void		handleCgi(CLIENTIT& clientIt);
+	void		handleCgi(void);
     std::string getErrorPage(int errorCode);
 };
 int	remove_all(const char *path, int &ecode);

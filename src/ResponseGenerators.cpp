@@ -33,17 +33,31 @@ void	Response::sendResponseBuffer(CLIENTIT& clientIt)
 		sendAutoIndexBuffer(clientIt);
     else
     {
-        if (readbytes < response_size)
-        {
-            fileContent->read(buffer, CLIENT_RESPONSE_BUFFER_SIZE);
-            rd = fileContent->gcount();
-            readbytes += rd;
-            send(clientIt->connect_socket, &buffer, rd, 0);
-        }
-        else
+		if (fd < 0)
 		{
-			delete fileContent;
-            clientIt->response_all_sent = true;
+			if (readbytes < response_size)
+        	{
+	
+				fileContent->read(buffer, CLIENT_RESPONSE_BUFFER_SIZE);
+				rd = fileContent->gcount();
+        	    readbytes += rd;
+        	    send(clientIt->connect_socket, &buffer, rd, 0);
+        	}
+        	else
+			{
+				delete fileContent;
+        	    clientIt->response_all_sent = true;
+			}
+		}
+		else
+		{
+			if ((rd = read(fd, buffer, CLIENT_RESPONSE_BUFFER_SIZE)) <= 0)
+			{
+				close(fd);
+				clientIt->response_all_sent = true;
+			}
+			else
+				send(clientIt->connect_socket, &buffer, rd, 0);
 		}
     }
 }

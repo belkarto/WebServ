@@ -17,7 +17,7 @@ class Multiplexer
     std::vector<std::string> headers_fields;  
 
   public:
-    Multiplexer(SERVVECT &servers);
+    Multiplexer(SERVVECT &servers, char **env);
     ~Multiplexer();
     void     registerServers();
     void     registerClient(SERVIT &serverIt);
@@ -35,6 +35,7 @@ class Multiplexer
     SERVIT   findListenSocket(int socket, SERVVECT &sockets);
     CLIENTIT findConnectSocket(int socket, CLIENTVECT &sockets);
 
+    static char                    **env;
     static const char *fields[HEADERS_FIELDS_SIZE];
     static void (Client::*fields_setters[HEADERS_FIELDS_SIZE])(std::string &field);
     static const char                        *defErrorPagesStrings[NUM_DEF_ERROR];

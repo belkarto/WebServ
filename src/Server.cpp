@@ -76,6 +76,23 @@ std::map<std::vector<int>, std::string>::iterator	Server::findErrorPage(int code
 	return it;
 }
 
+std::string	Server::findCgi(CLIENTIT &clientIt, std::string &uri)
+{
+	size_t											pos;
+	std::string										extension;
+	std::map<std::string, std::string>::iterator	cgiIt;
+
+	if ((pos = uri.find_last_of('.')) != std::string::npos)
+	{
+		extension = uri.substr(pos);
+		cgiIt = clientIt->locatIt->cgi.find(extension);
+		if (cgiIt != clientIt->locatIt->cgi.end())
+			return cgiIt->second;
+		return	"";
+	}
+	return "";
+}
+
 void	Server::findLocation(CLIENTIT &clientIt, std::string &uri)
 {
 	std::vector<struct Location>::iterator	it;
@@ -87,3 +104,4 @@ void	Server::findLocation(CLIENTIT &clientIt, std::string &uri)
 			|| it->uri.length() > clientIt->locatIt->uri.length()))
 				clientIt->locatIt = it;
 }
+

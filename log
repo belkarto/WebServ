@@ -1,6 +1,10 @@
 listen on 127.0.0.1:2001
 listen on 127.0.0.1:2000
-setDeleteResponse
-here 39
-setErrorResponse
+setGetResponse
+parseFilePath
+handleCgi
+handleFile
+-1
+-1
 sendHeaders
+sendResponseBuffer

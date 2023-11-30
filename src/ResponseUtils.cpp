@@ -25,7 +25,10 @@ void	Response::parseFilePath(CLIENTIT& clientIt)
 		if (is_directory(filePath.c_str()))
 			handleDirectory(clientIt);
 		else
+		{
+			handleCgi();
 			handleFile(clientIt);
+		}
 	}
 }
 
@@ -79,21 +82,41 @@ bool	Response::handleIndexPages(CLIENTIT& clientIt)
 	return false;
 }
 
+void displayFileContent(int fd) 
+{
+    
+    char buffer[1024];
+    ssize_t bytesRead;
+
+    while ((bytesRead = read(fd, buffer, sizeof(buffer))) > 0) 
+	{
+        if (write(STDOUT_FILENO, buffer, bytesRead) != bytesRead) {
+            perror("Error writing to stdout");
+            return;
+        }
+    }
+}
+
 void	Response::handleFile(CLIENTIT& clientIt)
 {
 	std::cout << __FUNCTION__ << std::endl;
 
 	status = STATUS_200;
-	fileContent = new std::ifstream(filePath.c_str());
-	if (!fileContent)
+	if (fd < 0)
 	{
-		if (status == STATUS_500)
-			handleDefaultErrorPage(clientIt);
-		status = STATUS_500;
-		setErrorResponse(clientIt);
+		fileContent = new std::ifstream(filePath.c_str());
+		if (!fileContent)
+		{
+			if (status == STATUS_500)
+				handleDefaultErrorPage(clientIt);
+			status = STATUS_500;
+			setErrorResponse(clientIt);
+		}
+		response_size = getFileSize(fileContent);
+		contentLength = toString(response_size);
 	}
-	response_size = getFileSize(fileContent);
-	contentLength = toString(response_size);
+	else
+		response_size = getFileSize(fd);
 	contentType = clientIt->getMimeType(filePath);
 	sendHeaders(clientIt);
 }
@@ -146,10 +169,36 @@ void	Response::handleDefaultErrorPage(CLIENTIT &clientIt)
 	clientIt->response_all_sent = true;
 }
 
-void		Response::handleCgi(CLIENTIT& clientIt)
+void		Response::handleCgi(void)
 {
-	//TODO:
-	(void) clientIt;
+	std::cout << __FUNCTION__ << std::endl;
+
+	pid_t		pid;
+	int			fds[2];
+	char		*cmds[3];
+
+	cmds[0] = const_cast<char *> (cgiExecutable.c_str());
+	cmds[1] = const_cast<char *> (filePath.c_str());
+	cmds[2] = NULL;
+	if (!access(cmds[0], F_OK) && !access(cmds[0], X_OK))
+	{
+		if (pipe(fds) < 0)
+			return;
+		if ((pid = fork()) < 0)
+			return;
+		if (!pid)
+		{
+			dup2(fds[1], 1);
+			close(fds[0]);
+			execve(cmds[0], cmds, Multiplexer::env);
+		}
+		else
+		{
+			close(fds[1]);
+			wait(NULL);
+			fd = fds[0]; // should be closed when read done
+		}
+	}
 }
 
 void	Response::handleDelete(CLIENTIT& clientIt)

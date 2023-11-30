@@ -11,11 +11,13 @@ Response::Response(void)
 
 	filePath 		= "";
 	root 			= "";
+	cgiExecutable	= "";
 	index 			= NULL;
     autoindex 		= false;
 
 	code 			= 0;
 	special_response = "";
+	fd 				= -1;
     fileContent 	= NULL;
 	directory		= NULL;
 	response_size	= 0;
@@ -33,11 +35,13 @@ void	Response::resetState()
 
 	filePath 		= "";
 	root 			= "";
+	cgiExecutable	= "";
 	index 			= NULL;
     autoindex 		= false;
 
 	code 			= 0;
 	special_response = "";
+	fd 				= -1;
     fileContent 	= NULL;
 	directory		= NULL;
 	response_size	= 0;
@@ -70,6 +74,7 @@ void    Response::setGetResponse(CLIENTIT& clientIt)
 		root = clientIt->locatIt->root;				//
 		if (!clientIt->locatIt->redirect.empty())
 			return (handleExternalRedirection(clientIt));
+		cgiExecutable = clientIt->serverIt->findCgi(clientIt, uri);
 	}
 	else
 	{

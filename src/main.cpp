@@ -2,7 +2,7 @@
 #include "ConfigParser.hpp"
 #include <csignal>
 
-int	main(int ac, char **av)
+int	main(int ac, char **av, char **env)
 {
 	if (ac > 2)
 	{
@@ -10,22 +10,22 @@ int	main(int ac, char **av)
 		return 1;
 	}
 	if (ac > 1)
-		webServManager(av[1]);
+		webServManager(av[1], env);
 	else
-		webServManager(DEFAULT_CONF_PATH);
+		webServManager(DEFAULT_CONF_PATH, env);
 	return (0);
 }
 
 
-void	webServManager(const char *config_path)
+void	webServManager(const char *config_path, char **env)
 {
 	std::vector<Server>	servers;
 
-  signal(SIGPIPE, SIG_IGN);
+  	signal(SIGPIPE, SIG_IGN);
 	try 
 	{
 		ConfigParser	parser(config_path, servers);
-		Multiplexer		multiplexer(servers);
+		Multiplexer		multiplexer(servers, env);
 	}
 	catch (std::exception &e)
 	{

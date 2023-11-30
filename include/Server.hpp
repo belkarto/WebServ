@@ -7,14 +7,14 @@
 
 typedef struct Location
 {
-    std::string                         uri;
-    std::string                         root;
-    STRINGVECT                          index;
-    STRINGVECT                          method;
-    std::string                         redirect;
-    bool                                autoindex;
-    std::pair<std::string, std::string> cgi;
-    std::string                         upload_store;
+    std::string     					uri;
+    std::string     					root;
+    STRINGVECT      					index;
+    STRINGVECT      					method;
+    std::string     					redirect;
+    bool            					autoindex;
+    std::map<std::string, std::string>  cgi;
+    std::string							upload_store;
 
 } Location;
 
@@ -33,10 +33,11 @@ class Server
     std::vector<Location>                   location;
 
     Server();
-    void                                              emplaceBackLocation();
-    void                                              initServer();
-    void                                              acceptConnection(Client &client);
-    void                                              findLocation(CLIENTIT &clientIt, std::string &uri);
-    std::map<std::vector<int>, std::string>::iterator findErrorPage(int code);
+    void                                             	emplaceBackLocation();
+    void                                             	initServer();
+    void                                             	acceptConnection(Client &client);
+    void                                             	findLocation(CLIENTIT &clientIt, std::string &uri);
+    std::map<std::vector<int>, std::string>::iterator	findErrorPage(int code);
+    std::string											findCgi(CLIENTIT &clientIt, std::string &uri);
 };
 #endif

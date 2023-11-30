@@ -35,6 +35,6 @@ public:
   	void        	setContentLength(std::string &content_length);
   	void        	setConnection(std::string &connection);
   	void        	setTransferEncoding(std::string &encoding);
-  	std::string	getMimeType(std::string &filepath);
+  	std::string		getMimeType(std::string &filepath);
 };
 #endif

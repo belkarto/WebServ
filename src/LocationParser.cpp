@@ -120,8 +120,7 @@ void	ConfigParser::parseCgi()
 {
 	if (directive_components.size() != 2)
 		throw ConfigFileParsingException("invalid number of arguments in cgi directive");
-	_servers.back().location.back().cgi.first = directive_components[0];	// extension
-	_servers.back().location.back().cgi.second = directive_components[1];	// interpreter
+	_servers.back().location.back().cgi[directive_components[0]] = directive_components[1];	// extension [interpreter]
 }
 
 void	ConfigParser::parseUploadStore()

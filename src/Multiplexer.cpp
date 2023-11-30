@@ -1,5 +1,7 @@
 #include "../include/Multiplexer.hpp"
 
+char	**Multiplexer::env;
+
 std::map<std::string, std::string> Multiplexer::mime_types;
 
 std::map<int, std::string> Multiplexer::defErrorPages;
@@ -30,8 +32,9 @@ void (Client::*Multiplexer::fields_setters[HEADERS_FIELDS_SIZE])(std::string &fi
 	&Client::setTransferEncoding,
 };
 
-Multiplexer::Multiplexer(SERVVECT &servers) : servers(servers)
+Multiplexer::Multiplexer(SERVVECT &servers, char **env) : servers(servers)
 {
+	this->env = env;
 	epfd = epoll_create1(0);
 	if (epfd < 0)
 	{
@@ -141,7 +144,8 @@ void Multiplexer::handleResponse(CLIENTIT &clientIt)
 		{
 			if (clientIt->response.connection == "close")
 				dropClient(clientIt);
-			clientIt->resetState();
+			else
+				clientIt->resetState();	// keep-alive connection
 		}
 		else if (!clientIt->start_responding)
 		{
