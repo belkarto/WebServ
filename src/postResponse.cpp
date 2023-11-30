@@ -1,5 +1,4 @@
 #include "../include/Multiplexer.hpp"
-#include <ostream>
 
 void Response::setPostResponse(CLIENTIT &clientIt)
 {
@@ -54,6 +53,9 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         clientIt->response.outFile->flush();
         response_size -= rc;
         if (response_size <= 0)
+        {
+            clientIt->response.outFile->close();
             exit(2);
+        }
     }
 }
