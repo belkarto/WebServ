@@ -1,4 +1,5 @@
 #include "../include/Multiplexer.hpp"
+#include <ostream>
 
 void Response::setPostResponse(CLIENTIT &clientIt)
 {
@@ -28,6 +29,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     parsePostFilePath(clientIt);
     filePath.append("/" + clientIt->generateFileName(clientIt->fields["Content-Type"]));
     clientIt->response.outFile = new std::ofstream(filePath.c_str());
+    std::cout << "file state " << clientIt->response.outFile->is_open() << std::endl;
     if (!clientIt->response.outFile)
     {
 		if (status == STATUS_500)
@@ -47,7 +49,9 @@ void Response::setPostResponse(CLIENTIT &clientIt)
 
     while ((rc = recv(clientIt->connect_socket, buffer, BUFFER_SIZE, 0)))
     {
+        std::cout << buffer << " " << rc << std::endl;
         clientIt->response.outFile->write(buffer, rc);
+        clientIt->response.outFile->flush();
         response_size -= rc;
         if (response_size <= 0)
             exit(2);
