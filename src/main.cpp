@@ -21,7 +21,7 @@ void	webServManager(const char *config_path)
 {
 	std::vector<Server>	servers;
 
-  signal(SIGPIPE, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN);
 	try 
 	{
 		ConfigParser	parser(config_path, servers);

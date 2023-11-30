@@ -1,4 +1,5 @@
 #include "../include/Multiplexer.hpp"
+#include <ostream>
 
 std::map<std::string, std::string> Multiplexer::mime_types;
 
@@ -233,6 +234,13 @@ void Multiplexer::loadMimeTypes()
 		mime_types[key] = value;
 		ss.str("");
 	}
+    std::map<std::string, std::string>::iterator it = mime_types.begin();
+    for ( ; it != mime_types.end(); it++)
+    {
+        std::cout << it->first << " " << it->second << std::endl;
+    }
+    std::cout << "all mime printed" << std::endl;
+    exit(1);
 }
 
 void Multiplexer::loadDefErrorPages()
