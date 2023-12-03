@@ -88,4 +88,8 @@
 #define KEEPALIVE_TIMEOUT           60
 #define BACKLOG                     500
 #define MIMETYPE_PATH               "./config/mimes.txt"
+
+/*              Response                */
+#define CGI_TIMEOUT                 4
+
 #endif

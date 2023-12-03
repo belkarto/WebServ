@@ -130,6 +130,7 @@ void Multiplexer::connectionListener()
 						getClientRequest(clientIt);
 				}
 				if ((events[i].events & EPOLLOUT))
+				
 					handleResponse(clientIt);
 			}
 		}
@@ -146,6 +147,13 @@ void Multiplexer::handleResponse(CLIENTIT &clientIt)
 				dropClient(clientIt);
 			else
 				clientIt->resetState();	// keep-alive connection
+		}
+		else if (clientIt->response.cgi)
+		{
+			if (!clientIt->start_responding)
+				clientIt->response.checkCgiTimeout(clientIt);
+			else
+				clientIt->response.sendResponseBuffer(clientIt);
 		}
 		else if (!clientIt->start_responding)
 		{

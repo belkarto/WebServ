@@ -31,10 +31,9 @@ void	Response::sendResponseBuffer(CLIENTIT& clientIt)
 
     if (!transferEncoding.empty())
 	{
-		if (fd < 0)
-			sendAutoIndexBuffer(clientIt);
-		else
-			sendPipeBuffer(clientIt);
+		if (!cgi)
+			return (sendAutoIndexBuffer(clientIt));
+		return (sendPipeBuffer(clientIt));
 	}
     else
     {
@@ -54,12 +53,37 @@ void	Response::sendResponseBuffer(CLIENTIT& clientIt)
     }
 }
 
-void	Response::sendAutoIndexBuffer(CLIENTIT& clientIt)
+void	Response::sendPipeBuffer(CLIENTIT& clientIt)
 {
+	std::cout << __FUNCTION__ << std::endl;
+
 	char				buffer[CLIENT_RESPONSE_BUFFER_SIZE];
 	std::streamsize		rd;
+	std::string			chunk_size;
+	std::string			chunk_data;
+	std::stringstream	ss;
 
-	if ((rd = read(fd, buffer, CLIENT_RESPONSE_BUFFER_SIZE - 2)))
+	if ((rd = read(fd, buffer, CLIENT_RESPONSE_BUFFER_SIZE)) > 0)
+	{
+		chunk_data = "";
+		chunk_data.append(buffer, rd);
+		ss << std::hex << chunk_data.length();
+		ss >> chunk_size;
+		chunk_data += CRLF;
+		chunk_size += CRLF;
+		send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
+		send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
+	}
+	else
+	{
+		chunk_data = CRLF;
+		chunk_size = "0" + chunk_data;
+		send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
+		send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
+		std::cout << "terminated" << std::endl;
+		close(fd);
+		clientIt->response_all_sent = true;
+	}
 }
 
 void		Response::sendAutoIndexBuffer(CLIENTIT& clientIt)

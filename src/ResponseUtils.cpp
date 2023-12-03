@@ -26,7 +26,8 @@ void	Response::parseFilePath(CLIENTIT& clientIt)
 			handleDirectory(clientIt);
 		else
 		{
-			handleCgi();
+			if (cgi)
+				return (handleCgi(clientIt));
 			handleFile(clientIt);
 		}
 	}
@@ -82,27 +83,12 @@ bool	Response::handleIndexPages(CLIENTIT& clientIt)
 	return false;
 }
 
-void displayFileContent(int fd) 
-{
-    
-    char buffer[1024];
-    ssize_t bytesRead;
-
-    while ((bytesRead = read(fd, buffer, sizeof(buffer))) > 0) 
-	{
-        if (write(STDOUT_FILENO, buffer, bytesRead) != bytesRead) {
-            perror("Error writing to stdout");
-            return;
-        }
-    }
-}
-
 void	Response::handleFile(CLIENTIT& clientIt)
 {
 	std::cout << __FUNCTION__ << std::endl;
 
 	status = STATUS_200;
-	if (fd < 0)
+	if (!cgi)
 	{
 		fileContent = new std::ifstream(filePath.c_str());
 		if (!fileContent)
@@ -169,13 +155,11 @@ void	Response::handleDefaultErrorPage(CLIENTIT &clientIt)
 	clientIt->response_all_sent = true;
 }
 
-void		Response::handleCgi(void)
+void		Response::handleCgi(CLIENTIT& clientIt)
 {
 	std::cout << __FUNCTION__ << std::endl;
 
-	pid_t		pid;
-	int			fds[2];
-	char		*cmds[3];
+	char			*cmds[3];
 
 	cmds[0] = const_cast<char *> (cgiExecutable.c_str());
 	cmds[1] = const_cast<char *> (filePath.c_str());
@@ -183,9 +167,19 @@ void		Response::handleCgi(void)
 	if (!access(cmds[0], F_OK) && !access(cmds[0], X_OK))
 	{
 		if (pipe(fds) < 0)
-			return;
+		{
+			resetState();
+			status = STATUS_500;
+			return (setErrorResponse(clientIt));
+		}
 		if ((pid = fork()) < 0)
-			return;
+		{
+			close(fds[0]);
+			close(fds[1]);
+			resetState();
+			status = STATUS_500;
+			return (setErrorResponse(clientIt));
+		}
 		if (!pid)
 		{
 			dup2(fds[1], 1);
@@ -194,10 +188,47 @@ void		Response::handleCgi(void)
 		}
 		else
 		{
+			counter = time(NULL);
 			close(fds[1]);
-			wait(NULL);
-			fd = fds[0]; // should be closed when read done
+			checkCgiTimeout(clientIt);
 		}
+	}
+}
+
+void	Response::checkCgiTimeout(CLIENTIT& clientIt)
+{
+	std::cout << __FUNCTION__ << std::endl;
+
+	int	wstatus;
+	int	wpid;
+
+	wpid = waitpid(pid, &wstatus, WNOHANG);
+	if (wpid < 0)
+	{
+		kill(pid, SIGKILL);
+		wait(NULL);
+		close(fds[0]);
+		resetState();
+		status = STATUS_500;
+		setErrorResponse(clientIt);
+
+	}
+	else if (wpid > 0)
+	{
+		if (WIFEXITED(wstatus))
+		{
+			fd = fds[0];
+			handleFile(clientIt);
+		}
+	}
+	else if ((time(NULL) - counter) >= CGI_TIMEOUT)
+	{
+			kill(pid, SIGKILL);
+			wait(NULL);
+			close(fds[0]);
+			resetState();
+			status = STATUS_408;
+			setErrorResponse(clientIt);
 	}
 }
 
