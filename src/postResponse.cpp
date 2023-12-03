@@ -31,24 +31,25 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     std::cout << "file state " << clientIt->response.outFile->is_open() << std::endl;
     if (!clientIt->response.outFile)
     {
-		if (status == STATUS_500)
-			return (handleDefaultErrorPage(clientIt));
-		this->resetState();
-		status = STATUS_500;
-		this->setErrorResponse(clientIt);	
+        if (status == STATUS_500)
+            return (handleDefaultErrorPage(clientIt));
+        this->resetState();
+        status = STATUS_500;
+        this->setErrorResponse(clientIt);
     }
 
     std::stringstream ss;
 
     ss << clientIt->fields["Content-Length"];
     ss >> response_size;
-    
+
     char buffer[BUFFER_SIZE];
-    int rc = 0;
+    int  rc = 0;
 
     while ((rc = recv(clientIt->connect_socket, buffer, BUFFER_SIZE, 0)))
     {
-        std::cout << buffer << " " << rc << std::endl;
+        // std::cout << "\nlen--------------------->" << rc << std::endl;
+        // write(1, buffer, rc);
         clientIt->response.outFile->write(buffer, rc);
         clientIt->response.outFile->flush();
         response_size -= rc;

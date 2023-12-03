@@ -47,10 +47,13 @@ void Client::setContentType(std::string &content_type)
     std::transform(content_type.begin(), content_type.end(), content_type.begin(), tolower);
     it = Multiplexer::mime_types.begin();
     ite = Multiplexer::mime_types.end();
-    while (it != ite )
+    while (it != ite)
     {
         if (it->second == content_type)
+        {
+            std::cout << it->second << " ===== " << content_type << std::endl;
             break;
+        }
         std::cout << it->second << " ===== " << content_type << std::endl;
         it++;
     }
