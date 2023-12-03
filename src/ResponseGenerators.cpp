@@ -17,6 +17,7 @@ void	Response::sendHeaders(CLIENTIT& clientIt)
 	    headers += "Content-Length: " + contentLength + CRLF;
 	if (!location.empty())
 		headers += "Location: " + location + CRLF;
+	connection =  clientIt->fields["Connection"];
 	headers += "Connection: " + connection + CRLF;
 	headers += CRLF;
 	send(clientIt->connect_socket, &headers[0], headers.length(), 0);
@@ -47,6 +48,7 @@ void	Response::sendResponseBuffer(CLIENTIT& clientIt)
         }
         else
 		{
+			fileContent->close();
 			delete fileContent;
             clientIt->response_all_sent = true;
 		}

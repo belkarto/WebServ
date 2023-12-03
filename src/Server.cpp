@@ -59,11 +59,9 @@ void    Server::initServer()
 void	Server::acceptConnection(Client &client)
 {
 	if ((client.connect_socket = accept(listen_socket, NULL, NULL)) < 0)
-	{
-		perror("accept()");
-		exit(EXIT_FAILURE);
-	}
-	client.listen_socket = this->listen_socket;
+		client.connect_socket = -1;
+	else
+		client.listen_socket = this->listen_socket;
 }
 
 std::map<std::vector<int>, std::string>::iterator	Server::findErrorPage(int code)

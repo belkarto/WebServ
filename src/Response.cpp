@@ -3,7 +3,6 @@
 Response::Response(void)
 {
 	status 			= "";   
-	connection 		= "keep-alive";
 	contentType 	= "text/html";
 	contentLength 	= "";
 	transferEncoding = "";
@@ -28,7 +27,6 @@ Response::Response(void)
 void	Response::resetState()
 {
 	status 			= "";   
-	connection 		= "keep-alive";
 	contentType 	= "text/html";
 	contentLength 	= "";
 	transferEncoding = "";

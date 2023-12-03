@@ -147,7 +147,6 @@ bool Response::handleAutoIndex(CLIENTIT &clientIt)
 
 void	Response::handleDefaultErrorPage(CLIENTIT &clientIt)
 {
-	connection = "close";
     special_response = getErrorPage(code);
 	contentLength = toString(special_response.length());
 	sendHeaders(clientIt);

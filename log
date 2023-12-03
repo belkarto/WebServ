@@ -1,9 +1,0 @@
-listen on 127.0.0.1:2001
-listen on 127.0.0.1:2000
-setErrorResponse
-setGetResponse
-parseFilePath
-handleFile
-sendHeaders
-sendResponseBuffer
-sendResponseBuffer

@@ -3,14 +3,14 @@
 Client::Client()
 {
 	headers = "";
-	headers_all_recieved = false;
 	request_line_received = false;
+	headers_all_recieved = false;
 	request_all_processed = false;
+    start_responding = false;
 	response_all_sent = false;
-	start_responding = false;
-    response_template_set = false;
-    // error = false;
-    // ResTemplate.reset();
+	keepalive_requests = 0;
+	header_timeout = time(NULL);
+	last_activity = header_timeout;
 }
 
 void    Client::resetState()
@@ -21,10 +21,9 @@ void    Client::resetState()
 	request_all_processed = false;
 	response_all_sent = false;
 	start_responding = false;
-  	response_template_set = false;
+	keepalive_requests += 1;
+	last_activity = time(NULL);
 	response.resetState();
-	// error = false;
-	// this->ResTemplate.headersSent = false;
 }
 
 void	Client::setTransferEncoding(std::string &encoding)
@@ -106,7 +105,17 @@ void	Client::setConnection(std::string &connection)
 {
 	std::transform(connection.begin(), connection.end(), connection.begin(), tolower);
 	if (connection == "keep-alive" || connection == "close")
+	{
+		if (connection == "keep-alive")
+		{
+			if (Multiplexer::keepalive_connections >= KEEPALIVE_CONNECTIONS)
+				connection = "close";
+			else
+				Multiplexer::keepalive_connections++;
+		}
 		fields.insert(std::make_pair("Connection", connection));
+	}
+
 	else
 		throw RequestParsingException(STATUS_400);
 }
