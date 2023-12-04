@@ -1,4 +1,4 @@
-#include "Multiplexer.hpp"
+#include "../include/Multiplexer.hpp"
 
 void	Response::sendHeaders(CLIENTIT& clientIt)
 {
@@ -104,6 +104,7 @@ void		Response::sendAutoIndexBuffer(CLIENTIT& clientIt)
     while (entry && chunk_data.length() != CLIENT_RESPONSE_BUFFER_SIZE)
     {
         chunk_data.append("<a href=\"");
+        chunk_data.append(clientIt->fields[URI]);
         chunk_data.append(entry->d_name);
         chunk_data.append("\">");
 		chunk_data.append(entry->d_name);
