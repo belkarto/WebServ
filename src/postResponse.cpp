@@ -17,7 +17,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
             if (response_size <= 0)
             {
                 clientIt->response.outFile->close();
-                exit(2);
+                // send response 
             }
         }
     }
@@ -65,8 +65,6 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
     clientIt->response.outFile = new std::ofstream(filePath.c_str());
     if (!clientIt->response.outFile)
     {
-        if (status == STATUS_500)
-            return (handleDefaultErrorPage(clientIt));
         this->resetState();
         status = STATUS_500;
         this->setErrorResponse(clientIt);
