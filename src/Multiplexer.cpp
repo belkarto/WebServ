@@ -222,7 +222,8 @@ void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 		clientIt->response.status = e.what();
 		clientIt->response.setErrorResponse(clientIt);
 	}
-	delete[] clientIt->header_buffer;
+    if (clientIt->fields["method"] != "POST")
+	    delete[] clientIt->header_buffer;
 }
 
 bool	checkClientTimeOut(Client client)

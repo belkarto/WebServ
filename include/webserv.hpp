@@ -21,6 +21,7 @@
 # include <queue>
 # include <map>
 # include <exception>
+# include <cstring>
 # include <cstdlib>
 # include <climits>
 # include <ctime>

@@ -1,4 +1,4 @@
-#include "Multiplexer.hpp"
+#include "../include/Multiplexer.hpp"
 
 void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
 {
