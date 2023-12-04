@@ -25,7 +25,11 @@ void	Response::parseFilePath(CLIENTIT& clientIt)
 		if (is_directory(filePath.c_str()))
 			handleDirectory(clientIt);
 		else
+		{
+			if (cgi)
+				return (handleCgi(clientIt));
 			handleFile(clientIt);
+		}
 	}
 }
 
@@ -84,16 +88,21 @@ void	Response::handleFile(CLIENTIT& clientIt)
 	std::cout << __FUNCTION__ << std::endl;
 
 	status = STATUS_200;
-	fileContent = new std::ifstream(filePath.c_str());
-	if (!fileContent)
+	if (!cgi)
 	{
-		if (status == STATUS_500)
-			handleDefaultErrorPage(clientIt);
-		status = STATUS_500;
-		setErrorResponse(clientIt);
+		fileContent = new std::ifstream(filePath.c_str());
+		if (!fileContent)
+		{
+			if (status == STATUS_500)
+				handleDefaultErrorPage(clientIt);
+			status = STATUS_500;
+			setErrorResponse(clientIt);
+		}
+		response_size = getFileSize(fileContent);
+		contentLength = toString(response_size);
 	}
-	response_size = getFileSize(fileContent);
-	contentLength = toString(response_size);
+	else
+		transferEncoding = "chunked";
 	contentType = clientIt->getMimeType(filePath);
 	sendHeaders(clientIt);
 }
@@ -138,7 +147,6 @@ bool Response::handleAutoIndex(CLIENTIT &clientIt)
 
 void	Response::handleDefaultErrorPage(CLIENTIT &clientIt)
 {
-	connection = "close";
     special_response = getErrorPage(code);
 	contentLength = toString(special_response.length());
 	sendHeaders(clientIt);
@@ -174,4 +182,145 @@ void	Response::parsePostFilePath(CLIENTIT& clientIt)
 		status = STATUS_405;
 		this->setErrorResponse(clientIt);	
     }
+}
+
+void		Response::handleCgi(CLIENTIT& clientIt)
+{
+	std::cout << __FUNCTION__ << std::endl;
+
+	char			*cmds[3];
+
+	cmds[0] = const_cast<char *> (cgiExecutable.c_str());
+	cmds[1] = const_cast<char *> (filePath.c_str());
+	cmds[2] = NULL;
+	if (!access(cmds[0], F_OK) && !access(cmds[0], X_OK))
+	{
+		if (pipe(fds) < 0)
+		{
+			resetState();
+			status = STATUS_500;
+			return (setErrorResponse(clientIt));
+		}
+		if ((pid = fork()) < 0)
+		{
+			close(fds[0]);
+			close(fds[1]);
+			resetState();
+			status = STATUS_500;
+			return (setErrorResponse(clientIt));
+		}
+		if (!pid)
+		{
+			dup2(fds[1], 1);
+			close(fds[0]);
+			execve(cmds[0], cmds, Multiplexer::env);
+		}
+		else
+		{
+			counter = time(NULL);
+			close(fds[1]);
+			checkCgiTimeout(clientIt);
+		}
+	}
+}
+
+void	Response::checkCgiTimeout(CLIENTIT& clientIt)
+{
+	std::cout << __FUNCTION__ << std::endl;
+
+	int	wstatus;
+	int	wpid;
+
+	wpid = waitpid(pid, &wstatus, WNOHANG);
+	if (wpid < 0)
+	{
+		kill(pid, SIGKILL);
+		wait(NULL);
+		close(fds[0]);
+		resetState();
+		status = STATUS_500;
+		setErrorResponse(clientIt);
+
+	}
+	else if (wpid > 0)
+	{
+		if (WIFEXITED(wstatus))
+		{
+			fd = fds[0];
+			handleFile(clientIt);
+		}
+	}
+	else if ((time(NULL) - counter) >= CGI_TIMEOUT)
+	{
+			kill(pid, SIGKILL);
+			wait(NULL);
+			close(fds[0]);
+			resetState();
+			status = STATUS_408;
+			setErrorResponse(clientIt);
+	}
+}
+
+void	Response::handleDelete(CLIENTIT& clientIt)
+{
+	int ecode;
+
+	if (remove_all(filePath.c_str(), ecode) < 0)
+	{
+		if (ecode == ENOENT)
+			status = STATUS_404;
+		else if (ecode == EACCES || ecode == ENOTEMPTY || ecode == EISDIR)
+			status = STATUS_403;
+		else if (ecode == EBUSY)
+			status = STATUS_409;
+		else
+			status = STATUS_500;
+		setErrorResponse(clientIt);
+	}
+	else
+	{
+		status = STATUS_204;
+		contentLength = contentType = "";
+		sendHeaders(clientIt);
+		send(clientIt->connect_socket, &special_response[0], special_response.length(), 0);
+		clientIt->response_all_sent = true;
+	}
+}
+
+int	setEcode(int &ecode)
+{
+	ecode = errno;
+	return -1;
+}
+
+int	remove_all(const char *path, int &ecode)
+{
+	struct stat			statbuf;
+	DIR 				*dir;
+	struct dirent		*entry;
+	std::string			new_path;
+
+	if (stat(path, &statbuf) < 0)
+		return (setEcode(ecode));
+	if (S_ISDIR(statbuf.st_mode))
+	{
+		if ((dir = opendir(path)) == NULL)
+			return (setEcode(ecode));
+		while ((entry = readdir(dir)) != NULL)
+		{
+			if (!strcmp(entry->d_name, "..") || !strcmp(entry->d_name, "."))
+				continue ;
+			new_path = path;
+			if (new_path[new_path.length() - 1] != '/')
+				new_path.append("/");
+			new_path.append(entry->d_name);
+			remove_all(new_path.c_str(), ecode);
+		}
+		closedir(dir);
+		if (remove(path) < 0)
+			return (setEcode(ecode));
+	}
+	else if (remove(path) < 0)
+		return (setEcode(ecode));
+	return 0;
 }

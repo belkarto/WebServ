@@ -52,8 +52,8 @@ void	Multiplexer::parseRequestLine(CLIENTIT& clientIt)
 	ss >> method >> request_target >> protocol_version >> blank;	// method uri protocol_version\r\n
 	if (method.empty() || request_target.empty() || protocol_version.empty() || !blank.empty())
 		throw RequestParsingException(STATUS_400);
-	clientIt->fields["request_target"] = request_target;
 	clientIt->setMethod(method);
+	clientIt->setUri(request_target);
 	clientIt->setProtocolVersion(protocol_version);
 	clientIt->headers = clientIt->headers.substr(pos + delim.length());
 	clientIt->request_line_received = true;
@@ -69,6 +69,7 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 	if (clientIt->fields["method"] == "POST" && clientIt->fields.find("Content-Length") == clientIt->fields.end() 
 		&& clientIt->fields.find("Transfer-Encoding") == clientIt->fields.end())
 		throw RequestParsingException(STATUS_400);
+	// clientIt->fields["Connection"] = "keep-alive";
 	clientIt->headers_all_recieved = true;
 	setServerByHost(clientIt);
 	if (clientIt->fields["method"] != "POST")	// POST has to read the client's request body

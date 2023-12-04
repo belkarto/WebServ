@@ -3,7 +3,6 @@
 Response::Response(void)
 {
 	status 			= "";   
-	connection 		= "keep-alive";
 	contentType 	= "text/html";
 	contentLength 	= "";
 	transferEncoding = "";
@@ -11,8 +10,11 @@ Response::Response(void)
 
 	filePath 		= "";
 	root 			= "";
+	cgiExecutable	= "";
 	index 			= NULL;
     autoindex 		= false;
+
+	cgi				= false;
 
 	code 			= 0;
 	special_response = "";
@@ -25,7 +27,6 @@ Response::Response(void)
 void	Response::resetState()
 {
 	status 			= "";   
-	connection 		= "keep-alive";
 	contentType 	= "text/html";
 	contentLength 	= "";
 	transferEncoding = "";
@@ -33,8 +34,11 @@ void	Response::resetState()
 
 	filePath 		= "";
 	root 			= "";
+	cgiExecutable	= "";
 	index 			= NULL;
     autoindex 		= false;
+	
+	cgi 			= false;
 
 	code 			= 0;
 	special_response = "";
@@ -42,6 +46,11 @@ void	Response::resetState()
 	directory		= NULL;
 	response_size	= 0;
 	readbytes 		= 0;
+}
+
+Response::~Response()
+{
+
 }
 
 void    Response::setGetResponse(CLIENTIT& clientIt)
@@ -54,11 +63,20 @@ void    Response::setGetResponse(CLIENTIT& clientIt)
 	clientIt->serverIt->findLocation(clientIt, uri);
 	if (clientIt->locatIt != clientIt->serverIt->location.end())
 	{
+		if (find(clientIt->locatIt->method.begin(), clientIt->locatIt->method.end(), "GET")
+			 == clientIt->locatIt->method.end())
+		{
+			status = STATUS_405;
+			return (setErrorResponse(clientIt));
+		}
 		index = &(clientIt->locatIt->index);		// common directives
 		autoindex = clientIt->locatIt->autoindex;	// to server and location
 		root = clientIt->locatIt->root;				//
 		if (!clientIt->locatIt->redirect.empty())
 			return (handleExternalRedirection(clientIt));
+		cgiExecutable = clientIt->serverIt->findCgi(clientIt, uri);
+		if (!cgiExecutable.empty())
+			cgi = true;
 	}
 	else
 	{
@@ -67,8 +85,6 @@ void    Response::setGetResponse(CLIENTIT& clientIt)
 		root = clientIt->serverIt->root;
 	}
 	filePath = root + uri;
-	std::cout << "uri: " << uri <<  std::endl;
-	std::cout << "filePath: " << filePath << std::endl;
 	parseFilePath(clientIt);
 }
 
@@ -76,7 +92,7 @@ void    Response::setGetResponse(CLIENTIT& clientIt)
 void    Response::setErrorResponse(CLIENTIT& clientIt)
 {
 	std::cout << __FUNCTION__ << std::endl;
-	std::cout << status << std::endl;
+
 	std::stringstream									ss;
 	std::map<std::vector<int>, std::string>::iterator	pageIt;
 
@@ -102,6 +118,32 @@ void    Response::setErrorResponse(CLIENTIT& clientIt)
 
 void Response::setDeleteResponse(CLIENTIT &clientIt)
 {
-    (void)clientIt;
-}
+	std::cout << __FUNCTION__ << std::endl;
 
+	std::string	uri;
+
+    uri = clientIt->fields["request_target"];
+	clientIt->serverIt->findLocation(clientIt, uri);
+	if (clientIt->locatIt != clientIt->serverIt->location.end())
+	{
+		if (find(clientIt->locatIt->method.begin(), clientIt->locatIt->method.end(), "DELETE")
+			 == clientIt->locatIt->method.end())
+		{
+			status = STATUS_405;
+			return (setErrorResponse(clientIt));
+		}
+		index = &(clientIt->locatIt->index);		// common directives
+		autoindex = clientIt->locatIt->autoindex;	// to server and location
+		root = clientIt->locatIt->root;				//
+		if (!clientIt->locatIt->redirect.empty())
+			return (handleExternalRedirection(clientIt));
+	}
+	else
+	{
+		index = &(clientIt->serverIt->index);
+		autoindex = clientIt->serverIt->autoindex;
+		root = clientIt->serverIt->root;
+	}
+	filePath = root + uri;
+	handleDelete(clientIt);
+}

@@ -1,6 +1,5 @@
 #include "Multiplexer.hpp"
 
-
 void	Response::sendHeaders(CLIENTIT& clientIt)
 {
     std::cout << __FUNCTION__ << std::endl;
@@ -10,15 +9,15 @@ void	Response::sendHeaders(CLIENTIT& clientIt)
 	clientIt->start_responding = true;
 	headers = "HTTP/1.1 ";
 	headers += status + CRLF;
-	headers += "Content-Type: " + contentType + CRLF;
+	if (!contentType.empty())
+		headers += "Content-Type: " + contentType + CRLF;
     if (!transferEncoding.empty())
         headers += "Transfer-Encoding: " + transferEncoding + CRLF;
-    else
-	{
+    else if (!contentLength.empty())
 	    headers += "Content-Length: " + contentLength + CRLF;
-	}
 	if (!location.empty())
 		headers += "Location: " + location + CRLF;
+	connection =  clientIt->fields["Connection"];
 	headers += "Connection: " + connection + CRLF;
 	headers += CRLF;
 	send(clientIt->connect_socket, &headers[0], headers.length(), 0);
@@ -32,19 +31,61 @@ void	Response::sendResponseBuffer(CLIENTIT& clientIt)
 	std::streamsize		rd;
 
     if (!transferEncoding.empty())
-		sendAutoIndexBuffer(clientIt);
+	{
+		if (!cgi)
+			return (sendAutoIndexBuffer(clientIt));
+		return (sendPipeBuffer(clientIt));
+	}
     else
     {
-        if (readbytes < response_size)
+		if (readbytes < response_size)
         {
-            fileContent->read(buffer, CLIENT_RESPONSE_BUFFER_SIZE);
-            rd = fileContent->gcount();
+
+			fileContent->read(buffer, CLIENT_RESPONSE_BUFFER_SIZE);
+			rd = fileContent->gcount();
             readbytes += rd;
             send(clientIt->connect_socket, &buffer, rd, 0);
         }
         else
+		{
+			fileContent->close();
+			delete fileContent;
             clientIt->response_all_sent = true;
+		}
     }
+}
+
+void	Response::sendPipeBuffer(CLIENTIT& clientIt)
+{
+	std::cout << __FUNCTION__ << std::endl;
+
+	char				buffer[CLIENT_RESPONSE_BUFFER_SIZE];
+	std::streamsize		rd;
+	std::string			chunk_size;
+	std::string			chunk_data;
+	std::stringstream	ss;
+
+	if ((rd = read(fd, buffer, CLIENT_RESPONSE_BUFFER_SIZE)) > 0)
+	{
+		chunk_data = "";
+		chunk_data.append(buffer, rd);
+		ss << std::hex << chunk_data.length();
+		ss >> chunk_size;
+		chunk_data += CRLF;
+		chunk_size += CRLF;
+		send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
+		send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
+	}
+	else
+	{
+		chunk_data = CRLF;
+		chunk_size = "0" + chunk_data;
+		send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
+		send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
+		std::cout << "terminated" << std::endl;
+		close(fd);
+		clientIt->response_all_sent = true;
+	}
 }
 
 void		Response::sendAutoIndexBuffer(CLIENTIT& clientIt)
@@ -73,18 +114,17 @@ void		Response::sendAutoIndexBuffer(CLIENTIT& clientIt)
 		chunk_data.append("</pre>\n<hr>\n</body>\n</html>");
     ss << std::hex << chunk_data.length();
 	ss >> chunk_size;
+	chunk_data += CRLF;
+	chunk_size += CRLF;
 	send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
-	send(clientIt->connect_socket, CRLF, 2, 0);
 	send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
-	send(clientIt->connect_socket, CRLF, 2, 0);
 	if (!entry)
 	{
-		chunk_data = "";
-		chunk_size = "0";
+		chunk_data = CRLF;
+		chunk_size = "0" + chunk_data;
 		send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
-		send(clientIt->connect_socket, CRLF, 2, 0);
 		send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
-		send(clientIt->connect_socket, CRLF, 2, 0);
+		closedir(directory);
 		clientIt->response_all_sent = true;
 	}
 }

@@ -16,11 +16,18 @@ class Response
 
 	std::string	    	filePath;
 	std::string			root;
+	std::string			cgiExecutable;
 	STRINGVECT	    	*index;
     bool		    	autoindex;
 
+	bool				cgi;
+	time_t				counter;
+	int 				fds[2];
+	pid_t				pid;
+
 	int					code;
-	std::string			special_response; 
+	std::string			special_response;
+	int					fd;
     std::ifstream   	*fileContent;
     std::ofstream   	*outFile;
 	DIR 				*directory;
@@ -29,6 +36,7 @@ class Response
 
 
 	Response(void);
+	~Response();
 	void	resetState();
 
     /*		error handling				*/
@@ -41,7 +49,6 @@ class Response
 	void	setDeleteResponse(CLIENTIT& clientIt);
 
     /*  common methods  */
-    std::string getErrorPage(int errorCode);
     void		handleDefaultErrorPage(CLIENTIT &clientIt);
     void		parseFilePath(CLIENTIT& clientIt);
     void		handleExternalRedirection(CLIENTIT& clientIt);
@@ -53,5 +60,11 @@ class Response
 	void		sendResponseBuffer(CLIENTIT& clientIt);
 	void		sendAutoIndexBuffer(CLIENTIT& clientIt);
     void		parsePostFilePath(CLIENTIT& clientIt);
+	void		sendPipeBuffer(CLIENTIT& clientIt);
+	void		handleDelete(CLIENTIT& clientIt);
+	void		handleCgi(CLIENTIT& clientIt);
+	void		checkCgiTimeout(CLIENTIT& clientIt);
+    std::string getErrorPage(int errorCode);
 };
+int	remove_all(const char *path, int &ecode);
 #endif

@@ -4,7 +4,7 @@ Server::Server()
 {
     root 					= DEFAULT_ROOT;
     client_max_body_size	= DEFAULT_CLIENT_MAX_BODY_SIZE;
-     autoindex 				= DEFAULT_AUTOINDEX;
+    autoindex 				= DEFAULT_AUTOINDEX;
     addr_resolver(&bind_addr, DEFAULT_HOST, DEFAULT_PORT);
     // index.push_back(DEFAULT_INDEX);
 }
@@ -17,6 +17,10 @@ void	Server::emplaceBackLocation()
 	location.root 		= this->root;
     location.index 		= this->index;
     location.autoindex 	= this->autoindex;
+	/* allow all methods by default*/
+	location.method.push_back("GET");
+	location.method.push_back("POST");
+	location.method.push_back("DELETE");
 	this->location.push_back(location);
 }
 
@@ -55,11 +59,9 @@ void    Server::initServer()
 void	Server::acceptConnection(Client &client)
 {
 	if ((client.connect_socket = accept(listen_socket, NULL, NULL)) < 0)
-	{
-		perror("accept()");
-		exit(EXIT_FAILURE);
-	}
-	client.listen_socket = this->listen_socket;
+		client.connect_socket = -1;
+	else
+		client.listen_socket = this->listen_socket;
 }
 
 std::map<std::vector<int>, std::string>::iterator	Server::findErrorPage(int code)
@@ -70,6 +72,23 @@ std::map<std::vector<int>, std::string>::iterator	Server::findErrorPage(int code
 	ite = this->error_page.end();
 	for (; it != ite && find(it->first.begin(), it->first.end(), code) == it->first.end(); it++ );
 	return it;
+}
+
+std::string	Server::findCgi(CLIENTIT &clientIt, std::string &uri)
+{
+	size_t											pos;
+	std::string										extension;
+	std::map<std::string, std::string>::iterator	cgiIt;
+
+	if ((pos = uri.find_last_of('.')) != std::string::npos)
+	{
+		extension = uri.substr(pos);
+		cgiIt = clientIt->locatIt->cgi.find(extension);
+		if (cgiIt != clientIt->locatIt->cgi.end())
+			return cgiIt->second;
+		return	"";
+	}
+	return "";
 }
 
 void	Server::findLocation(CLIENTIT &clientIt, std::string &uri)
@@ -83,3 +102,4 @@ void	Server::findLocation(CLIENTIT &clientIt, std::string &uri)
 			|| it->uri.length() > clientIt->locatIt->uri.length()))
 				clientIt->locatIt = it;
 }
+

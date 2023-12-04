@@ -88,6 +88,7 @@ ConfigParser::ConfigParser(const char *config_path, std::vector<Server> &servers
 	}
 	if (_servers.empty())
 		throw ConfigFileParsingException("no configuration provided in config file");
+	config.close();
 }
 
 
