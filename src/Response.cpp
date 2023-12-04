@@ -20,6 +20,7 @@ Response::Response(void)
 	directory		= NULL;
 	response_size	= 0;
 	readbytes 		= 0;
+    filePathParsed  = false;
 }
 
 void	Response::resetState()
@@ -42,6 +43,7 @@ void	Response::resetState()
 	directory		= NULL;
 	response_size	= 0;
 	readbytes 		= 0;
+    filePathParsed  = false;
 }
 
 void    Response::setGetResponse(CLIENTIT& clientIt)
@@ -67,8 +69,6 @@ void    Response::setGetResponse(CLIENTIT& clientIt)
 		root = clientIt->serverIt->root;
 	}
 	filePath = root + uri;
-	std::cout << "uri: " << uri <<  std::endl;
-	std::cout << "filePath: " << filePath << std::endl;
 	parseFilePath(clientIt);
 }
 

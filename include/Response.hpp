@@ -26,6 +26,7 @@ class Response
 	DIR 				*directory;
 	std::streamsize		response_size;
 	std::streamsize		readbytes;
+    bool                filePathParsed;
 
 
 	Response(void);
@@ -53,5 +54,6 @@ class Response
 	void		sendResponseBuffer(CLIENTIT& clientIt);
 	void		sendAutoIndexBuffer(CLIENTIT& clientIt);
     void		parsePostFilePath(CLIENTIT& clientIt);
+    void        postParseFilePath(CLIENTIT &clientIt);
 };
 #endif
