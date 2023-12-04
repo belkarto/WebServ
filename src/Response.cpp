@@ -57,7 +57,6 @@ Response::~Response()
 
 void    Response::setGetResponse(CLIENTIT& clientIt)
 {
-	std::cout << __FUNCTION__ << std::endl;
 
 	std::string	uri;
 
@@ -93,7 +92,6 @@ void    Response::setGetResponse(CLIENTIT& clientIt)
 
 void    Response::setErrorResponse(CLIENTIT& clientIt)
 {
-	std::cout << __FUNCTION__ << std::endl;
 
 	std::stringstream									ss;
 	std::map<std::vector<int>, std::string>::iterator	pageIt;
@@ -120,7 +118,6 @@ void    Response::setErrorResponse(CLIENTIT& clientIt)
 
 void Response::setDeleteResponse(CLIENTIT &clientIt)
 {
-	std::cout << __FUNCTION__ << std::endl;
 
 	std::string	uri;
 

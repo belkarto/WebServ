@@ -33,7 +33,6 @@ static void checkUnprocessedData(char *buffer, std::streamsize &size, std::ostre
         return;
     startPos += 4;
     leftDataLen = CLIENT_HEADER_BUFFER_SIZE - (startPos - buffer);
-    std::cout << leftDataLen << std::endl;
     outFile->write(startPos, leftDataLen);
     size -= leftDataLen;
     delete[] buffer;

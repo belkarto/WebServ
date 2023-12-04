@@ -97,8 +97,8 @@ void Multiplexer::dropClient(CLIENTIT &clientIt)
 {
 	close(clientIt->connect_socket);
 	clients.erase(clientIt);
-	Multiplexer::keepalive_connections--;
-	std::cout << "client dropped" << std::endl;
+	if (Multiplexer::keepalive_connections > 0)
+		Multiplexer::keepalive_connections--;
 }
 
 
@@ -200,11 +200,11 @@ CLIENTIT Multiplexer::findConnectSocket(int socket, CLIENTVECT &sockets)
 void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 {
 	ssize_t 	r;
-	
 	try
 	{
 		clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
 		r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
+		//TODO:
 		if (r < 1)
 			return (dropClient(clientIt));
 		else
@@ -231,8 +231,7 @@ bool	checkClientTimeOut(Client client)
 	return ((!client.headers_all_recieved 
 		&& time(NULL) - client.header_timeout >= CLIENT_HEADER_timeout) ||
 			(client.request_all_processed && !client.start_responding 
-		&& time(NULL) - client.last_activity >= KEEPALIVE_TIMEOUT));
-	// keepalive timout should be checked when the server isnt processing the request or the response
+		&& (Multiplexer::keepalive_connections == KEEPALIVE_CONNECTIONS || time(NULL) - client.last_activity >= KEEPALIVE_TIMEOUT)));
 }
 
 void Multiplexer::dropInactiveClients()
@@ -242,10 +241,11 @@ void Multiplexer::dropInactiveClients()
 	newEnd = std::remove_if(clients.begin(), clients.end(), checkClientTimeOut);
 	end = clients.end();
 	temp = newEnd;
-	for (; newEnd!= end; newEnd++)
+	for (; newEnd != end; newEnd++)
 	{
 		close(newEnd->connect_socket);
-		Multiplexer::keepalive_connections--;
+		if (Multiplexer::keepalive_connections > 0)
+			Multiplexer::keepalive_connections--;
 	}
 	clients.erase(temp, end);
 }

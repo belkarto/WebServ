@@ -6,7 +6,6 @@ void	Server::setupServer(void)
 	int					status;
 	int					reuse = 0;
 
-	// std::cout << "Configuring socket..." << std::endl;
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
@@ -15,7 +14,6 @@ void	Server::setupServer(void)
 		perror("getaddrinfo()");
 		exit(EXIT_FAILURE);
 	}
-	// std::cout << "creating socket..." << std::endl;
 	if ((sockfd = socket(bind_addr->ai_family, bind_addr->ai_socktype, bind_addr->ai_protocol)) < 0)
 	{
 		perror("socket()");
@@ -27,19 +25,16 @@ void	Server::setupServer(void)
 		perror("setsockopt()");
 		exit(EXIT_FAILURE);
 	}
-	// std::cout << "binding socket..." << std::endl;
 	if (bind(sockfd, bind_addr->ai_addr, bind_addr->ai_addrlen))
 	{
 		perror("bind()");
 		exit(EXIT_FAILURE);
 	}
-	// std::cout << "listening socket..." << std::endl;
 	if (listen(sockfd, 5) < 0)
 	{
 		perror("listen()");
 		exit(EXIT_FAILURE);
 	}	
-  std::cout << "Set socket " << node << ":" << service << std::endl;
 }
 
 Server::Server(const char* node, const char* service)

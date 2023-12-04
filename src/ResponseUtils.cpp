@@ -3,7 +3,6 @@
 
 void Response::parseFilePath(CLIENTIT &clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
 
     if (access(filePath.c_str(), F_OK)) // file not found
     {
@@ -36,7 +35,6 @@ void Response::parseFilePath(CLIENTIT &clientIt)
 
 void Response::handleDirectory(CLIENTIT &clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
 
     if (!handleIndexPages(clientIt))
     {
@@ -53,7 +51,6 @@ void Response::handleDirectory(CLIENTIT &clientIt)
 
 bool Response::handleIndexPages(CLIENTIT &clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
 
     std::vector<std::string>::iterator it;
     std::string                        fileTmp;
@@ -89,7 +86,6 @@ bool Response::handleIndexPages(CLIENTIT &clientIt)
 
 void Response::handleFile(CLIENTIT &clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
 
     status = STATUS_200;
     if (!cgi)
@@ -113,7 +109,6 @@ void Response::handleFile(CLIENTIT &clientIt)
 
 void Response::handleExternalRedirection(CLIENTIT &clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
 
     status = STATUS_302;
     if (location.empty()) // if location snt empty => location = errorPageURI
@@ -131,7 +126,6 @@ void Response::handleExternalRedirection(CLIENTIT &clientIt)
 
 bool Response::handleAutoIndex(CLIENTIT &clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
 
     if (!autoindex)
         return false;
@@ -160,7 +154,6 @@ void Response::handleDefaultErrorPage(CLIENTIT &clientIt)
 
 void Response::parsePostFilePath(CLIENTIT &clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
 
     if (access(filePath.c_str(), F_OK)) // file not found
     {
@@ -190,7 +183,6 @@ void Response::parsePostFilePath(CLIENTIT &clientIt)
 
 void Response::handleCgi(CLIENTIT &clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
 
     char *cmds[3];
 
@@ -230,7 +222,6 @@ void Response::handleCgi(CLIENTIT &clientIt)
 
 void Response::checkCgiTimeout(CLIENTIT &clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
 
     int wstatus;
     int wpid;

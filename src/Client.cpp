@@ -49,19 +49,11 @@ void Client::setContentType(std::string &content_type)
     while (it != ite)
     {
         if (it->second == content_type)
-        {
-            std::cout << it->second << " ===== " << content_type << std::endl;
             break;
-        }
-        std::cout << it->second << " ===== " << content_type << std::endl;
         it++;
     }
     if (it == ite)
-    {
-        std::cout << it->second << "--------> throw 400" << std::endl;
-        // throw RequestParsingException(STATUS_400);
         fields.insert(std::make_pair("Content-Type", "application/octet-stream"));
-    }
     else
         fields.insert(std::make_pair("Content-Type", content_type));
     /*
@@ -118,17 +110,7 @@ void	Client::setConnection(std::string &connection)
 {
 	std::transform(connection.begin(), connection.end(), connection.begin(), tolower);
 	if (connection == "keep-alive" || connection == "close")
-	{
-		if (connection == "keep-alive")
-		{
-			if (Multiplexer::keepalive_connections >= KEEPALIVE_CONNECTIONS)
-				connection = "close";
-			else
-				Multiplexer::keepalive_connections++;
-		}
 		fields.insert(std::make_pair("Connection", connection));
-	}
-
 	else
 		throw RequestParsingException(STATUS_400);
 }

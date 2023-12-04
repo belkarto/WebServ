@@ -2,7 +2,7 @@
 
 void	Response::sendHeaders(CLIENTIT& clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
+    
 
 	std::string	headers;
 
@@ -25,7 +25,7 @@ void	Response::sendHeaders(CLIENTIT& clientIt)
 
 void	Response::sendResponseBuffer(CLIENTIT& clientIt)
 {
-    std::cout << __FUNCTION__ << std::endl;
+    
 
 	char				buffer[CLIENT_RESPONSE_BUFFER_SIZE];
 	std::streamsize		rd;
@@ -57,7 +57,7 @@ void	Response::sendResponseBuffer(CLIENTIT& clientIt)
 
 void	Response::sendPipeBuffer(CLIENTIT& clientIt)
 {
-	std::cout << __FUNCTION__ << std::endl;
+	
 
 	char				buffer[CLIENT_RESPONSE_BUFFER_SIZE];
 	std::streamsize		rd;
@@ -82,7 +82,6 @@ void	Response::sendPipeBuffer(CLIENTIT& clientIt)
 		chunk_size = "0" + chunk_data;
 		send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
 		send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
-		std::cout << "terminated" << std::endl;
 		close(fd);
 		clientIt->response_all_sent = true;
 	}
