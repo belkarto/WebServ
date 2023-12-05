@@ -17,7 +17,12 @@ void Response::setPostResponse(CLIENTIT &clientIt)
             if (response_size <= 0)
             {
                 clientIt->response.outFile->close();
-                // send response 
+                this->resetState();
+                status = STATUS_201;
+                this->setErrorResponse(clientIt);
+                std::cout << "served" << std::endl;
+                return;
+                // send response
             }
         }
     }
