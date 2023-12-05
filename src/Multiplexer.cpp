@@ -97,8 +97,8 @@ void Multiplexer::dropClient(CLIENTIT &clientIt)
 {
 	close(clientIt->connect_socket);
 	clients.erase(clientIt);
-	if (Multiplexer::keepalive_connections > 0)
-		Multiplexer::keepalive_connections--;
+	// if (Multiplexer::keepalive_connections > 0)
+	// 	Multiplexer::keepalive_connections--;
 }
 
 
@@ -125,6 +125,7 @@ void Multiplexer::connectionListener()
 			{
 				if ((events[i].events & EPOLLIN))
 				{
+					clientIt->active = true;
 					if (!clientIt->request_line_received)
 						clientIt->header_timeout = time(NULL);
 					if (clientIt->headers_all_recieved)
@@ -228,10 +229,12 @@ void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 
 bool	checkClientTimeOut(Client client)
 {
-	return ((!client.headers_all_recieved 
-		&& time(NULL) - client.header_timeout >= CLIENT_HEADER_timeout) ||
-			(client.request_all_processed && !client.start_responding 
-		&& (Multiplexer::keepalive_connections == KEEPALIVE_CONNECTIONS || time(NULL) - client.last_activity >= KEEPALIVE_TIMEOUT)));
+	// return ((!client.headers_all_recieved 
+	// 	&& time(NULL) - client.header_timeout >= CLIENT_HEADER_timeout) ||
+	// 		(client.request_all_processed && !client.start_responding 
+	// 	&& (Multiplexer::keepalive_connections == KEEPALIVE_CONNECTIONS || time(NULL) - client.last_activity >= KEEPALIVE_TIMEOUT)));
+
+	return (!client.active && time(NULL) - client.last_activity >= KEEPALIVE_TIMEOUT);
 }
 
 void Multiplexer::dropInactiveClients()
@@ -244,8 +247,9 @@ void Multiplexer::dropInactiveClients()
 	for (; newEnd != end; newEnd++)
 	{
 		close(newEnd->connect_socket);
-		if (Multiplexer::keepalive_connections > 0)
-			Multiplexer::keepalive_connections--;
+		std::cout << "dropped" << std::endl;
+		// if (Multiplexer::keepalive_connections > 0)
+		// 	Multiplexer::keepalive_connections--;
 	}
 	clients.erase(temp, end);
 }

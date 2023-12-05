@@ -71,16 +71,16 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 		throw RequestParsingException(STATUS_400);
 	//todo:
 	// clientIt->fields["Connection"] = "keep-alive";
-	if (clientIt->fields["Connection"] == "keep-alive")
-	{
-		if (Multiplexer::keepalive_connections < KEEPALIVE_CONNECTIONS)
-		{
-			if (clientIt->keepalive_requests == 0)
-				Multiplexer::keepalive_connections++;
-		}
-		// else
-		// 	clientIt->fields["Connection"]  = "close";
-	}
+	// if (clientIt->fields["Connection"] == "keep-alive")
+	// {
+	// 	if (Multiplexer::keepalive_connections < KEEPALIVE_CONNECTIONS)
+	// 	{
+	// 		if (clientIt->keepalive_requests == 0)
+	// 			Multiplexer::keepalive_connections++;
+	// 	}
+	// 	else
+	// 		clientIt->fields["Connection"]  = "close";
+	// }
 	clientIt->headers_all_recieved = true;
 	setServerByHost(clientIt);
 	if (clientIt->fields["method"] != "POST")	// POST has to read the client's request body
