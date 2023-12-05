@@ -6,7 +6,7 @@ std::map<std::string, std::string> Multiplexer::mime_types;
 
 std::map<int, std::string> Multiplexer::defErrorPages;
 
-int Multiplexer::keepalive_connections = 0;
+int Multiplexer::connections = 0;
 
 const char *Multiplexer::defErrorPagesStrings[NUM_DEF_ERROR] = {
     STATUS_100, STATUS_101, STATUS_200, STATUS_201, STATUS_202, STATUS_203,
@@ -85,9 +85,11 @@ void Multiplexer::registerServers()
 void Multiplexer::registerClient(SERVIT &serverIt)
 {
 	Client client;
+
 	serverIt->acceptConnection(client);
 	if (client.connect_socket < 0)
 		return ;
+	Multiplexer::connections += 1;
 	client.serverIt = serverIt;
 	epoll_add2(epfd, client.connect_socket);
 	clients.push_back(client);
@@ -97,8 +99,8 @@ void Multiplexer::dropClient(CLIENTIT &clientIt)
 {
 	close(clientIt->connect_socket);
 	clients.erase(clientIt);
-	// if (Multiplexer::keepalive_connections > 0)
-	// 	Multiplexer::keepalive_connections--;
+	if (Multiplexer::connections > 0)
+		Multiplexer::connections--;
 }
 
 
@@ -205,7 +207,6 @@ void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 	{
 		clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
 		r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
-		//TODO:
 		if (r < 1)
 			return (dropClient(clientIt));
 		else
@@ -229,12 +230,7 @@ void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 
 bool	checkClientTimeOut(Client client)
 {
-	// return ((!client.headers_all_recieved 
-	// 	&& time(NULL) - client.header_timeout >= CLIENT_HEADER_timeout) ||
-	// 		(client.request_all_processed && !client.start_responding 
-	// 	&& (Multiplexer::keepalive_connections == KEEPALIVE_CONNECTIONS || time(NULL) - client.last_activity >= KEEPALIVE_TIMEOUT)));
-
-	return (!client.active && time(NULL) - client.last_activity >= KEEPALIVE_TIMEOUT);
+	return (!client.active && (Multiplexer::connections >= CONNECTIONS || (time(NULL) - client.last_activity >= KEEPALIVE_TIMEOUT)));
 }
 
 void Multiplexer::dropInactiveClients()
@@ -246,10 +242,10 @@ void Multiplexer::dropInactiveClients()
 	temp = newEnd;
 	for (; newEnd != end; newEnd++)
 	{
+		if (Multiplexer::connections > 0)
+			Multiplexer::connections--;
 		close(newEnd->connect_socket);
-		std::cout << "dropped" << std::endl;
-		// if (Multiplexer::keepalive_connections > 0)
-		// 	Multiplexer::keepalive_connections--;
+		perror("close():");
 	}
 	clients.erase(temp, end);
 }

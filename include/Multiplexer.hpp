@@ -41,15 +41,8 @@ class Multiplexer
     static const char                        *defErrorPagesStrings[NUM_DEF_ERROR];
     static std::map<std::string, std::string> mime_types;
     static std::map<int, std::string>         defErrorPages;
-    static int                      keepalive_connections;
+    static int                                connections;
 
-    //------------ respons functions -------------------------------//
-    void        sendResponseToClient(CLIENTIT &);
-    void        setErrorTemplate(CLIENTIT &, const std::string);
-    void        sendingRespons(CLIENTIT &);
-    SERVIT      getMatchingServer(std::string &, int);
-    void        checkFilePath(CLIENTIT &);
-    std::string getFileType(std::string);
-    void        setResponseTemplate(CLIENTIT &);
 };
 #endif
+ 
