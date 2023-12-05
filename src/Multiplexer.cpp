@@ -137,7 +137,6 @@ void Multiplexer::connectionListener()
 						getClientRequest(clientIt);
 				}
 				if ((events[i].events & EPOLLOUT))
-				
 					handleResponse(clientIt);
 			}
 		}

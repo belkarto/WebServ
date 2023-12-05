@@ -76,7 +76,10 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 		if (Multiplexer::keepalive_connections < KEEPALIVE_CONNECTIONS)
 		{
 			if (clientIt->keepalive_requests == 0)
+            {
 				Multiplexer::keepalive_connections++;
+                std::cout << "keep alive : " << Multiplexer::keepalive_connections << std::endl;
+            }
 		}
 		// else
 		// 	clientIt->fields["Connection"]  = "close";

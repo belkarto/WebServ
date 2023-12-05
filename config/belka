@@ -1,0 +1,53 @@
+server {
+    listen 10.32.120.34:2001;
+
+    server_name server1;
+
+	client_max_body_size 5M;
+    root /home/belkarto/.my_projects/WebServ/www;
+
+    autoindex on;
+
+    location /
+    {
+        index index.html;
+    }
+
+    location /upload
+    {
+        root /home/belkarto/Postman;
+    }
+}
+
+server {
+    listen 127.0.0.1:2001;
+
+    server_name server1;
+
+	client_max_body_size 5M;
+    root /home/belkarto/.my_projects/WebServ/www;
+
+    autoindex on;
+
+    location /
+    {
+        index index.html;
+    }
+
+    location /upload
+    {
+        root /home/belkarto/Postman;
+    }
+}
+
+server {
+ 
+    listen 127.0.0.1:2001;
+
+    server_name redir;
+
+    location /redir 
+    {
+        redirect www.google.com;
+    }
+}
