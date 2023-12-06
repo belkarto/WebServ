@@ -15,6 +15,7 @@ class Response
 	std::string	    	location;
 
 	std::string	    	filePath;
+	std::string	    	fileLocation;
 	std::string			root;
 	std::string			cgiExecutable;
 	STRINGVECT	    	*index;

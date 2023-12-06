@@ -1,4 +1,5 @@
 #include "../include/Multiplexer.hpp"
+#include <algorithm>
 
 void Response::setPostResponse(CLIENTIT &clientIt)
 {
@@ -6,24 +7,23 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         this->postParseFilePath(clientIt);
     else
     {
+        // uploading post body
         char buffer[BUFFER_SIZE];
         int  rc = 0;
 
-        while ((rc = recv(clientIt->connect_socket, buffer, BUFFER_SIZE, 0)))
+        rc = recv(clientIt->connect_socket, buffer, BUFFER_SIZE, 0);
+        clientIt->response.outFile->write(buffer, rc);
+        clientIt->response.outFile->flush();
+        response_size -= rc;
+        if (response_size <= 0)
         {
-            clientIt->response.outFile->write(buffer, rc);
-            clientIt->response.outFile->flush();
-            response_size -= rc;
-            if (response_size <= 0)
-            {
-                clientIt->response.outFile->close();
-                this->resetState();
-                status = STATUS_201;
-                this->setErrorResponse(clientIt);
-                std::cout << "served" << std::endl;
-                return;
-                // send response
-            }
+            clientIt->response.outFile->close();
+            this->resetState();
+            status = STATUS_201;
+            this->setErrorResponse(clientIt);
+            std::cout << "served" << std::endl;
+            return;
+            // send response
         }
     }
 }
@@ -47,7 +47,8 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
 {
     std::string       uri;
     std::stringstream ss;
-
+    std::string       fileName;
+    STRINGVECTIT      it;
     uri = clientIt->fields[URI];
     clientIt->serverIt->findLocation(clientIt, uri);
     if (clientIt->locatIt != clientIt->serverIt->location.end())
@@ -56,16 +57,26 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         root = clientIt->locatIt->root;
         if (!clientIt->locatIt->redirect.empty())
             return (handleExternalRedirection(clientIt));
+        if (clientIt->locatIt->method.end() ==
+            std::find(clientIt->locatIt->method.begin(), clientIt->locatIt->method.end(), "POST"))
+        {
+            this->resetState();
+            status = STATUS_405;
+            this->setErrorResponse(clientIt); // set error to 405
+            return;
+        }
     }
     else
     {
         index = &(clientIt->serverIt->index);
         root = clientIt->serverIt->root;
     }
-    filePath = root + uri;
-
+    filePath = root + uri + clientIt->locatIt->upload_store;
+    std::cout << filePath << std::endl;
     parsePostFilePath(clientIt);
-    filePath.append("/" + clientIt->generateFileName(clientIt->fields["Content-Type"]));
+    fileName = clientIt->generateFileName(clientIt->fields["Content-Type"]);
+    clientIt->response.fileLocation = uri + fileName;
+    filePath.append(fileName);
     clientIt->response.outFile = new std::ofstream(filePath.c_str());
     if (!clientIt->response.outFile)
     {

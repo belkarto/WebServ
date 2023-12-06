@@ -19,6 +19,10 @@ void	Response::sendHeaders(CLIENTIT& clientIt)
 		headers += "Location: " + location + CRLF;
 	connection =  clientIt->fields["Connection"];
 	headers += "Connection: " + connection + CRLF;
+    if (status == STATUS_201 && !fileLocation.empty())
+    {
+        headers += "Content-Location: " + fileLocation + CRLF;
+    }
 	headers += CRLF;
 	send(clientIt->connect_socket, &headers[0], headers.length(), 0);
 }

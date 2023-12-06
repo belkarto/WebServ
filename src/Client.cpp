@@ -197,7 +197,7 @@ std::string Client::generateFileName(std::string &contentType)
     ss << std::setw(2) << localTime->tm_min;
     ss << std::setw(2) << localTime->tm_sec;
 
-    return (ss.str() + getFileExtension(contentType));
+    return ("/" + ss.str() + getFileExtension(contentType));
 }
 void	Client::setUri(std::string &uri)
 {
