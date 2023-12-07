@@ -78,6 +78,7 @@
 
 /*                  Multiplexer                                  */
 #define Running                     true
+#define EPOLL_TIMEOUT               200
 #define HEADERS_FIELDS_SIZE         5
 #define MAX_EVENTS                  1024
 #define BUFFER_SIZE                 1024
@@ -86,7 +87,7 @@
 #define CLIENT_HEADER_timeout       20
 #define KEEPALIVE_TIMEOUT           10
 #define BACKLOG                     100
-#define CONNECTIONS                 500
+#define CONNECTIONS                 400
 #define MIMETYPE_PATH               "./config/mimes.txt"
 
 /*              Response                */

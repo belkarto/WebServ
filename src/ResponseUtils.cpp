@@ -1,5 +1,4 @@
 #include "../include/Multiplexer.hpp"
-#include <string>
 
 void Response::parseFilePath(CLIENTIT &clientIt)
 {
@@ -91,12 +90,13 @@ void Response::handleFile(CLIENTIT &clientIt)
     if (!cgi)
     {
         fileContent = new std::ifstream(filePath.c_str());
+        std::cout << (fileContent == NULL) << std::endl;
         if (!fileContent)
         {
             if (status == STATUS_500)
-                handleDefaultErrorPage(clientIt);
+                return (handleDefaultErrorPage(clientIt));
             status = STATUS_500;
-            setErrorResponse(clientIt);
+            return (setErrorResponse(clientIt));
         }
         response_size = getFileSize(fileContent);
         contentLength = toString(response_size);

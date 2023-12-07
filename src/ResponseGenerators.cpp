@@ -2,8 +2,6 @@
 
 void	Response::sendHeaders(CLIENTIT& clientIt)
 {
-    
-
 	std::string	headers;
 
 	clientIt->start_responding = true;
@@ -25,8 +23,6 @@ void	Response::sendHeaders(CLIENTIT& clientIt)
 
 void	Response::sendResponseBuffer(CLIENTIT& clientIt)
 {
-    
-
 	char				buffer[CLIENT_RESPONSE_BUFFER_SIZE];
 	std::streamsize		rd;
 

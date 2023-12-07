@@ -113,11 +113,8 @@ void Multiplexer::connectionListener()
 	while (Running)
 	{
 		dropInactiveClients();
-		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 0)
-		{
-			perror("epoll_wait()");
-			exit(EXIT_FAILURE);
-		}
+		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, KEEPALIVE_TIMEOUT * 1000)) < 0)
+			continue;
 		i = -1;
 		while (++i < num_events)
 		{
@@ -140,7 +137,6 @@ void Multiplexer::connectionListener()
 						getClientRequest(clientIt);
 				}
 				if ((events[i].events & EPOLLOUT))
-				
 					handleResponse(clientIt);
 			}
 		}
@@ -203,6 +199,7 @@ CLIENTIT Multiplexer::findConnectSocket(int socket, CLIENTVECT &sockets)
 void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 {
 	ssize_t 	r;
+
 	try
 	{
 		clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
@@ -230,24 +227,20 @@ void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 
 bool	checkClientTimeOut(Client client)
 {
-	return (!client.active && (Multiplexer::connections >= CONNECTIONS || (time(NULL) - client.last_activity >= KEEPALIVE_TIMEOUT)));
+	if (!client.active && time(NULL) - client.last_activity >= KEEPALIVE_TIMEOUT)
+	{
+		close(client.connect_socket);
+		return true;
+	}
+	return false;
 }
 
 void Multiplexer::dropInactiveClients()
 {
-	CLIENTIT newEnd, end, temp;
+	CLIENTIT	end;
 
-	newEnd = std::remove_if(clients.begin(), clients.end(), checkClientTimeOut);
-	end = clients.end();
-	temp = newEnd;
-	for (; newEnd != end; newEnd++)
-	{
-		if (Multiplexer::connections > 0)
-			Multiplexer::connections--;
-		close(newEnd->connect_socket);
-		perror("close():");
-	}
-	clients.erase(temp, end);
+	end = std::remove_if(clients.begin(), clients.end(), checkClientTimeOut);
+	clients.erase(end, clients.end());
 }
 
 void Multiplexer::loadMimeTypes()
