@@ -78,7 +78,6 @@ template <typename T>
 std::string	toString(T number) 
 {
 	std::stringstream	convert;
-
 	convert << number;
 	return convert.str();
 }

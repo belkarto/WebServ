@@ -90,13 +90,13 @@ void Response::handleFile(CLIENTIT &clientIt)
     if (!cgi)
     {
         fileContent = new std::ifstream(filePath.c_str());
-        std::cout << (fileContent == NULL) << std::endl;
-        if (!fileContent)
+        if (!fileContent || !fileContent->is_open())
         {
-            if (status == STATUS_500)
+            // if (status == STATUS_500)
+                code = 500;
+                status = STATUS_500;
                 return (handleDefaultErrorPage(clientIt));
-            status = STATUS_500;
-            return (setErrorResponse(clientIt));
+            // return (setErrorResponse(clientIt));
         }
         response_size = getFileSize(fileContent);
         contentLength = toString(response_size);
