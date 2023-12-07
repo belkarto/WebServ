@@ -1,5 +1,4 @@
 #include "../include/Multiplexer.hpp"
-#include <string>
 
 void Response::parseFilePath(CLIENTIT &clientIt)
 {
@@ -150,35 +149,6 @@ void Response::handleDefaultErrorPage(CLIENTIT &clientIt)
     sendHeaders(clientIt);
     send(clientIt->connect_socket, &special_response[0], special_response.length(), 0);
     clientIt->response_all_sent = true;
-}
-
-void Response::parsePostFilePath(CLIENTIT &clientIt)
-{
-
-    if (access(filePath.c_str(), F_OK)) // file not found
-    {
-        if (status == STATUS_404)
-            return (handleDefaultErrorPage(clientIt));
-        this->resetState();
-        status = STATUS_404;
-        this->setErrorResponse(clientIt);
-    }
-    else if (access(filePath.c_str(), W_OK) || *(--filePath.end()) == '/') // permission denied
-    {
-        if (status == STATUS_403)
-            return (handleDefaultErrorPage(clientIt));
-        this->resetState();
-        status = STATUS_403;
-        this->setErrorResponse(clientIt);
-    }
-    else if (!is_directory(filePath.c_str()))
-    {
-        if (status == STATUS_405)
-            return (handleDefaultErrorPage(clientIt));
-        this->resetState();
-        status = STATUS_405;
-        this->setErrorResponse(clientIt);
-    }
 }
 
 void Response::handleCgi(CLIENTIT &clientIt)
