@@ -7,6 +7,5 @@ std::streamsize	getFileSize(std::ifstream *file)
 	file->seekg(0, std::ios::end);
 	file_size = file->tellg();
 	file->seekg(0, std::ios::beg);
-	std::cout <<  file_size << std::endl;
 	return file_size;
 }

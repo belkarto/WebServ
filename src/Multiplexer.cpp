@@ -89,7 +89,6 @@ void Multiplexer::registerClient(SERVIT &serverIt)
 	serverIt->acceptConnection(client);
 	if (client.connect_socket < 0)
 		return ;
-	Multiplexer::connections += 1;
 	client.serverIt = serverIt;
 	epoll_add2(epfd, client.connect_socket);
 	clients.push_back(client);
@@ -99,8 +98,7 @@ void Multiplexer::dropClient(CLIENTIT &clientIt)
 {
 	close(clientIt->connect_socket);
 	clients.erase(clientIt);
-	if (Multiplexer::connections > 0)
-		Multiplexer::connections--;
+	std::cout << "dropped 1" << std::endl;
 }
 
 
@@ -112,15 +110,15 @@ void Multiplexer::connectionListener()
 
 	while (Running)
 	{
-		dropInactiveClients();
-		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, KEEPALIVE_TIMEOUT * 1000)) < 0)
+		// dropInactiveClients();
+		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 0)
 			continue;
 		i = -1;
 		while (++i < num_events)
 		{
 			if ((serverIt = this->findListenSocket(events[i].data.fd, servers)) != servers.end())
 				registerClient(serverIt);
-			else if ((clientIt = this->findConnectSocket(events[i].data.fd, clients)) != clients.end())
+			if ((clientIt = this->findConnectSocket(events[i].data.fd, clients)) != clients.end())
 			{
 				if ((events[i].events & EPOLLIN))
 				{
@@ -149,10 +147,10 @@ void Multiplexer::handleResponse(CLIENTIT &clientIt)
 	{
 		if (clientIt->response_all_sent)
 		{
-			if (clientIt->response.connection == "close")
-				dropClient(clientIt);
+			if (KEEPALIVE_CONN)
+				clientIt->resetState();
 			else
-				clientIt->resetState();	// keep-alive connection
+				dropClient(clientIt);
 		}
 		else if (clientIt->response.cgi)
 		{
@@ -229,6 +227,7 @@ bool	checkClientTimeOut(Client client)
 {
 	if (!client.active && time(NULL) - client.last_activity >= KEEPALIVE_TIMEOUT)
 	{
+		std::cout << "dropped 2" << std::endl;
 		close(client.connect_socket);
 		return true;
 	}

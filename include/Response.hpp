@@ -25,7 +25,6 @@ class Response
 	int 				fds[2];
 	pid_t				pid;
 
-	int					code;
 	std::string			special_response;
 	int					fd;
     std::ifstream   	*fileContent;
