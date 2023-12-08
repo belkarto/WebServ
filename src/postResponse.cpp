@@ -94,7 +94,7 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
     std::string       uri;
     std::stringstream ss;
     std::string       fileName;
-    STRINGVECTIT      it;
+    STRINGVECTIT      indexIt;
     int               ret_val;
 
     uri = clientIt->fields[URI];
@@ -143,7 +143,6 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
             {
                 std::cout << filePath << std::endl;
                 // search indexes
-                STRINGVECTIT indexIt;
 
                 indexIt = getIndex(clientIt->locatIt->index, filePath);
                 if (indexIt == clientIt->locatIt->index.end())
@@ -154,8 +153,7 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
                     this->setErrorResponse(clientIt);
                     return;
                 }
-                filePath.append(*it);
-                if (access(filePath.c_str(), R_OK | W_OK) != 0 || clientIt->locatIt->cgi.empty())
+                if (access((filePath + *indexIt).c_str(), R_OK | W_OK) != 0 || clientIt->locatIt->cgi.empty())
                 {
                     this->resetState();
                     status = STATUS_403;
@@ -164,6 +162,7 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
                 }
                 else
                 {
+                    std::cout << "not cgi implemented yet" << std::endl;
                     exit(1);
                     // run cgi on requested file
                 }

@@ -31,8 +31,8 @@ CC			= c++
 
 OBJF		= .cache_exists
 
-FLAGS		=  -Wall -Wextra -Werror -std=c++98 -Iinclude -g \
-#-g -fsanitize=address
+FLAGS		=  -Wall -Wextra -Werror -std=c++98 -Iinclude -g
+#-fsanitize=address
 
 # #======================================================================================
 
