@@ -42,7 +42,7 @@ void	Response::sendResponseBuffer(CLIENTIT& clientIt)
             readbytes += rd;
             send(clientIt->connect_socket, &buffer, rd, 0);
         }
-        else
+        if (readbytes == response_size)
 		{
 			fileContent->close();
 			delete fileContent;

@@ -98,7 +98,6 @@ void Multiplexer::dropClient(CLIENTIT &clientIt)
 {
 	close(clientIt->connect_socket);
 	clients.erase(clientIt);
-	std::cout << "dropped 1" << std::endl;
 }
 
 
@@ -136,6 +135,13 @@ void Multiplexer::connectionListener()
 				}
 				if ((events[i].events & EPOLLOUT))
 					handleResponse(clientIt);
+				if (clientIt->response_all_sent)
+				{
+					if (clientIt->fields["Connection"] == "close")
+						dropClient(clientIt);
+					else
+						clientIt->resetState();
+				}
 			}
 		}
 	}
@@ -145,14 +151,7 @@ void Multiplexer::handleResponse(CLIENTIT &clientIt)
 {
 	if (clientIt->request_all_processed)
 	{
-		if (clientIt->response_all_sent)
-		{
-			if (KEEPALIVE_CONN)
-				clientIt->resetState();
-			else
-				dropClient(clientIt);
-		}
-		else if (clientIt->response.cgi)
+		if (clientIt->response.cgi)
 		{
 			if (!clientIt->start_responding)
 				clientIt->response.checkCgiTimeout(clientIt);

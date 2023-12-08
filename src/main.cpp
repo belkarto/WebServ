@@ -9,6 +9,7 @@ int	main(int ac, char **av, char **env)
 		std::cerr << "Usage: ./executable [configfile]" << std::endl;
 		return 1;
 	}
+	std::cout << KEEPALIVE_CONN << std::endl;
 	if (ac > 1)
 		webServManager(av[1], env);
 	else
