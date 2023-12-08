@@ -40,7 +40,7 @@ int Response::parseResourcePath(CLIENTIT &clientIt)
         this->setErrorResponse(clientIt);
         return ERROR;
     }
-    else if (!is_directory(filePath.c_str()))
+    else if (is_directory(filePath.c_str()))
     {
         return IS_DIRECTORY;
     }

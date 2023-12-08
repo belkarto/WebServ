@@ -1,4 +1,5 @@
 #include "../include/Multiplexer.hpp"
+#include <unistd.h>
 
 void Response::setPostResponse(CLIENTIT &clientIt)
 {
@@ -71,6 +72,23 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
     }
 }
 
+STRINGVECTIT getIndex(STRINGVECT &indexes, std::string root)
+{
+    STRINGVECTIT it;
+
+    it = indexes.begin();
+    for (; it != indexes.end(); it++)
+    {
+        std::string indexPath;
+        indexPath = root + *it;
+        std::cout << "index " << *it << std::endl;
+        std::cout << indexPath << std::endl;
+        if (access(indexPath.c_str(), F_OK) == 0)
+            return it;
+    }
+    return it;
+}
+
 void Response::processResourceRequest(CLIENTIT &clientIt)
 {
     std::string       uri;
@@ -86,6 +104,7 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
         return;
     else if (ret_val == IS_FILE)
     {
+        std::cout << "reques file" << std::endl;
         if (!clientIt->locatIt->cgi.empty())
         {
             // if location support cgi
@@ -100,15 +119,21 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
     }
     else
     {
+        std::cout << "request directory" << std::endl;
         // its directory
         if (*(--filePath.end()) != '/')
         {
-            // add / to the end of request and make redirection to now uri 301 response
+            // add / to the end of request and make redirection to new uri 301 response
+            // clientIt->locatIt->redirect = clientIt->serverIt->bind_addr_str + uri + "/";
+            // std::cout << clientIt->locatIt->redirect << std::endl;
+            // return (handleExternalRedirection(clientIt));
         }
         else
         {
+            std::cout << filePath << std::endl;
             if (clientIt->locatIt->index.empty())
             {
+                std::cout << "error no index provided" << std::endl;
                 this->resetState();
                 status = STATUS_403;
                 this->setErrorResponse(clientIt);
@@ -116,7 +141,21 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
             }
             else
             {
-                if (clientIt->locatIt->cgi.empty())
+                std::cout << filePath << std::endl;
+                // search indexes
+                STRINGVECTIT indexIt;
+
+                indexIt = getIndex(clientIt->locatIt->index, filePath);
+                if (indexIt == clientIt->locatIt->index.end())
+                {
+                    std::cout << "index file not found" << std::endl;
+                    this->resetState();
+                    status = STATUS_404;
+                    this->setErrorResponse(clientIt);
+                    return;
+                }
+                filePath.append(*it);
+                if (access(filePath.c_str(), R_OK | W_OK) != 0 || clientIt->locatIt->cgi.empty())
                 {
                     this->resetState();
                     status = STATUS_403;
@@ -125,7 +164,8 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
                 }
                 else
                 {
-                    // run cgi on requested file 
+                    exit(1);
+                    // run cgi on requested file
                 }
             }
         }
