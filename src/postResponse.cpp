@@ -41,6 +41,8 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         root = clientIt->locatIt->root;
         if (!clientIt->locatIt->redirect.empty())
             return (handleExternalRedirection(clientIt));
+
+        // check if location suddport post request
         if (clientIt->locatIt->method.empty() ||
             clientIt->locatIt->method.end() ==
                 std::find(clientIt->locatIt->method.begin(), clientIt->locatIt->method.end(), "POST"))
@@ -50,6 +52,8 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
             this->setErrorResponse(clientIt); // set error to 405
             return;
         }
+
+        // check if location support upload
         if (!clientIt->locatIt->upload_store.empty())
             this->ProcessUploadLocation(clientIt);
         else
@@ -66,12 +70,64 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         // root = clientIt->serverIt->root;
     }
 }
+
 void Response::processResourceRequest(CLIENTIT &clientIt)
 {
-    (void)clientIt;
-    // get requested resource F_OK W_OK
-    // if request is file ==> if location has CGI else 405
-    // if request is directory ==>           it has / in the end           ==> if directory has index ==> if
-    // location has CGI else 405
-    //                         ==> else make redirection with / in the end ==> else 405
+    std::string       uri;
+    std::stringstream ss;
+    std::string       fileName;
+    STRINGVECTIT      it;
+    int               ret_val;
+
+    uri = clientIt->fields[URI];
+    filePath = root + uri;
+    ret_val = this->parseResourcePath(clientIt);
+    if (ret_val == ERROR)
+        return;
+    else if (ret_val == IS_FILE)
+    {
+        if (!clientIt->locatIt->cgi.empty())
+        {
+            // if location support cgi
+        }
+        else
+        {
+            this->resetState();
+            status = STATUS_403;
+            this->setErrorResponse(clientIt);
+            return;
+        }
+    }
+    else
+    {
+        // its directory
+        if (*(--filePath.end()) != '/')
+        {
+            // add / to the end of request and make redirection to now uri 301 response
+        }
+        else
+        {
+            if (clientIt->locatIt->index.empty())
+            {
+                this->resetState();
+                status = STATUS_403;
+                this->setErrorResponse(clientIt);
+                return;
+            }
+            else
+            {
+                if (clientIt->locatIt->cgi.empty())
+                {
+                    this->resetState();
+                    status = STATUS_403;
+                    this->setErrorResponse(clientIt);
+                    return;
+                }
+                else
+                {
+                    // run cgi on requested file 
+                }
+            }
+        }
+    }
 }

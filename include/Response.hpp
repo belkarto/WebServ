@@ -67,6 +67,7 @@ class Response
     // post
     void postParseFilePath(CLIENTIT &);
     void parseUploadPath(CLIENTIT &);
+    int  parseResourcePath(CLIENTIT &);
     void ProcessUploadLocation(CLIENTIT &);
     void processResourceRequest(CLIENTIT &);
 };

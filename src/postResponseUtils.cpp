@@ -29,6 +29,33 @@ void Response::parseUploadPath(CLIENTIT &clientIt)
     }
 }
 
+int Response::parseResourcePath(CLIENTIT &clientIt)
+{
+    if (access(filePath.c_str(), F_OK)) // file not found
+    {
+        // if (status == STATUS_404)
+        //     return (handleDefaultErrorPage(clientIt));
+        this->resetState();
+        status = STATUS_404;
+        this->setErrorResponse(clientIt);
+        return ERROR;
+    }
+    else if (!is_directory(filePath.c_str()))
+    {
+        return IS_DIRECTORY;
+    }
+    else if (access(filePath.c_str(), W_OK) || *(--filePath.end()) == '/') // permission denied
+    {
+        // if (status == STATUS_403)
+        //     return (handleDefaultErrorPage(clientIt));
+        this->resetState();
+        status = STATUS_403;
+        this->setErrorResponse(clientIt);
+        return ERROR;
+    }
+    return IS_FILE;
+}
+
 static void checkUnprocessedData(char *buffer, std::streamsize &size, std::ostream *outFile)
 {
     char *startPos;
@@ -53,7 +80,6 @@ void Response::ProcessUploadLocation(CLIENTIT &clientIt)
     // location supportes upload
     uri = clientIt->fields[URI];
     filePath = root + uri + clientIt->locatIt->upload_store;
-    std::cout << filePath << std::endl;
     parseUploadPath(clientIt);
     fileName = clientIt->generateFileName(clientIt->fields["Content-Type"]);
     clientIt->response.fileLocation = uri + fileName;

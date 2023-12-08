@@ -92,4 +92,8 @@
 /*              Response                */
 #define CGI_TIMEOUT                 4
 
+/*          return status                */
+#define IS_FILE 0
+#define IS_DIRECTORY 1
+#define ERROR -1
 #endif
