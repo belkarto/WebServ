@@ -70,6 +70,8 @@ class Response
     int  parseResourcePath(CLIENTIT &);
     void ProcessUploadLocation(CLIENTIT &);
     void processResourceRequest(CLIENTIT &);
+    void handleRequestFile(CLIENTIT &);
+    void handleRequestDire(CLIENTIT &);
 };
 int remove_all(const char *path, int &ecode);
 #endif

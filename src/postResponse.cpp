@@ -72,29 +72,11 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
     }
 }
 
-STRINGVECTIT getIndex(STRINGVECT &indexes, std::string root)
-{
-    STRINGVECTIT it;
-
-    it = indexes.begin();
-    for (; it != indexes.end(); it++)
-    {
-        std::string indexPath;
-        indexPath = root + *it;
-        std::cout << "index " << *it << std::endl;
-        std::cout << indexPath << std::endl;
-        if (access(indexPath.c_str(), F_OK) == 0)
-            return it;
-    }
-    return it;
-}
-
 void Response::processResourceRequest(CLIENTIT &clientIt)
 {
     std::string       uri;
     std::stringstream ss;
     std::string       fileName;
-    STRINGVECTIT      indexIt;
     int               ret_val;
 
     uri = clientIt->fields[URI];
@@ -103,70 +85,7 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
     if (ret_val == ERROR)
         return;
     else if (ret_val == IS_FILE)
-    {
-        std::cout << "reques file" << std::endl;
-        if (!clientIt->locatIt->cgi.empty())
-        {
-            // if location support cgi
-        }
-        else
-        {
-            this->resetState();
-            status = STATUS_403;
-            this->setErrorResponse(clientIt);
-            return;
-        }
-    }
+        this->handleRequestFile(clientIt);
     else
-    {
-        std::cout << "request directory" << std::endl;
-        // its directory
-        if (*(--filePath.end()) != '/')
-        {
-            // add / to the end of request and make redirection to new uri 301 response
-            // clientIt->locatIt->redirect = clientIt->serverIt->bind_addr_str + uri + "/";
-            // std::cout << clientIt->locatIt->redirect << std::endl;
-            // return (handleExternalRedirection(clientIt));
-        }
-        else
-        {
-            std::cout << filePath << std::endl;
-            if (clientIt->locatIt->index.empty())
-            {
-                std::cout << "error no index provided" << std::endl;
-                this->resetState();
-                status = STATUS_403;
-                this->setErrorResponse(clientIt);
-                return;
-            }
-            else
-            {
-                std::cout << filePath << std::endl;
-                // search indexes
-
-                indexIt = getIndex(clientIt->locatIt->index, filePath);
-                if (indexIt == clientIt->locatIt->index.end())
-                {
-                    std::cout << "index file not found" << std::endl;
-                    this->resetState();
-                    status = STATUS_404;
-                    this->setErrorResponse(clientIt);
-                    return;
-                }
-                if (access((filePath + *indexIt).c_str(), R_OK | W_OK) != 0 || clientIt->locatIt->cgi.empty())
-                {
-                    this->resetState();
-                    status = STATUS_403;
-                    this->setErrorResponse(clientIt);
-                    return;
-                }
-                else
-                {
-                    std::cout << "not cgi implemented yet" << std::endl;
-                    exit(1);
-                    // run cgi on requested file
-                }
-            }
-        }
-    }
+        this->handleRequestDire(clientIt);
 }
