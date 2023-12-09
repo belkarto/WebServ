@@ -85,7 +85,7 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
     if (ret_val == ERROR)
         return;
     else if (ret_val == IS_FILE)
-        this->handleRequestFile(clientIt);
+        this->handleResourceFile(clientIt);
     else
-        this->handleRequestDire(clientIt);
+        this->handleResourceDire(clientIt);
 }

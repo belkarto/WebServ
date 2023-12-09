@@ -106,7 +106,7 @@ void Response::ProcessUploadLocation(CLIENTIT &clientIt)
     this->filePathParsed = true;
 }
 
-void Response::handleRequestFile(CLIENTIT &clientIt)
+void Response::handleResourceFile(CLIENTIT &clientIt)
 {
     if (access((filePath).c_str(), R_OK | W_OK) == 0 && !clientIt->locatIt->cgi.empty())
     {
@@ -139,7 +139,7 @@ static STRINGVECTIT getIndex(STRINGVECT &indexes, std::string root)
     return it;
 }
 
-void Response::handleRequestDire(CLIENTIT &clientIt)
+void Response::handleResourceDire(CLIENTIT &clientIt)
 {
     STRINGVECTIT      indexIt;
 
@@ -165,6 +165,6 @@ void Response::handleRequestDire(CLIENTIT &clientIt)
             return;
         }
         filePath.append(*indexIt);
-        this->handleRequestFile(clientIt);
+        this->handleResourceFile(clientIt);
     }
 }
