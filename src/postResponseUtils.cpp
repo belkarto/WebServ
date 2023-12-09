@@ -40,12 +40,10 @@ void Response::ProcessUploadLocation(CLIENTIT &clientIt)
 
 void Response::handleResourceFile(CLIENTIT &clientIt)
 {
-    if (access((filePath).c_str(), R_OK | W_OK) == 0 && !clientIt->locatIt->cgi.empty())
-    {
-        // if location support cgi
-    }
-    else
+    if (access((filePath).c_str(), R_OK | W_OK) != 0 || clientIt->locatIt->cgi.empty())
         throw std::runtime_error(STATUS_403);
+    else
+        this->cgi = true;
 }
 
 static STRINGVECTIT getIndex(STRINGVECT &indexes, std::string root)
@@ -71,7 +69,6 @@ void Response::handleResourceDire(CLIENTIT &clientIt)
     // its directory
     if (*(--filePath.end()) != '/')
         filePath.append("/");
-    std::cout << " " << std::endl;
     if (clientIt->locatIt->index.empty())
         throw std::runtime_error(STATUS_403);
     else

@@ -10,6 +10,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         }
         catch (std::exception &e)
         {
+            std::cout << "got exception " << e.what() << std::endl;
             this->resetState();
             status = e.what();
             this->setErrorResponse(clientIt);
@@ -19,21 +20,32 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     else
     {
         // uploading post body
-        char buffer[BUFFER_SIZE];
-        int  rc = 0;
-
-        rc = recv(clientIt->connect_socket, buffer, BUFFER_SIZE, 0);
-        clientIt->response.outFile->write(buffer, rc);
-        clientIt->response.outFile->flush();
-        response_size -= rc;
         if (response_size <= 0)
         {
-            clientIt->response.outFile->close();
-            this->resetState();
-            status = STATUS_201;
-            this->setErrorResponse(clientIt);
-            return;
-            // send response
+            if (cgi)
+            {
+                std::cout << "request require CGI" << std::endl;
+                exit(100);
+            }
+            else
+            {
+
+                clientIt->response.outFile->close();
+                this->resetState();
+                status = STATUS_201;
+                this->setErrorResponse(clientIt);
+                return;
+            }
+        }
+        else
+        {
+            char buffer[BUFFER_SIZE];
+            int  rc = 0;
+
+            rc = recv(clientIt->connect_socket, buffer, BUFFER_SIZE, 0);
+            clientIt->response.outFile->write(buffer, rc);
+            clientIt->response.outFile->flush();
+            response_size -= rc;
         }
     }
 }
@@ -81,7 +93,7 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         else
             this->processResourceRequest(clientIt);
 
-        if (!clientIt->response.outFile)
+        if (!clientIt->response.outFile->is_open())
             throw std::runtime_error(STATUS_500);
         ss << clientIt->fields["Content-Length"];
         ss >> response_size;
@@ -109,5 +121,6 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
     else
         this->handleResourceDire(clientIt);
     std::string oFile = "/tmp" + clientIt->generateFileName(clientIt->fields["Content-Type"]);
+    std::cout << "outfile is ==> " << oFile << std::endl;
     clientIt->response.outFile = new std::ofstream(oFile.c_str());
 }
