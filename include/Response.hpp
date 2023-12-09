@@ -66,8 +66,8 @@ class Response
     std::string getErrorPage(int errorCode);
     // post
     void postParseFilePath(CLIENTIT &);
-    void parseUploadPath(CLIENTIT &);
-    int  parseResourcePath(CLIENTIT &);
+    void parseUploadPath();
+    int  parseResourcePath();
     void ProcessUploadLocation(CLIENTIT &);
     void processResourceRequest(CLIENTIT &);
     void handleResourceFile(CLIENTIT &);

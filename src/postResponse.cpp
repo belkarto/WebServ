@@ -1,10 +1,21 @@
 #include "../include/Multiplexer.hpp"
-#include <unistd.h>
 
 void Response::setPostResponse(CLIENTIT &clientIt)
 {
     if (!this->filePathParsed)
-        this->postParseFilePath(clientIt);
+    {
+        try
+        {
+            this->postParseFilePath(clientIt);
+        }
+        catch (std::exception &e)
+        {
+            this->resetState();
+            status = e.what();
+            this->setErrorResponse(clientIt);
+            return;
+        }
+    }
     else
     {
         // uploading post body
@@ -27,6 +38,21 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     }
 }
 
+static void checkUnprocessedData(char *buffer, std::streamsize &size, std::ostream *outFile)
+{
+    char *startPos;
+    int   leftDataLen;
+
+    startPos = std::strstr(buffer, "\r\n\r\n");
+    if (startPos == NULL || (startPos + 4) - buffer == CLIENT_HEADER_BUFFER_SIZE)
+        return;
+    startPos += 4;
+    leftDataLen = CLIENT_HEADER_BUFFER_SIZE - (startPos - buffer);
+    outFile->write(startPos, leftDataLen);
+    size -= leftDataLen;
+    delete[] buffer;
+}
+
 void Response::postParseFilePath(CLIENTIT &clientIt)
 {
     std::string       uri;
@@ -43,33 +69,29 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         if (!clientIt->locatIt->redirect.empty())
             return (handleExternalRedirection(clientIt));
 
-        // check if location suddport post request
+        // check if location support post request
         if (clientIt->locatIt->method.empty() ||
             clientIt->locatIt->method.end() ==
                 std::find(clientIt->locatIt->method.begin(), clientIt->locatIt->method.end(), "POST"))
-        {
-            this->resetState();
-            status = STATUS_405;
-            this->setErrorResponse(clientIt); // set error to 405
-            return;
-        }
+            throw std::runtime_error(STATUS_405);
 
         // check if location support upload
         if (!clientIt->locatIt->upload_store.empty())
             this->ProcessUploadLocation(clientIt);
         else
             this->processResourceRequest(clientIt);
+
+        if (!clientIt->response.outFile)
+            throw std::runtime_error(STATUS_500);
+        ss << clientIt->fields["Content-Length"];
+        ss >> response_size;
+        if (response_size >= clientIt->serverIt->client_max_body_size)
+            throw std::runtime_error(STATUS_413);
+        checkUnprocessedData(clientIt->header_buffer, response_size, clientIt->response.outFile);
+        this->filePathParsed = true;
     }
     else
-    {
-        std::cerr << STATUS_405 << std::endl;
-        this->resetState();
-        status = STATUS_405;
-        this->setErrorResponse(clientIt); // set error to 405
-        return;
-        // index = &(clientIt->serverIt->index);
-        // root = clientIt->serverIt->root;
-    }
+        throw std::runtime_error(STATUS_405);
 }
 
 void Response::processResourceRequest(CLIENTIT &clientIt)
@@ -81,11 +103,11 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
 
     uri = clientIt->fields[URI];
     filePath = root + uri;
-    ret_val = this->parseResourcePath(clientIt);
-    if (ret_val == ERROR)
-        return;
-    else if (ret_val == IS_FILE)
+    ret_val = this->parseResourcePath();
+    if (ret_val == IS_FILE)
         this->handleResourceFile(clientIt);
     else
         this->handleResourceDire(clientIt);
+    std::string oFile = "/tmp" + clientIt->generateFileName(clientIt->fields["Content-Type"]);
+    clientIt->response.outFile = new std::ofstream(oFile.c_str());
 }
