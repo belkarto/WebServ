@@ -2,7 +2,6 @@
 #define CLIENT_HPP
 
 #include "Multiplexer.hpp"
-#include "ResponseTemplate.hpp"
 #include "define.hpp"
 
 class Client {
