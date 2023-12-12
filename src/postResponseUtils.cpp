@@ -1,5 +1,4 @@
 #include "../include/Multiplexer.hpp"
-#include <algorithm>
 
 void Response::parseUploadPath()
 {
@@ -43,7 +42,7 @@ void Response::handleResourceFile(CLIENTIT &clientIt)
     if (access((filePath).c_str(), R_OK | W_OK) != 0 || clientIt->locatIt->cgi.empty())
         throw std::runtime_error(STATUS_403);
     else
-        this->cgi = true;
+        this->postCgi = true;
 }
 
 static STRINGVECTIT getIndex(STRINGVECT &indexes, std::string root)

@@ -23,6 +23,8 @@ Response::Response(void)
 	response_size	= 0;
 	readbytes 		= 0;
     filePathParsed  = false;
+    
+    postCgi         = false;
 }
 
 void	Response::resetState()
@@ -48,6 +50,8 @@ void	Response::resetState()
 	response_size	= 0;
 	readbytes 		= 0;
     filePathParsed  = false;
+
+    postCgi         = false;
 }
 
 Response::~Response()

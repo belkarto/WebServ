@@ -22,7 +22,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         // uploading post body
         if (response_size <= 0)
         {
-            if (cgi)
+            if (postCgi)
             {
                 std::cout << "request require CGI" << std::endl;
                 exit(100);
@@ -121,6 +121,5 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
     else
         this->handleResourceDire(clientIt);
     std::string oFile = "/tmp" + clientIt->generateFileName(clientIt->fields["Content-Type"]);
-    std::cout << "outfile is ==> " << oFile << std::endl;
     clientIt->response.outFile = new std::ofstream(oFile.c_str());
 }

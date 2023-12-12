@@ -96,4 +96,9 @@
 #define IS_FILE 0
 #define IS_DIRECTORY 1
 #define ERROR -1
+
+/*           cgi env indexes           */
+#define METHOD 0
+#define CONTENT_LENGTH 1
+#define CONTENT_TYPE 2
 #endif

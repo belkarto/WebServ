@@ -65,6 +65,9 @@ class Response
     void        checkCgiTimeout(CLIENTIT &clientIt);
     std::string getErrorPage(int errorCode);
     // post
+    bool postCgi;
+    bool *envCgi[10];
+
     void postParseFilePath(CLIENTIT &);
     void parseUploadPath();
     int  parseResourcePath();
