@@ -153,7 +153,6 @@ void Response::handleDefaultErrorPage(CLIENTIT &clientIt)
 
 void Response::handleCgi(CLIENTIT &clientIt)
 {
-
     char *cmds[3];
 
     cmds[0] = const_cast<char *>(cgiExecutable.c_str());

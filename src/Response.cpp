@@ -61,7 +61,6 @@ Response::~Response()
 
 void    Response::setGetResponse(CLIENTIT& clientIt)
 {
-
 	std::string	uri;
 
 	uri = clientIt->fields["request_target"];
