@@ -61,7 +61,7 @@ class Response
     void        sendAutoIndexBuffer(CLIENTIT &clientIt);
     void        sendPipeBuffer(CLIENTIT &clientIt);
     void        handleDelete(CLIENTIT &clientIt);
-    void        handleCgi(CLIENTIT &clientIt);
+    void        handleCgi(CLIENTIT &clientIt, int method);
     void        checkCgiTimeout(CLIENTIT &clientIt);
     std::string getErrorPage(int errorCode);
     // post
@@ -75,6 +75,7 @@ class Response
     void processResourceRequest(CLIENTIT &);
     void handleResourceFile(CLIENTIT &);
     void handleResourceDire(CLIENTIT &);
+    char **setPostCgiEnv(char **envp, CLIENTIT &clientIt);
 };
 int remove_all(const char *path, int &ecode);
 #endif

@@ -110,7 +110,7 @@ void Multiplexer::connectionListener()
 
 	while (Running)
 	{
-		dropInactiveClients();
+		// dropInactiveClients();
 		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 0)
 		{
 			perror("epoll_wait()");

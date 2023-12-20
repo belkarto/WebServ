@@ -42,11 +42,10 @@ void Response::handleResourceFile(CLIENTIT &clientIt)
     if (access((filePath).c_str(), R_OK | W_OK) == 0 && !clientIt->locatIt->cgi.empty())
     {
         this->postCgi = true;
-        cgiExecutable = clientIt->serverIt->findCgi(clientIt, clientIt->fields[URI]);
-        if (!cgiExecutable.empty())
-            cgi = true;
-        else
-            throw std::runtime_error(STATUS_403);
+        // if (!cgiExecutable.empty())
+        //     cgi = true;
+        // else
+        //     throw std::runtime_error(STATUS_403);
     }
     else
         throw std::runtime_error(STATUS_403);

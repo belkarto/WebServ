@@ -24,12 +24,20 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         {
             if (postCgi)
             {
-                std::cout << "request require CGI" << std::endl;
-                exit(100);
+                Multiplexer::env = setPostCgiEnv(Multiplexer::env, clientIt);
+                cgiExecutable = clientIt->serverIt->findCgi(clientIt, clientIt->fields[URI]);
+                if (!cgiExecutable.empty())
+                {
+                    cgi = true;
+                    handleCgi(clientIt, POST);
+                }
+                else
+                    throw std::runtime_error(STATUS_403);
+                // std::cout << "request require CGI" << std::endl;
+                // exit(100);
             }
             else
             {
-
                 clientIt->response.outFile->close();
                 this->resetState();
                 status = STATUS_201;
@@ -122,4 +130,5 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
         this->handleResourceDire(clientIt);
     std::string oFile = "/tmp" + clientIt->generateFileName(clientIt->fields["Content-Type"]);
     clientIt->response.outFile = new std::ofstream(oFile.c_str());
+    std::cout << "file name is " << oFile << std::endl;
 }

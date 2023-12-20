@@ -101,4 +101,8 @@
 #define METHOD 0
 #define CONTENT_LENGTH 1
 #define CONTENT_TYPE 2
+
+
+#define GET 0
+#define POST 1
 #endif

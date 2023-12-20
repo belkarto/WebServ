@@ -26,7 +26,7 @@ void Response::parseFilePath(CLIENTIT &clientIt)
         else
         {
             if (cgi)
-                return (handleCgi(clientIt));
+                return (handleCgi(clientIt, GET));
             handleFile(clientIt);
         }
     }
@@ -151,7 +151,7 @@ void Response::handleDefaultErrorPage(CLIENTIT &clientIt)
     clientIt->response_all_sent = true;
 }
 
-void Response::handleCgi(CLIENTIT &clientIt)
+void Response::handleCgi(CLIENTIT &clientIt, int method)
 {
     char *cmds[3];
 
@@ -176,6 +176,14 @@ void Response::handleCgi(CLIENTIT &clientIt)
         }
         if (!pid)
         {
+            if (method == POST)
+            {
+                // int outFD;
+                // dup2(fd, 0);
+                std::cerr << "POST" << std::endl;
+                std::cerr << "filePath: " << filePath << std::endl;
+                std::freopen(filePath.c_str(), "r", stdin);
+            }
             dup2(fds[1], 1);
             close(fds[0]);
             execve(cmds[0], cmds, Multiplexer::env);
