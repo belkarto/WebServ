@@ -26,13 +26,19 @@ void Response::setPostResponse(CLIENTIT &clientIt)
             {
                 Multiplexer::env = setPostCgiEnv(Multiplexer::env, clientIt);
                 cgiExecutable = clientIt->serverIt->findCgi(clientIt, clientIt->fields[URI]);
+                std::cout << "cgiExecutable is " << cgiExecutable << std::endl;
                 if (!cgiExecutable.empty())
                 {
                     cgi = true;
                     handleCgi(clientIt, POST);
                 }
                 else
-                    throw std::runtime_error(STATUS_403);
+                {
+                    resetState();
+                    status = STATUS_403;
+                    this->setErrorResponse(clientIt);
+                    return;
+                }
                 // std::cout << "request require CGI" << std::endl;
                 // exit(100);
             }
