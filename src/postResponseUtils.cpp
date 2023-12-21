@@ -30,10 +30,12 @@ void Response::ProcessUploadLocation(CLIENTIT &clientIt)
     // location supportes upload
     uri = clientIt->fields[URI];
     filePath = root + uri + clientIt->locatIt->upload_store;
+    std::cout << "file path is " << filePath << std::endl;
     parseUploadPath();
     fileName = clientIt->generateFileName(clientIt->fields["Content-Type"]);
     filePath.append(fileName);
     clientIt->response.fileLocation = uri + fileName;
+    std::cout << "file name is " << filePath << std::endl;
     clientIt->response.outFile = new std::ofstream(filePath.c_str());
 }
 
