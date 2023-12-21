@@ -178,12 +178,11 @@ void Response::handleCgi(CLIENTIT &clientIt, int method)
         {
             if (method == POST)
             {
-                // int outFD;
-                // dup2(fd, 0);
                 Multiplexer::env = setPostCgiEnv(Multiplexer::env, clientIt);
                 std::cerr << "POST" << std::endl;
+                std::cerr << "outfilePath: " << outFilePath << std::endl;
                 std::cerr << "filePath: " << filePath << std::endl;
-                std::freopen(filePath.c_str(), "r", stdin);
+                std::freopen(outFilePath.c_str(), "r", stdin);
             }
             dup2(fds[1], 1);
             close(fds[0]);

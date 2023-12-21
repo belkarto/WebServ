@@ -30,6 +30,7 @@ class Response
     int             fd;
     std::ifstream  *fileContent;
     std::ofstream  *outFile;
+    std::string     outFilePath;
     DIR            *directory;
     std::streamsize response_size;
     std::streamsize readbytes;
@@ -65,16 +66,16 @@ class Response
     void        checkCgiTimeout(CLIENTIT &clientIt);
     std::string getErrorPage(int errorCode);
     // post
-    bool postCgi;
+    bool  postCgi;
     bool *envCgi[10];
 
-    void postParseFilePath(CLIENTIT &);
-    void parseUploadPath();
-    int  parseResourcePath();
-    void ProcessUploadLocation(CLIENTIT &);
-    void processResourceRequest(CLIENTIT &);
-    void handleResourceFile(CLIENTIT &);
-    void handleResourceDire(CLIENTIT &);
+    void   postParseFilePath(CLIENTIT &);
+    void   parseUploadPath();
+    int    parseResourcePath();
+    void   ProcessUploadLocation(CLIENTIT &);
+    void   processResourceRequest(CLIENTIT &);
+    void   handleResourceFile(CLIENTIT &);
+    void   handleResourceDire(CLIENTIT &);
     char **setPostCgiEnv(char **envp, CLIENTIT &clientIt);
 };
 int remove_all(const char *path, int &ecode);

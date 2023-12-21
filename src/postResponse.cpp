@@ -25,8 +25,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
             if (postCgi)
             {
                 Multiplexer::env = setPostCgiEnv(Multiplexer::env, clientIt);
-                cgiExecutable = clientIt->serverIt->findCgi(clientIt, clientIt->fields[URI]);
-                std::cout << "cgiExecutable is " << cgiExecutable << std::endl;
+                cgiExecutable = clientIt->serverIt->findCgi(clientIt, filePath);
                 if (!cgiExecutable.empty())
                 {
                     cgi = true;
@@ -134,7 +133,7 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
         this->handleResourceFile(clientIt);
     else
         this->handleResourceDire(clientIt);
-    std::string oFile = "/tmp" + clientIt->generateFileName(clientIt->fields["Content-Type"]);
-    clientIt->response.outFile = new std::ofstream(oFile.c_str());
-    std::cout << "file name is " << oFile << std::endl;
+    outFilePath = "/tmp" + clientIt->generateFileName(clientIt->fields["Content-Type"]);
+    clientIt->response.outFile = new std::ofstream(outFilePath.c_str());
+    std::cout << "file name is " << outFilePath << std::endl;
 }
