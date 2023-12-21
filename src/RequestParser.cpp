@@ -72,7 +72,7 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 	if (clientIt->fields.find("Connection") == clientIt->fields.end())
 		clientIt->fields["Connection"] = "keep-alive";
 	if (!KEEPALIVE_CONN)
-		clientIt->fields["Connection"] = "close";
+	clientIt->fields["Connection"] = "close";
 	clientIt->headers_all_recieved = true;
 	setServerByHost(clientIt);
 	if (clientIt->fields["method"] != "POST")	// POST has to read the client's request body

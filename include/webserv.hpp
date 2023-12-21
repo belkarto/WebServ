@@ -9,6 +9,7 @@
 # include <netinet/ip.h>
 # include <unistd.h>
 # include <signal.h>
+# include <csignal>
 # include <arpa/inet.h>
 # include <string.h>
 # include <fcntl.h>

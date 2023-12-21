@@ -26,9 +26,9 @@
 /*                  Multiplexer                                  */
 
 #ifdef KEEPALIVE
-    # define KEEPALIVE_CONN true
+    # define KEEPALIVE_CONN 1
 #else
-    # define KEEPALIVE_CONN false
+    # define KEEPALIVE_CONN 0
 #endif
 
 #define Running                     true
@@ -37,8 +37,8 @@
 #define BUFFER_SIZE                 1024
 #define CLIENT_HEADER_BUFFER_SIZE   1024
 #define CLIENT_RESPONSE_BUFFER_SIZE 1024
-#define CLIENT_HEADER_timeout       20
-#define KEEPALIVE_TIMEOUT           10000 // 10s
+#define CLIENT_HEADER_TIMEOUT       30
+#define KEEPALIVE_TIMEOUT           10
 #define BACKLOG                     100
 #define CONNECTIONS                 400
 #define MIMETYPE_PATH               "./config/mimes.txt"

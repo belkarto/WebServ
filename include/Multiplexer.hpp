@@ -23,13 +23,13 @@ class Multiplexer
     void		  registerClient(SERVIT &serverIt);
     void		  dropClient(CLIENTIT &clientIt);
     void		  connectionListener();
-    void		  getClientRequest(CLIENTIT &clientIt);
+    bool		  getClientRequest(CLIENTIT &clientIt);
+    bool	    ConnectionTimedOut(CLIENTIT& clientIt);
     void		  parseRequestLine(CLIENTIT &clientIt);
     void		  parseRequestHeaders(CLIENTIT &clientIt);
     void		  reviewHeaders(CLIENTIT &clientIt);
     void		  setServerByHost(CLIENTIT &clientIt);
     void		  handleResponse(CLIENTIT &clientIt);
-    void    	dropInactiveClients();
     void    	loadMimeTypes();
     void    	loadDefErrorPages();
     SERVIT  	findListenSocket(int socket, SERVVECT &sockets);

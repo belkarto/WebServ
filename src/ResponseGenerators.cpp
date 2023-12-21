@@ -16,6 +16,8 @@ void	Response::sendHeaders(CLIENTIT& clientIt)
 	if (!location.empty())
 		headers += "Location: " + location + CRLF;
 	connection =  clientIt->fields["Connection"];
+	if (connection.empty())
+		connection = "close";
 	headers += "Connection: " + connection + CRLF;
 	headers += CRLF;
 	send(clientIt->connect_socket, &headers[0], headers.length(), 0);
@@ -100,6 +102,8 @@ void		Response::sendAutoIndexBuffer(CLIENTIT& clientIt)
     {
         chunk_data.append("<a href=\"");
         chunk_data.append(clientIt->fields[URI]);
+		if ((clientIt->fields[URI])[clientIt->fields[URI].length() - 1] != '/')
+			chunk_data.append("/");
         chunk_data.append(entry->d_name);
         chunk_data.append("\">");
 		chunk_data.append(entry->d_name);

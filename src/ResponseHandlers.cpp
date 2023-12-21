@@ -192,7 +192,19 @@ void Response::handleCgi(CLIENTIT &clientIt)
     cmds[0] = const_cast<char *>(cgiExecutable.c_str());
     cmds[1] = const_cast<char *>(filePath.c_str());
     cmds[2] = NULL;
-    if (!access(cmds[0], F_OK) && !access(cmds[0], X_OK))
+    if (access(cmds[0], F_OK))
+    {
+        resetState();
+        status = STATUS_404;
+        setErrorResponse(clientIt);
+    }
+    else if (access(cmds[0], X_OK))
+    {
+        resetState();
+        status = STATUS_403;
+        setErrorResponse(clientIt);
+    }
+    else
     {
         if (pipe(fds) < 0)
         {
@@ -210,7 +222,9 @@ void Response::handleCgi(CLIENTIT &clientIt)
         }
         if (!pid)
         {
+
             dup2(fds[1], 1);
+            dup2(fds[1], 2);
             close(fds[0]);
             execve(cmds[0], cmds, Multiplexer::env);
         }
@@ -243,6 +257,13 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
     {
         if (WIFEXITED(wstatus))
         {
+            if (WEXITSTATUS(wstatus))
+            {
+                close(fds[0]);
+                resetState();
+                status = STATUS_500;
+                setErrorResponse(clientIt);
+            }
             fd = fds[0];
             handleFile(clientIt);
         }
