@@ -12,15 +12,103 @@
     <div class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
         <h1 class="text-2xl font-semibold text-center text-gray-800 mb-4">File Upload Form</h1>
 
-        <form action="up_script.php" method="POST" enctype="multipart/form-data" class="max-w-lg mx-auto">
+        <form id="uploadForm" class="max-w-lg mx-auto">
             <div class="mb-4">
                 <label for="file" class="block text-gray-700 font-bold mb-2">Choose a File:</label>
-                <input type="file" name="files[]" id="file" accept="image/*,video/mp4" multiple class="w-full">
+                <input type="file" name="files[]" id="file" accept="image/*" multiple class="w-full">
             </div>
-            <button type="submit"
-                class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Upload</button>
+            <button type="button"
+                class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                onclick="uploadFile()">Upload</button>
         </form>
+
+        <!-- Notification Container -->
+        <div id="notification" class="mt-4 px-4 py-2 rounded-md bg-green-500 text-white hidden">
+            File uploaded successfully!
+        </div>
+
+        <script>
+            function uploadFile() {
+                const fileInput = document.getElementById('file');
+                const notification = document.getElementById('notification');
+                const formData = new FormData(document.getElementById('uploadForm'));
+
+                // Check if there are selected files
+                if (fileInput.files.length === 0) {
+                    alert('Please select at least one file.');
+                    return;
+                }
+
+                // Check if the selected files are images
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    if (!fileInput.files[i].type.startsWith('image/')) {
+                        alert('Please select only image files.');
+                        return;
+                    }
+                }
+
+                // Make a POST request using Fetch API
+                fetch('upload', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text(); // You can use response.json() if the server sends JSON
+                })
+                .then(data => {
+                    // Handle the response from the server
+                    console.log('Server response:', data);
+
+                    // Show the notification
+                    notification.innerText = 'File uploaded successfully!';
+                    notification.classList.remove('hidden');
+
+                    // Hide the notification after 3 seconds
+                    setTimeout(() => {
+                        notification.classList.add('hidden');
+                    }, 3000);
+                })
+                .catch(error => {
+                    // Handle errors during the fetch
+                    console.error('Error during fetch:', error);
+                });
+            }
+        </script>
     </div>
 </body>
 
 </html>
+
+
+<!-- <!DOCTYPE html> -->
+<!-- <html lang="en"> -->
+<!---->
+<!-- <head> -->
+<!--     <meta charset="UTF-8"> -->
+<!--     <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+<!--     <title>File Upload Form</title> -->
+<!--     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet"> -->
+<!-- </head> -->
+<!---->
+<!-- <body class="bg-gray-100"> -->
+<!--     <div class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-md"> -->
+<!--         <h1 class="text-2xl font-semibold text-center text-gray-800 mb-4">File Upload Form</h1> -->
+<!---->
+<!--         <form action="upload" method="POST" enctype="multipart/form-data" class="max-w-lg mx-auto"> -->
+<!--             <div class="mb-4"> -->
+<!--                 <label for="file" class="block text-gray-700 font-bold mb-2">Choose a File:</label> -->
+<!--                 <input type="file" name="files[]" id="file" accept="image/*" multiple class="w-full"> -->
+<!--             </div> -->
+<!--             <button type="submit" -->
+<!--                 class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Upload</button> -->
+<!--         </form> -->
+<!--     </div> -->
+<!-- </body> -->
+<!---->
+<!-- </html> -->
+<!---->
+<!---->
+<!DOCTYPE html>
