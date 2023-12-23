@@ -94,4 +94,7 @@
 #define STATUS_504 "504 Gateway Timeout"
 #define STATUS_505 "505 HTTP Version Not Supported"
 
+#define IS_FILE 0
+#define IS_DIRECTORY 1
+
 #endif
