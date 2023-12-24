@@ -44,7 +44,19 @@ void Client::setTransferEncoding(std::string &encoding)
 void Client::setContentType(std::string &content_type)
 {
     std::map<std::string, std::string>::iterator it, ite;
+    std::stringstream                               ss;
+    std::string                                     boundary;
+    size_t                                          pos;
 
+    ss << content_type;
+    getline(ss, content_type, ';');
+    ss >> boundary;
+    if ((pos = boundary.find("boundary=")) != std::string::npos)
+    {
+        ss.clear();
+        ss << boundary.substr(pos + strlen("boundary="));
+        getline(ss,  fields["boundary"], ';');
+    }
     std::transform(content_type.begin(), content_type.end(), content_type.begin(), tolower);
     it = Multiplexer::mime_types.begin();
     ite = Multiplexer::mime_types.end();
