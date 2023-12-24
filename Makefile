@@ -1,6 +1,6 @@
 #================================= Files to compile ===================================
 SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer  Exception RequestParser \
- Response ResponseUtils ResponseGenerators postResponse postResponseUtils postCgi
+ Response ResponseHandlers ResponseGenerators postResponse postResponseUtils postCgi
 LIB_FILES 	= signal split trim  addr_resolver ft_stoll ft_stoi socket_addr_ntop displayConfig epoll_add \
 						getFileSize	is_directory
 # #======================================================================================
@@ -66,6 +66,11 @@ $(NAME) : $(OBJ) $(OBJ_LIB)
 	@$(CC) $(FLAGS) $(OBJ) $(OBJ_LIB) -o $(NAME)
 	@printf "$(GREEN)\n- Finished ✅🥳\n$(NO_COLOR)"
 # #===========================================
+
+# #================================= keepalive rule ===================================
+keepalive: FLAGS += -DKEEPALIVE
+keepalive: clean all
+# #======================================================================================
 
 # #=============================================================================#
 

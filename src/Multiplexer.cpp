@@ -6,7 +6,7 @@ std::map<std::string, std::string> Multiplexer::mime_types;
 
 std::map<int, std::string> Multiplexer::defErrorPages;
 
-int Multiplexer::keepalive_connections = 0;
+int Multiplexer::connections = 0;
 
 const char *Multiplexer::defErrorPagesStrings[NUM_DEF_ERROR] = {
     STATUS_100, STATUS_101, STATUS_200, STATUS_201, STATUS_202, STATUS_203,
@@ -85,6 +85,7 @@ void Multiplexer::registerServers()
 void Multiplexer::registerClient(SERVIT &serverIt)
 {
 	Client client;
+
 	serverIt->acceptConnection(client);
 	if (client.connect_socket < 0)
 		return ;
@@ -97,8 +98,6 @@ void Multiplexer::dropClient(CLIENTIT &clientIt)
 {
 	close(clientIt->connect_socket);
 	clients.erase(clientIt);
-	if (Multiplexer::keepalive_connections > 0)
-		Multiplexer::keepalive_connections--;
 }
 
 
@@ -110,33 +109,32 @@ void Multiplexer::connectionListener()
 
 	while (Running)
 	{
-		// dropInactiveClients();
-		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 0)
-		{
-			perror("epoll_wait()");
-			exit(EXIT_FAILURE);
-		}
+		if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 1)
+			continue;
 		i = -1;
 		while (++i < num_events)
 		{
 			if ((serverIt = this->findListenSocket(events[i].data.fd, servers)) != servers.end())
 				registerClient(serverIt);
-			else if ((clientIt = this->findConnectSocket(events[i].data.fd, clients)) != clients.end())
+			if ((clientIt = this->findConnectSocket(events[i].data.fd, clients)) != clients.end())
 			{
 				if ((events[i].events & EPOLLIN))
 				{
-					if (!clientIt->request_line_received)
-						clientIt->header_timeout = time(NULL);
 					if (clientIt->headers_all_recieved)
-					{
-						// TODO:
-                        // in case of POST request get the request body
                         clientIt->request_all_processed = true;
-					}
-					else
-						getClientRequest(clientIt);
+					else if (!getClientRequest(clientIt))
+						continue;
 				}
-				if ((events[i].events & EPOLLOUT))
+				if (ConnectionTimedOut(clientIt))
+					dropClient(clientIt);
+				else if (clientIt->response_all_sent)
+				{
+					if (clientIt->response.connection == "close")
+						dropClient(clientIt);
+					else
+						clientIt->resetState();
+				}
+				else if ((events[i].events & EPOLLOUT))
 					handleResponse(clientIt);
 			}
 		}
@@ -147,14 +145,7 @@ void Multiplexer::handleResponse(CLIENTIT &clientIt)
 {
 	if (clientIt->request_all_processed)
 	{
-		if (clientIt->response_all_sent)
-		{
-			if (clientIt->response.connection == "close")
-				dropClient(clientIt);
-			else
-				clientIt->resetState();	// keep-alive connection
-		}
-		else if (clientIt->response.cgi)
+		if (clientIt->response.cgi)
 		{
 			if (!clientIt->start_responding)
 				clientIt->response.checkCgiTimeout(clientIt);
@@ -196,19 +187,20 @@ CLIENTIT Multiplexer::findConnectSocket(int socket, CLIENTVECT &sockets)
 	return clientIt;
 }
 
-void Multiplexer::getClientRequest(CLIENTIT &clientIt)
+bool Multiplexer::getClientRequest(CLIENTIT &clientIt)
 {
 	ssize_t 	r;
+
 	try
 	{
 		clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
 		r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
-        std::cout << "headers begin -----------------------------------------------------------" << std::endl;
-        write(1, clientIt->header_buffer, r);
-        std::cout << "headers end -----------------------------------------------------------" << std::endl;
-		//TODO:
 		if (r < 1)
-			return (dropClient(clientIt));
+		{
+			delete[] clientIt->header_buffer;
+			dropClient(clientIt);
+			return false;
+		}
 		else
 		{
 			clientIt->headers.append(clientIt->header_buffer, r);
@@ -226,30 +218,26 @@ void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 	}
     if (clientIt->fields["method"] != "POST")
 	    delete[] clientIt->header_buffer;
+	return true;
 }
 
-bool	checkClientTimeOut(Client client)
+bool	Multiplexer::ConnectionTimedOut(CLIENTIT& clientIt)
 {
-	return ((!client.headers_all_recieved 
-		&& time(NULL) - client.header_timeout >= CLIENT_HEADER_timeout) ||
-			(client.request_all_processed && !client.start_responding 
-		&& (Multiplexer::keepalive_connections == KEEPALIVE_CONNECTIONS || time(NULL) - client.last_activity >= KEEPALIVE_TIMEOUT)));
-}
-
-void Multiplexer::dropInactiveClients()
-{
-	CLIENTIT newEnd, end, temp;
-
-	newEnd = std::remove_if(clients.begin(), clients.end(), checkClientTimeOut);
-	end = clients.end();
-	temp = newEnd;
-	for (; newEnd != end; newEnd++)
+	if (KEEPALIVE_CONN && !clientIt->request_line_received)
 	{
-		close(newEnd->connect_socket);
-		if (Multiplexer::keepalive_connections > 0)
-			Multiplexer::keepalive_connections--;
+		time_t elapsed = time(NULL) - clientIt->last_activity;
+		if (!clientIt->keepalive_requests)
+		{
+			if (elapsed >= CLIENT_HEADER_TIMEOUT)
+				return true;
+		}
+		else
+		{
+			if (elapsed >= KEEPALIVE_TIMEOUT)
+				return true;
+		}
 	}
-	clients.erase(temp, end);
+	return false;
 }
 
 void Multiplexer::loadMimeTypes()

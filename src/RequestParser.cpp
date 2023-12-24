@@ -14,6 +14,7 @@ void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
 		if (pos == offset)
 			return (reviewHeaders(clientIt));
 		header = clientIt->headers.substr(offset, pos - offset);
+		std::cout << header << std::endl;
 		if ((sep = header.find(':')) != std::string::npos)
 		{
 			last = header.begin() + sep;
@@ -70,21 +71,10 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 	if (clientIt->fields["method"] == "POST" && clientIt->fields.find("Content-Length") == clientIt->fields.end() 
 		&& clientIt->fields.find("Transfer-Encoding") == clientIt->fields.end())
 		throw RequestParsingException(STATUS_400);
-	//todo:
-	// clientIt->fields["Connection"] = "keep-alive";
-	if (clientIt->fields["Connection"] == "keep-alive")
-	{
-		if (Multiplexer::keepalive_connections < KEEPALIVE_CONNECTIONS)
-		{
-			if (clientIt->keepalive_requests == 0)
-            {
-				Multiplexer::keepalive_connections++;
-                std::cout << "keep alive : " << Multiplexer::keepalive_connections << std::endl;
-            }
-		}
-		// else
-		// 	clientIt->fields["Connection"]  = "close";
-	}
+	if (clientIt->fields.find("Connection") == clientIt->fields.end())
+		clientIt->fields["Connection"] = "keep-alive";
+	if (!KEEPALIVE_CONN)
+	clientIt->fields["Connection"] = "close";
 	clientIt->headers_all_recieved = true;
 	setServerByHost(clientIt);
 	if (clientIt->fields["method"] != "POST")	// POST has to read the client's request body

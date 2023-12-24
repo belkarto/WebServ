@@ -8,6 +8,44 @@
 #define URI           "request_target"
 #define NUM_DEF_ERROR 41
 #define CRLF          "\r\n"
+
+/*                  server default configuration                */
+#define DEFAULT_CONF_PATH            "config/default.conf"
+#define DEFAULT_HOST                 "localhost"
+#define DEFAULT_PORT                 "1337"
+#define DEFAULT_ROOT                 "./www"
+#define DEFAULT_INDEX                "index.html"
+#define DEFAULT_AUTOINDEX            false
+#define DEFAULT_CLIENT_MAX_BODY_SIZE 1048576 // 1M
+#define MAX_REQUEST_SIZE             107374182400 //  10GB --> 107374182400B // 5GB --> 5368709120 // 1GB --> 1073741824 // 9223372036GB --> MAX LONG LONG 9223372036854775807
+
+/*                  ConfigParser                                */
+#define NUM_SERV_DIREC  8
+#define NUM_LOCAT_DIREC 7
+
+/*                  Multiplexer                                  */
+
+#ifdef KEEPALIVE
+    # define KEEPALIVE_CONN 1
+#else
+    # define KEEPALIVE_CONN 0
+#endif
+
+#define Running                     true
+#define HEADERS_FIELDS_SIZE         5
+#define MAX_EVENTS                  1024
+#define BUFFER_SIZE                 1024
+#define CLIENT_HEADER_BUFFER_SIZE   1024
+#define CLIENT_RESPONSE_BUFFER_SIZE 1024
+#define CLIENT_HEADER_TIMEOUT       30
+#define KEEPALIVE_TIMEOUT           10
+#define BACKLOG                     100
+#define CONNECTIONS                 400
+#define MIMETYPE_PATH               "./config/mimes.txt"
+
+/*              Response                */
+#define CGI_TIMEOUT                 4
+
 /*                       status codes                           */
 //====== 1XX =====//
 #define STATUS_100 "100 Continue"
@@ -56,41 +94,8 @@
 #define STATUS_504 "504 Gateway Timeout"
 #define STATUS_505 "505 HTTP Version Not Supported"
 
-/*                  server default configuration                */
-#define DEFAULT_CONF_PATH            "config/default.conf"
-#define DEFAULT_HOST                 "localhost"
-#define DEFAULT_PORT                 "1337"
-#define DEFAULT_ROOT                 "./www"
-#define DEFAULT_INDEX                "index.html"
-#define DEFAULT_AUTOINDEX            false
-#define DEFAULT_CLIENT_MAX_BODY_SIZE 1048576 // 1M
-
-#define MAX_REQUEST_SIZE             107374182400
-/*
-    10GB --> 107374182400B
-    5GB --> 5368709120
-    1GB --> 1073741824
-     9223372036GB --> MAX LONG LONG 9223372036854775807
-*/
-/*                  ConfigParser                                */
-#define NUM_SERV_DIREC  8
-#define NUM_LOCAT_DIREC 7
-
-/*                  Multiplexer                                  */
-#define Running                     true
-#define HEADERS_FIELDS_SIZE         5
-#define MAX_EVENTS                  1024
-#define BUFFER_SIZE                 1024
-#define CLIENT_HEADER_BUFFER_SIZE   1024
-#define CLIENT_RESPONSE_BUFFER_SIZE 1024
-#define CLIENT_HEADER_timeout       20
-#define KEEPALIVE_TIMEOUT           10
-#define BACKLOG                     500
-#define KEEPALIVE_CONNECTIONS       100
-#define MIMETYPE_PATH               "./config/mimes.txt"
-
-/*              Response                */
-#define CGI_TIMEOUT                 4
+#define IS_FILE 0
+#define IS_DIRECTORY 1
 
 /*          return status                */
 #define IS_FILE 0

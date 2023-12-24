@@ -14,6 +14,7 @@ public:
 	std::string                         headers; 
 	time_t                              last_activity;
 	time_t                              header_timeout;
+	bool								active;
 	bool                                request_line_received;
 	bool                                headers_all_recieved;
 	bool                                request_all_processed;

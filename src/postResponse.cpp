@@ -29,7 +29,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
                 if (!cgiExecutable.empty())
                 {
                     cgi = true;
-                    handleCgi(clientIt, POST);
+                    handleCgi(clientIt);
                 }
                 else
                 {

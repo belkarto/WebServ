@@ -1,6 +1,6 @@
 #include "Multiplexer.hpp"
 #include "ConfigParser.hpp"
-#include <csignal>
+
 
 int	main(int ac, char **av, char **env)
 {

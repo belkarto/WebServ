@@ -16,7 +16,6 @@ Response::Response(void)
 
 	cgi				= false;
 
-	code 			= 0;
 	special_response = "";
     fileContent 	= NULL;
 	directory		= NULL;
@@ -43,7 +42,6 @@ void	Response::resetState()
 	
 	cgi 			= false;
 
-	code 			= 0;
 	special_response = "";
     fileContent 	= NULL;
 	directory		= NULL;
@@ -70,6 +68,9 @@ void    Response::setGetResponse(CLIENTIT& clientIt)
 		if (find(clientIt->locatIt->method.begin(), clientIt->locatIt->method.end(), "GET")
 			 == clientIt->locatIt->method.end())
 		{
+			if (status == STATUS_405)
+				return (handleDefaultErrorPage(clientIt));
+			this->resetState();
 			status = STATUS_405;
 			return (setErrorResponse(clientIt));
 		}
@@ -98,6 +99,7 @@ void    Response::setErrorResponse(CLIENTIT& clientIt)
 
 	std::stringstream									ss;
 	std::map<std::vector<int>, std::string>::iterator	pageIt;
+	int													code;
 
 	ss << status;
 	ss >> code;

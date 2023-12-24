@@ -9,6 +9,7 @@
 # include <netinet/ip.h>
 # include <unistd.h>
 # include <signal.h>
+# include <csignal>
 # include <arpa/inet.h>
 # include <string.h>
 # include <fcntl.h>
@@ -78,7 +79,6 @@ template <typename T>
 std::string	toString(T number) 
 {
 	std::stringstream	convert;
-
 	convert << number;
 	return convert.str();
 }

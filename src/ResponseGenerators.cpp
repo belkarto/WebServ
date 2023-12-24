@@ -2,33 +2,35 @@
 
 void Response::sendHeaders(CLIENTIT &clientIt)
 {
-    std::string headers;
+	std::string	headers;
 
-    clientIt->start_responding = true;
-    headers = "HTTP/1.1 ";
-    headers += status + CRLF;
-    if (!contentType.empty())
-        headers += "Content-Type: " + contentType + CRLF;
+	clientIt->start_responding = true;
+	headers = "HTTP/1.1 ";
+	headers += status + CRLF;
+	if (!contentType.empty())
+		headers += "Content-Type: " + contentType + CRLF;
     if (!transferEncoding.empty())
         headers += "Transfer-Encoding: " + transferEncoding + CRLF;
     else if (!contentLength.empty())
-        headers += "Content-Length: " + contentLength + CRLF;
-    if (!location.empty())
-        headers += "Location: " + location + CRLF;
-    connection = clientIt->fields["Connection"];
-    headers += "Connection: " + connection + CRLF;
-    if (status == STATUS_201 && !fileLocation.empty())
+	    headers += "Content-Length: " + contentLength + CRLF;
+	if (!location.empty())
+		headers += "Location: " + location + CRLF;
+	connection =  clientIt->fields["Connection"];
+	if (connection.empty())
+		connection = "close";
+	headers += "Connection: " + connection + CRLF;
+	if (status == STATUS_201 && !fileLocation.empty())
     {
         headers += "Content-Location: " + fileLocation + CRLF;
     }
-    headers += CRLF;
-    send(clientIt->connect_socket, &headers[0], headers.length(), 0);
+	headers += CRLF;
+	send(clientIt->connect_socket, &headers[0], headers.length(), 0);
 }
 
 void Response::sendResponseBuffer(CLIENTIT &clientIt)
 {
-    char            buffer[CLIENT_RESPONSE_BUFFER_SIZE];
-    std::streamsize rd;
+	char				buffer[CLIENT_RESPONSE_BUFFER_SIZE];
+	std::streamsize		rd;
 
     if (!transferEncoding.empty())
     {
@@ -46,10 +48,10 @@ void Response::sendResponseBuffer(CLIENTIT &clientIt)
             readbytes += rd;
             send(clientIt->connect_socket, &buffer, rd, 0);
         }
-        else
-        {
-            fileContent->close();
-            delete fileContent;
+        if (readbytes == response_size)
+		{
+			fileContent->close();
+			delete fileContent;
             clientIt->response_all_sent = true;
         }
     }
@@ -101,6 +103,8 @@ void Response::sendAutoIndexBuffer(CLIENTIT &clientIt)
     {
         chunk_data.append("<a href=\"");
         chunk_data.append(clientIt->fields[URI]);
+		if ((clientIt->fields[URI])[clientIt->fields[URI].length() - 1] != '/')
+			chunk_data.append("/");
         chunk_data.append(entry->d_name);
         chunk_data.append("\">");
         chunk_data.append(entry->d_name);
