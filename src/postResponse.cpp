@@ -19,7 +19,6 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     }
     else
     {
-        // uploading post body
         if (response_size <= 0)
         {
             if (postCgi)
@@ -38,8 +37,6 @@ void Response::setPostResponse(CLIENTIT &clientIt)
                     this->setErrorResponse(clientIt);
                     return;
                 }
-                // std::cout << "request require CGI" << std::endl;
-                // exit(100);
             }
             else
             {
@@ -54,11 +51,27 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         {
             char buffer[BUFFER_SIZE];
             int  rc = 0;
+            std::string boundary;
+            std::size_t found = std::string::npos;
 
             rc = recv(clientIt->connect_socket, buffer, BUFFER_SIZE, 0);
+            if(!clientIt->fields["boundary"].empty())
+            {
+                boundary = "--" + clientIt->fields["boundary"] + "--";
+                std::string tmp(buffer, rc);
+                found = tmp.find(boundary);
+                if (found != std::string::npos)
+                {
+                    tmp = tmp.substr(0, found);
+                    rc = tmp.size();
+                }
+            }
             clientIt->response.outFile->write(buffer, rc);
             clientIt->response.outFile->flush();
-            response_size -= rc;
+            if (found != std::string::npos)
+                response_size = 0;
+            else
+                response_size -= rc;
         }
     }
 }
@@ -86,6 +99,10 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
     STRINGVECTIT      it;
 
     uri = clientIt->fields[URI];
+    if (!clientIt->fields["boundary"].empty())
+        getUnprocessedHeaders(clientIt);
+    if (!unprocessedHeadersDone && !clientIt->fields["boundary"].empty())
+        return;
     clientIt->serverIt->findLocation(clientIt, uri);
     if (clientIt->locatIt != clientIt->serverIt->location.end())
     {

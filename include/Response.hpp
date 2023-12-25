@@ -76,8 +76,13 @@ class Response
     void   processResourceRequest(CLIENTIT &);
     void   handleResourceFile(CLIENTIT &);
     void   handleResourceDire(CLIENTIT &);
-    void   parsePostFilePath(CLIENTIT &clientIt);
+    void   parsePostFilePath(CLIENTIT &);
+    void   getUnprocessedHeaders(CLIENTIT &);
     char **setPostCgiEnv(char **envp, CLIENTIT &clientIt);
+
+
+    bool unprocessedHeadersDone;
+    bool   firstBuffer;
 };
 int remove_all(const char *path, int &ecode);
 #endif

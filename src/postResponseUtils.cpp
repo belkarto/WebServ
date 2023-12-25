@@ -30,7 +30,7 @@ void Response::ProcessUploadLocation(CLIENTIT &clientIt)
     // location supportes upload
     uri = clientIt->fields[URI];
     filePath = root + uri + clientIt->locatIt->upload_store;
-    std::cout << "====================" << std::endl;
+    std::cout << GREEN << "====================" << std::endl;
     std::cout << "file path is " << filePath << std::endl;
     parseUploadPath();
     fileName = clientIt->generateFileName(clientIt->fields["Content-Type"]);
@@ -38,20 +38,14 @@ void Response::ProcessUploadLocation(CLIENTIT &clientIt)
     clientIt->response.fileLocation = uri + fileName;
     std::cout << "file location is " << clientIt->response.fileLocation << std::endl;
     std::cout << "file name is " << filePath << std::endl;
-    std::cout << "====================" << std::endl;
+    std::cout << "====================" << RESET << std::endl;
     clientIt->response.outFile = new std::ofstream(filePath.c_str());
 }
 
 void Response::handleResourceFile(CLIENTIT &clientIt)
 {
     if (access((filePath).c_str(), R_OK | W_OK) == 0 && !clientIt->locatIt->cgi.empty())
-    {
         this->postCgi = true;
-        // if (!cgiExecutable.empty())
-        //     cgi = true;
-        // else
-        //     throw std::runtime_error(STATUS_403);
-    }
     else
         throw std::runtime_error(STATUS_403);
 }

@@ -14,7 +14,6 @@ void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
 		if (pos == offset)
 			return (reviewHeaders(clientIt));
 		header = clientIt->headers.substr(offset, pos - offset);
-		std::cout << header << std::endl;
 		if ((sep = header.find(':')) != std::string::npos)
 		{
 			last = header.begin() + sep;

@@ -24,6 +24,8 @@ Response::Response(void)
     filePathParsed  = false;
     
     postCgi         = false;
+    firstBuffer     = true;
+    unprocessedHeadersDone = false;
 }
 
 void	Response::resetState()
@@ -50,6 +52,8 @@ void	Response::resetState()
     filePathParsed  = false;
 
     postCgi         = false;
+    firstBuffer     = true;
+    unprocessedHeadersDone = false;
 }
 
 Response::~Response()
