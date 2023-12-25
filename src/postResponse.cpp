@@ -10,7 +10,6 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         }
         catch (std::exception &e)
         {
-            std::cout << "got exception " << e.what() << std::endl;
             this->resetState();
             status = e.what();
             this->setErrorResponse(clientIt);
@@ -152,5 +151,4 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
         this->handleResourceDire(clientIt);
     outFilePath = "/tmp" + clientIt->generateFileName(clientIt->fields["Content-Type"]);
     clientIt->response.outFile = new std::ofstream(outFilePath.c_str());
-    std::cout << "file name is " << outFilePath << std::endl;
 }

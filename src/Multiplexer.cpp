@@ -256,6 +256,7 @@ void Multiplexer::loadMimeTypes()
 		mime_types[key] = value;
 		ss.str("");
 	}
+    infile.close();
 }
 
 void Multiplexer::loadDefErrorPages()

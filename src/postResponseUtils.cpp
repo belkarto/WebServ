@@ -30,15 +30,10 @@ void Response::ProcessUploadLocation(CLIENTIT &clientIt)
     // location supportes upload
     uri = clientIt->fields[URI];
     filePath = root + uri + clientIt->locatIt->upload_store;
-    std::cout << GREEN << "====================" << std::endl;
-    std::cout << "file path is " << filePath << std::endl;
     parseUploadPath();
     fileName = clientIt->generateFileName(clientIt->fields["Content-Type"]);
     filePath.append(fileName);
     clientIt->response.fileLocation = uri + fileName;
-    std::cout << "file location is " << clientIt->response.fileLocation << std::endl;
-    std::cout << "file name is " << filePath << std::endl;
-    std::cout << "====================" << RESET << std::endl;
     clientIt->response.outFile = new std::ofstream(filePath.c_str());
 }
 
@@ -69,8 +64,6 @@ void Response::handleResourceDire(CLIENTIT &clientIt)
 {
     STRINGVECTIT indexIt;
 
-    std::cout << "request directory" << std::endl;
-    // its directory
     if (*(--filePath.end()) != '/')
         filePath.append("/");
     if (clientIt->locatIt->index.empty())
