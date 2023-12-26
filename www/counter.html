@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Click Counter</title>
+  <script>
+    // Function to set a cookie with the counter value
+    function setCounterCookie(value) {
+      document.cookie = `counter=${value}`;
+    }
+
+    // Function to get the counter value from the cookie
+    function getCounterFromCookie() {
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'counter') {
+          return parseInt(value) || 0;
+        }
+      }
+      return 0;
+    }
+
+    let count = getCounterFromCookie(); // Initialize count from the cookie
+
+    function increaseCounter() {
+      count++;
+      document.getElementById('counter').innerText = count;
+      setCounterCookie(count); // Update the cookie with the new counter value
+    }
+
+    function resetCounter() {
+      count = 0;
+      document.getElementById('counter').innerText = count;
+      setCounterCookie(count); // Reset the cookie value to 0
+    }
+
+    // Initialize the counter value on page load
+    window.onload = function() {
+      document.getElementById('counter').innerText = count;
+    };
+  </script>
+</head>
+<body>
+  <h1>Click Counter</h1>
+  <p>Counter: <span id="counter">0</span></p>
+  <button onclick="increaseCounter()">Submit</button>
+  <button onclick="resetCounter()">Reset</button>
+</body>
+</html>

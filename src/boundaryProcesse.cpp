@@ -1,4 +1,5 @@
 #include "../include/Multiplexer.hpp"
+#include <unistd.h>
 
 void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
 {
@@ -7,21 +8,23 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
 
     if (firstBuffer)
     {
+        clientIt->header_buffer[CLIENT_HEADER_BUFFER_SIZE] = 0;
         startPos = std::strstr(clientIt->header_buffer, "\r\n\r\n");
         if (startPos == NULL || (startPos + 4) - clientIt->header_buffer == CLIENT_HEADER_BUFFER_SIZE)
             return;
         startPos += 4;
-        leftData = strlen(clientIt->header_buffer) - (startPos - clientIt->header_buffer);
+        leftData = (CLIENT_HEADER_BUFFER_SIZE + 1) - (startPos - clientIt->header_buffer);
         if (leftData > 0)
         {
             tmp = new char[leftData + 1];
             std::memset(tmp, 0, leftData + 1);
             std::memcpy(tmp, startPos, leftData);
-            std::memset(clientIt->header_buffer, 0, CLIENT_HEADER_BUFFER_SIZE);
-            std::memcpy(clientIt->header_buffer, tmp, leftData);
-            delete[] tmp;
+            delete[] clientIt->header_buffer;
+            clientIt->header_buffer = tmp;
+            tmp = NULL;
         }
-        if (std::strstr(clientIt->header_buffer, "\r\n\r\n") == NULL)
+        tmp = std::strstr(clientIt->header_buffer, "\r\n\r\n");
+        if (tmp == NULL)
         {
             delete[] clientIt->header_buffer;
             clientIt->header_buffer = NULL;
@@ -31,9 +34,12 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
     else
     {
         char *tmp = NULL;
-        clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
 
-        recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
+        if (clientIt->header_buffer == NULL)
+        {
+            clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
+            recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
+        }
         if ((tmp = std::strstr(clientIt->header_buffer, "Content-Type:")) == NULL)
         {
             delete[] clientIt->header_buffer;

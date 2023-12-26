@@ -193,7 +193,7 @@ bool Multiplexer::getClientRequest(CLIENTIT &clientIt)
 
 	try
 	{
-		clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
+		clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
 		r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
 		if (r < 1)
 		{
