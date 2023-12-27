@@ -7,6 +7,10 @@ void Response::sendHeaders(CLIENTIT &clientIt)
 	clientIt->start_responding = true;
 	headers = "HTTP/1.1 ";
 	headers += status + CRLF;
+    if (cgi)
+    {
+        contentType = "text/html";
+    }
 	if (!contentType.empty())
 		headers += "Content-Type: " + contentType + CRLF;
     if (!transferEncoding.empty())
