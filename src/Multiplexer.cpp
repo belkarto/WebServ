@@ -33,6 +33,7 @@ void (Client::*Multiplexer::fields_setters[HEADERS_FIELDS_SIZE])(std::string &fi
 	&Client::setContentLength,
 	&Client::setConnection,
 	&Client::setTransferEncoding,
+    &Client::setCookie,
 };
 
 Multiplexer::Multiplexer(SERVVECT &servers, char **env) : servers(servers)

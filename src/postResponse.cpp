@@ -18,7 +18,6 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     }
     else
     {
-        std::cout << RED << response_size << RESET << std::endl;
         if (response_size <= 0)
         {
             if (postCgi)
