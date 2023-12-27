@@ -9,6 +9,7 @@ void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
 	std::string::iterator				last;
 
 	offset = 0;
+    std::cout << clientIt->headers << std::endl;
     while ((pos = clientIt->headers.find("\r\n", offset)) != std::string::npos)
 	{
 		if (pos == offset)
@@ -52,6 +53,7 @@ void	Multiplexer::parseRequestLine(CLIENTIT& clientIt)
 	ss >> method >> request_target >> protocol_version >> blank;	// method uri protocol_version\r\n
 	if (method.empty() || request_target.empty() || protocol_version.empty() || !blank.empty())
 		throw RequestParsingException(STATUS_400);
+    std::cout << "request_line ==> " << ss.str() << std::endl;
 	clientIt->setMethod(method);
 	clientIt->setUri(request_target);
 	clientIt->setProtocolVersion(protocol_version);
@@ -72,7 +74,7 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 	if (clientIt->fields.find("Connection") == clientIt->fields.end())
 		clientIt->fields["Connection"] = "keep-alive";
 	if (!KEEPALIVE_CONN)
-	clientIt->fields["Connection"] = "close";
+	    clientIt->fields["Connection"] = "close";
 	clientIt->headers_all_recieved = true;
 	setServerByHost(clientIt);
 	if (clientIt->fields["method"] != "POST")	// POST has to read the client's request body

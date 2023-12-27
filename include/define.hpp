@@ -32,10 +32,10 @@
 #endif
 
 #define Running                     true
-#define HEADERS_FIELDS_SIZE         5
+#define HEADERS_FIELDS_SIZE         6
 #define MAX_EVENTS                  1024
 #define BUFFER_SIZE                 1024
-#define CLIENT_HEADER_BUFFER_SIZE   1024
+#define CLIENT_HEADER_BUFFER_SIZE   100
 #define CLIENT_RESPONSE_BUFFER_SIZE 1024
 #define CLIENT_HEADER_TIMEOUT       30
 #define KEEPALIVE_TIMEOUT           10

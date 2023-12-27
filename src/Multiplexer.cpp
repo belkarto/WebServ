@@ -24,6 +24,7 @@ const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {
 	"content-length",
 	"connection",
 	"transfer-encoding",
+	"cookie",
 };
 
 void (Client::*Multiplexer::fields_setters[HEADERS_FIELDS_SIZE])(std::string &field) = {
