@@ -218,7 +218,6 @@ std::string Client::generateFileName(std::string &contentType)
     ss << std::setw(2) << localTime->tm_min;
     ss << std::setw(2) << localTime->tm_sec;
 
-    return ("/" + ss.str() + ".txt");
     return ("/" + ss.str() + getFileExtension(contentType));
 }
 void Client::setUri(std::string &uri)
