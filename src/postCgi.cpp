@@ -28,13 +28,17 @@ char **Response::setPostCgiEnv(char **envp, CLIENTIT &clientIt)
 {
     std::string content = "CONTENT_LENGTH=" + clientIt->fields["Content-Length"];
     std::string type = "CONTENT_TYPE=" + clientIt->fields["Content-Type"];
-    char      **newEnvp = new char *[6];
+    char      **newEnvp = new char *[9];
 
     newEnvp[0] = strdup(("SERVER_PROTOCOL=" + clientIt->fields["protocol_version"]).c_str());
     newEnvp[1] = strdup(content.c_str());
     newEnvp[2] = strdup(type.c_str());
     newEnvp[3] = strdup(("HTTP_HOST=" + clientIt->serverIt->bind_addr_str).c_str());
     newEnvp[4] = strdup(("HTTP_COOKIE=" + clientIt->fields["Cookie"]).c_str());
-    newEnvp[5] = NULL;
+    newEnvp[5] = strdup(("REQUEST_METHOD=" + clientIt->fields["method"]).c_str());
+    newEnvp[6] = strdup(("REDIRECT_STATUS=200"));
+    newEnvp[7] = strdup(("SCRIPT_FILENAME=" + clientIt->response.filePath).c_str());
+    newEnvp[8] = NULL;
+    return newEnvp;
     return joinEnvp(envp, newEnvp);
 }

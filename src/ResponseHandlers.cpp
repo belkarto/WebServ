@@ -63,7 +63,7 @@ bool Response::handleIndexPages(CLIENTIT &clientIt)
             if (!access(filePath.c_str(), R_OK))
                 handleFile(clientIt);
             else
-            {         
+            {
                 if (status == STATUS_403)
                     handleDefaultErrorPage(clientIt);
                 else
@@ -82,7 +82,7 @@ bool Response::handleIndexPages(CLIENTIT &clientIt)
 void Response::handleFile(CLIENTIT &clientIt)
 {
     if (status.empty())
-		status = STATUS_200;
+        status = STATUS_200;
     if (!cgi)
     {
         fileContent = new std::ifstream(filePath.c_str());
@@ -143,11 +143,11 @@ bool Response::handleAutoIndex(CLIENTIT &clientIt)
 
 void Response::handleDefaultErrorPage(CLIENTIT &clientIt)
 {
-    std::stringstream   ss;
-    int                 code;
+    std::stringstream ss;
+    int               code;
 
-	ss << status;
-	ss >> code;
+    ss << status;
+    ss >> code;
     special_response = getErrorPage(code);
     contentLength = toString(special_response.length());
     sendHeaders(clientIt);
@@ -222,13 +222,12 @@ void Response::handleCgi(CLIENTIT &clientIt)
         }
         if (!pid)
         {
-             if (clientIt->fields["method"] == "POST")
+            if (clientIt->fields["method"] == "POST")
             {
                 Multiplexer::env = setPostCgiEnv(Multiplexer::env, clientIt);
                 std::freopen(outFilePath.c_str(), "r", stdin);
             }
             dup2(fds[1], 1);
-            dup2(fds[1], 2);
             close(fds[0]);
             execve(cmds[0], cmds, Multiplexer::env);
         }
@@ -261,7 +260,7 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
     {
         if (WIFEXITED(wstatus))
         {
-            if (WEXITSTATUS(wstatus))
+            if (WEXITSTATUS(wstatus) != 0)
             {
                 close(fds[0]);
                 resetState();

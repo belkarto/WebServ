@@ -7,7 +7,7 @@
 <body>
     <div class="container">
         <h1>Cookies</h1>
-        <form method="POST" action="set_cookies.php">
+        <form method="POST" action="set_cookies.py">
             <div class="form-group">
                 <label for="name">Name:</label>
                 <input type="text" name="name" id="name" vlaue="webserv" required>

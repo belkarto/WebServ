@@ -18,10 +18,11 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     }
     else
     {
-        if (response_size <= 0)
+        if (request_size <= 0)
         {
             if (postCgi)
             {
+                clientIt->response.outFile->close();
                 Multiplexer::env = setPostCgiEnv(Multiplexer::env, clientIt);
                 cgiExecutable = clientIt->serverIt->findCgi(clientIt, filePath);
                 if (!cgiExecutable.empty())
@@ -48,13 +49,13 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         }
         else
         {
-            char buffer[BUFFER_SIZE];
-            int  rc = 0;
+            char        buffer[BUFFER_SIZE];
+            int         rc = 0;
             std::string boundary;
             std::size_t found = std::string::npos;
 
             rc = recv(clientIt->connect_socket, buffer, BUFFER_SIZE, 0);
-            if(!clientIt->fields["boundary"].empty())
+            if (!clientIt->fields["boundary"].empty())
             {
                 boundary = "--" + clientIt->fields["boundary"] + "--";
                 std::string tmp(buffer, rc);
@@ -68,9 +69,9 @@ void Response::setPostResponse(CLIENTIT &clientIt)
             clientIt->response.outFile->write(buffer, rc);
             clientIt->response.outFile->flush();
             if (found != std::string::npos)
-                response_size = 0;
+                request_size = 0;
             else
-                response_size -= rc;
+                request_size -= rc;
         }
     }
 }
@@ -96,6 +97,7 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
     std::stringstream ss;
     std::string       fileName;
     STRINGVECTIT      it;
+    int               readed;
 
     uri = clientIt->fields[URI];
     if (!clientIt->fields["boundary"].empty())
@@ -125,11 +127,11 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         if (!clientIt->response.outFile->is_open())
             throw std::runtime_error(STATUS_500);
         ss << clientIt->fields["Content-Length"];
-        int readed =  response_size;
-        ss >> response_size;
-        if (response_size >= clientIt->serverIt->client_max_body_size)
+        readed = request_size;
+        ss >> request_size;
+        if (request_size >= clientIt->serverIt->client_max_body_size)
             throw std::runtime_error(STATUS_413);
-        checkUnprocessedData(clientIt->header_buffer, response_size, clientIt->response.outFile, readed);
+        checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile, readed);
         this->filePathParsed = true;
     }
     else

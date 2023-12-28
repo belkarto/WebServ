@@ -122,9 +122,7 @@ void Multiplexer::connectionListener()
 			{
 				if ((events[i].events & EPOLLIN))
 				{
-					if (clientIt->headers_all_recieved)
-                        clientIt->request_all_processed = true;
-					else if (!getClientRequest(clientIt))
+					if (!getClientRequest(clientIt))
 						continue;
 				}
 				if (ConnectionTimedOut(clientIt))
@@ -197,7 +195,7 @@ bool Multiplexer::getClientRequest(CLIENTIT &clientIt)
 	{
 		clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
 		r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
-        clientIt->response.response_size = r;
+        clientIt->response.request_size = r;
 		if (r < 1)
 		{
 			delete[] clientIt->header_buffer;

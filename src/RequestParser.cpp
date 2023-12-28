@@ -9,7 +9,6 @@ void	Multiplexer::parseRequestHeaders(CLIENTIT& clientIt)
 	std::string::iterator				last;
 
 	offset = 0;
-    std::cout << clientIt->headers << std::endl;
     while ((pos = clientIt->headers.find("\r\n", offset)) != std::string::npos)
 	{
 		if (pos == offset)
@@ -75,10 +74,8 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 		clientIt->fields["Connection"] = "keep-alive";
 	if (!KEEPALIVE_CONN)
 	    clientIt->fields["Connection"] = "close";
-	clientIt->headers_all_recieved = true;
+	clientIt->request_all_processed = true;
 	setServerByHost(clientIt);
-	if (clientIt->fields["method"] != "POST")	// POST has to read the client's request body
-		clientIt->request_all_processed = true;
 }
 
 

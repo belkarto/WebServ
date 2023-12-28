@@ -2,6 +2,7 @@
 #define RESPONSE_HPP
 
 #include "webserv.hpp"
+#include <ios>
 
 class Response
 {
@@ -30,6 +31,7 @@ class Response
     std::ofstream  *outFile;
     DIR            *directory;
     std::streamsize response_size;
+    std::streamsize request_size;
     std::streamsize readbytes;
 
     Response(void);
