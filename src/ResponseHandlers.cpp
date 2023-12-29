@@ -82,20 +82,18 @@ bool Response::handleIndexPages(CLIENTIT &clientIt)
 void Response::handleFile(CLIENTIT &clientIt)
 {
     if (status.empty())
-        status = STATUS_200;
-    if (!cgi)
-    {
-        fileContent = new std::ifstream(filePath.c_str());
-        if (!fileContent || !fileContent->is_open())
-        {
-            status = STATUS_500;
-            return (handleDefaultErrorPage(clientIt));
-        }
-        response_size = getFileSize(fileContent);
-        contentLength = toString(response_size);
-    }
+		status = STATUS_200;
+    if (cgi)
+        fileContent = new std::ifstream(CgiFilePath.c_str());
     else
-        transferEncoding = "chunked";
+        fileContent = new std::ifstream(filePath.c_str());
+    if (!fileContent || !fileContent->is_open())
+    {
+        status = STATUS_500;
+        return (handleDefaultErrorPage(clientIt));
+    }
+    response_size = getFileSize(fileContent);
+    contentLength = toString(response_size);
     contentType = clientIt->getMimeType(filePath);
     sendHeaders(clientIt);
 }
@@ -186,12 +184,15 @@ void Response::parsePostFilePath(CLIENTIT &clientIt)
 
 void Response::handleCgi(CLIENTIT &clientIt)
 {
-
-    char *cmds[3];
+    std::string content_type;
+    char        *cmds[3];
 
     cmds[0] = const_cast<char *>(cgiExecutable.c_str());
     cmds[1] = const_cast<char *>(filePath.c_str());
     cmds[2] = NULL;
+    CgiFilePath = "/tmp";
+    content_type = "text/plain";
+    CgiFilePath.append(clientIt->generateFileName(content_type));
     if (access(cmds[0], F_OK))
     {
         resetState();
@@ -227,7 +228,9 @@ void Response::handleCgi(CLIENTIT &clientIt)
                 Multiplexer::env = setPostCgiEnv(Multiplexer::env, clientIt);
                 std::freopen(outFilePath.c_str(), "r", stdin);
             }
-            dup2(fds[1], 1);
+            std::ofstream(CgiFilePath.c_str());
+            std::freopen(CgiFilePath.c_str(), "w+", stdout);
+            std::freopen(CgiFilePath.c_str(), "w+", stderr);
             close(fds[0]);
             execve(cmds[0], cmds, Multiplexer::env);
         }
@@ -251,6 +254,7 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
     {
         kill(pid, SIGKILL);
         wait(NULL);
+        unlink(CgiFilePath.c_str());
         close(fds[0]);
         resetState();
         status = STATUS_500;
@@ -262,12 +266,12 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
         {
             if (WEXITSTATUS(wstatus) != 0)
             {
+                unlink(CgiFilePath.c_str());
                 close(fds[0]);
                 resetState();
                 status = STATUS_500;
-                setErrorResponse(clientIt);
+                return (setErrorResponse(clientIt));
             }
-            fd = fds[0];
             handleFile(clientIt);
         }
     }
@@ -275,6 +279,7 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
     {
         kill(pid, SIGKILL);
         wait(NULL);
+        unlink(CgiFilePath.c_str());
         close(fds[0]);
         resetState();
         status = STATUS_408;
