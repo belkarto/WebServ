@@ -1,5 +1,5 @@
-.html   text/html 
-.htm    text/html 
+.html   text/html
+.htm    text/html
 .shtml  text/html 
 .css    text/css 
 .xml    text/xml 

@@ -255,6 +255,9 @@ void Multiplexer::loadMimeTypes()
 		ss >> key;
 		ss >> value;
 		mime_types[key] = value;
+        key.clear();
+        value.clear();
+        ss.clear();
 		ss.str("");
 	}
     infile.close();

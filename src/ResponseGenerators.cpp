@@ -52,7 +52,6 @@ void Response::sendHeaders(CLIENTIT &clientIt)
     else
         headers += "Cookie: " + clientIt->fields["Cookie"] + CRLF;
     headers += CRLF;
-    std::cout << RED << "Response headers: " << headers << RESET << std::endl;
     send(clientIt->connect_socket, &headers[0], headers.length(), 0);
 }
 
