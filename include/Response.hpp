@@ -15,17 +15,17 @@ class Response
 
     std::string filePath;
     std::string root;
-    std::string cgiExecutable;
     STRINGVECT *index;
     bool        autoindex;
 
+    std::string cgiExecutable; // cgi
+    std::string CgiFilePath;
     bool   cgi;
     time_t counter;
     int    fds[2];
     pid_t  pid;
 
-    std::string     special_response;
-    int             fd;
+    std::string     special_response; // response
     std::ifstream  *fileContent;
     std::ofstream  *outFile;
     DIR            *directory;
@@ -56,7 +56,6 @@ class Response
     void        sendHeaders(CLIENTIT &clientIt);
     void        sendResponseBuffer(CLIENTIT &clientIt);
     void        sendAutoIndexBuffer(CLIENTIT &clientIt);
-    void        sendPipeBuffer(CLIENTIT &clientIt);
     void        handleDelete(CLIENTIT &clientIt);
     void        handleCgi(CLIENTIT &clientIt);
     void        checkCgiTimeout(CLIENTIT &clientIt);
@@ -68,6 +67,8 @@ class Response
     std::string outFilePath;
     std::string fileLocation;
     bool        filePathParsed;
+    bool    unprocessedHeadersDone;
+    bool   firstBuffer;
 
     void   postParseFilePath(CLIENTIT &);
     void   parseUploadPath();
@@ -80,9 +81,6 @@ class Response
     void   getUnprocessedHeaders(CLIENTIT &);
     char **setPostCgiEnv(char **envp, CLIENTIT &clientIt);
 
-
-    bool unprocessedHeadersDone;
-    bool   firstBuffer;
 };
 int remove_all(const char *path, int &ecode);
 #endif

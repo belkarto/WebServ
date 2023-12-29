@@ -98,6 +98,15 @@ void Multiplexer::registerClient(SERVIT &serverIt)
 
 void Multiplexer::dropClient(CLIENTIT &clientIt)
 {
+	if (clientIt->response.fileContent)
+	{
+		clientIt->response.fileContent->close();
+		delete clientIt->response.fileContent;
+	}
+	if (clientIt->response.cgi)
+		unlink(clientIt->response.CgiFilePath.c_str());
+	if (clientIt->response.directory)
+		closedir(clientIt->response.directory);
 	close(clientIt->connect_socket);
 	clients.erase(clientIt);
 }
@@ -122,9 +131,7 @@ void Multiplexer::connectionListener()
 			{
 				if ((events[i].events & EPOLLIN))
 				{
-					if (clientIt->headers_all_recieved)
-                        clientIt->request_all_processed = true;
-					else if (!getClientRequest(clientIt))
+					if (!getClientRequest(clientIt))
 						continue;
 				}
 				if (ConnectionTimedOut(clientIt))

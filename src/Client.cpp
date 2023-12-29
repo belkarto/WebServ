@@ -30,7 +30,6 @@ void Client::resetState()
 
 void Client::setCookie(std::string &cookie)
 {
-    std::cout <<YELLOW << "cookie: " <<GREEN << cookie << RESET << std::endl;
     std::transform(cookie.begin(), cookie.end(), cookie.begin(), tolower);
     fields.insert(std::make_pair("Cookie", cookie));
 }

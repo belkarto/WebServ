@@ -2,7 +2,8 @@
 
 Response::Response(void)
 {
-	status 			= "";   
+	status 			= "";
+	connection		= "";
 	contentType 	= "text/html";
 	contentLength 	= "";
 	transferEncoding = "";
@@ -10,10 +11,11 @@ Response::Response(void)
 
 	filePath 		= "";
 	root 			= "";
-	cgiExecutable	= "";
 	index 			= NULL;
     autoindex 		= false;
 
+	cgiExecutable	= "";
+	CgiFilePath		= "";
 	cgi				= false;
 
 	special_response = "";
@@ -30,7 +32,8 @@ Response::Response(void)
 
 void	Response::resetState()
 {
-	status 			= "";   
+	status 			= "";
+	connection		= "";
 	contentType 	= "text/html";
 	contentLength 	= "";
 	transferEncoding = "";
@@ -38,11 +41,12 @@ void	Response::resetState()
 
 	filePath 		= "";
 	root 			= "";
-	cgiExecutable	= "";
 	index 			= NULL;
     autoindex 		= false;
-	
-	cgi 			= false;
+
+	cgiExecutable	= "";
+	CgiFilePath		= "";
+	cgi				= false;
 
 	special_response = "";
     fileContent 	= NULL;
@@ -50,7 +54,7 @@ void	Response::resetState()
 	response_size	= 0;
 	readbytes 		= 0;
     filePathParsed  = false;
-
+    
     postCgi         = false;
     firstBuffer     = true;
     unprocessedHeadersDone = false;
