@@ -110,6 +110,7 @@ void Multiplexer::connectionListener()
                 if ((events[i].events & EPOLLIN))
                 {
                     // note it always enter here causing problems in post request 
+                    // i did quick fix by adding if statement in the beginning of the function
                     if (!getClientRequest(clientIt))
                         continue;
                 }
@@ -178,8 +179,10 @@ bool Multiplexer::getClientRequest(CLIENTIT &clientIt)
 {
     ssize_t r;
 
+    // if statement i did add 
     if (clientIt->request_all_processed)
         return true;
+    // end of if statement
     try
     {
         clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
