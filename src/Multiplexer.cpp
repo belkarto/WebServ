@@ -195,6 +195,8 @@ bool Multiplexer::getClientRequest(CLIENTIT &clientIt)
 	{
 		clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
 		r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
+        clientIt->response.request_read = r;
+        clientIt->header_buffer[r] = 0;
 		if (r < 1)
 		{
 			delete[] clientIt->header_buffer;

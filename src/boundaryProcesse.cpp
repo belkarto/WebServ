@@ -8,12 +8,16 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
 
     if (firstBuffer)
     {
-        clientIt->header_buffer[CLIENT_HEADER_BUFFER_SIZE] = 0;
         startPos = std::strstr(clientIt->header_buffer, "\r\n\r\n");
-        if (startPos == NULL || (startPos + 4) - clientIt->header_buffer == CLIENT_HEADER_BUFFER_SIZE)
+        if (startPos == NULL || (startPos + 4) - clientIt->header_buffer == request_read)
+        {
+            delete[] clientIt->header_buffer;
+            clientIt->header_buffer = NULL;
+            firstBuffer = false;
             return;
+        }
         startPos += 4;
-        leftData = (CLIENT_HEADER_BUFFER_SIZE + 1) - (startPos - clientIt->header_buffer);
+        leftData = (request_read + 1) - (startPos - clientIt->header_buffer);
         if (leftData > 0)
         {
             tmp = new char[leftData + 1];
@@ -21,6 +25,7 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
             std::memcpy(tmp, startPos, leftData);
             delete[] clientIt->header_buffer;
             clientIt->header_buffer = tmp;
+            clientIt->header_buffer[leftData] = 0;
             tmp = NULL;
         }
         tmp = std::strstr(clientIt->header_buffer, "\r\n\r\n");
@@ -34,13 +39,19 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
     else
     {
         char *tmp = NULL;
+        int   rc = 0;
 
         if (clientIt->header_buffer == NULL)
         {
-            clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE];
-            recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
+            std::cout << "header buffer is null" << std::endl;
+            clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
+            rc = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
+            request_read = rc;
+            clientIt->header_buffer[rc] = 0;
+            std::cout << "rc = " << rc << std::endl;
         }
-        if ((tmp = std::strstr(clientIt->header_buffer, "Content-Type:")) == NULL)
+        tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
+        if (tmp == NULL)
         {
             delete[] clientIt->header_buffer;
             clientIt->header_buffer = NULL;

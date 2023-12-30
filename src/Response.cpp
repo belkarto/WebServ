@@ -20,6 +20,7 @@ Response::Response(void)
     fileContent 	= NULL;
 	directory		= NULL;
 	response_size	= 0;
+    request_size    = 0;
 	readbytes 		= 0;
     filePathParsed  = false;
     
@@ -48,6 +49,7 @@ void	Response::resetState()
     fileContent 	= NULL;
 	directory		= NULL;
 	response_size	= 0;
+    request_size    = 0;
 	readbytes 		= 0;
     filePathParsed  = false;
 

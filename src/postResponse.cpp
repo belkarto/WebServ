@@ -1,4 +1,5 @@
 #include "../include/Multiplexer.hpp"
+#include <unistd.h>
 
 void Response::setPostResponse(CLIENTIT &clientIt)
 {
@@ -18,7 +19,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     }
     else
     {
-        if (response_size <= 0)
+        if (request_size <= 0)
         {
             if (postCgi)
             {
@@ -68,9 +69,9 @@ void Response::setPostResponse(CLIENTIT &clientIt)
             clientIt->response.outFile->write(buffer, rc);
             clientIt->response.outFile->flush();
             if (found != std::string::npos)
-                response_size = 0;
+                request_size = 0;
             else
-                response_size -= rc;
+                request_size -= rc;
         }
     }
 }
@@ -125,10 +126,10 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         if (!clientIt->response.outFile->is_open())
             throw std::runtime_error(STATUS_500);
         ss << clientIt->fields["Content-Length"];
-        ss >> response_size;
-        if (response_size >= clientIt->serverIt->client_max_body_size)
+        ss >> request_size;
+        if (request_size >= clientIt->serverIt->client_max_body_size)
             throw std::runtime_error(STATUS_413);
-        checkUnprocessedData(clientIt->header_buffer, response_size, clientIt->response.outFile);
+        checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile);
         this->filePathParsed = true;
     }
     else
