@@ -1,4 +1,5 @@
 #include "../include/Multiplexer.hpp"
+#include <ios>
 #include <unistd.h>
 
 void Response::setPostResponse(CLIENTIT &clientIt)
@@ -76,16 +77,16 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     }
 }
 
-static void checkUnprocessedData(char *buffer, std::streamsize &size, std::ostream *outFile)
+static void checkUnprocessedData(char *buffer, std::streamsize &size, std::ostream *outFile, std::streamsize readed)
 {
     char *startPos;
     int   leftDataLen;
 
     startPos = std::strstr(buffer, "\r\n\r\n");
-    if (startPos == NULL || (startPos + 4) - buffer == CLIENT_HEADER_BUFFER_SIZE)
+    if (startPos == NULL || (startPos + 4) - buffer == readed)
         return;
     startPos += 4;
-    leftDataLen = CLIENT_HEADER_BUFFER_SIZE - (startPos - buffer);
+    leftDataLen = readed - (startPos - buffer);
     outFile->write(startPos, leftDataLen);
     size -= leftDataLen;
     delete[] buffer;
@@ -129,7 +130,7 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         ss >> request_size;
         if (request_size >= clientIt->serverIt->client_max_body_size)
             throw std::runtime_error(STATUS_413);
-        checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile);
+        checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile, clientIt->response.request_read);
         this->filePathParsed = true;
     }
     else

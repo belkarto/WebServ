@@ -75,6 +75,7 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 	clientIt->fields["Connection"] = "close";
 	clientIt->headers_all_recieved = true;
 	setServerByHost(clientIt);
+    clientIt->request_all_processed = true;
 	if (clientIt->fields["method"] != "POST")	// POST has to read the client's request body
 		clientIt->request_all_processed = true;
 }
