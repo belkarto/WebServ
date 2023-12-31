@@ -2,30 +2,36 @@
 
 Client::Client()
 {
-	headers = "";
+    headers = "";
     active = false;
-	request_line_received = false;
-	headers_all_recieved = false;
-	request_all_processed = false;
+    request_line_received = false;
+    headers_all_recieved = false;
+    request_all_processed = false;
     start_responding = false;
-	response_all_sent = false;
-	keepalive_requests = 0;
-	header_timeout = time(NULL);
-	last_activity = header_timeout;
+    response_all_sent = false;
+    keepalive_requests = 0;
+    header_timeout = time(NULL);
+    last_activity = header_timeout;
 }
 
 void Client::resetState()
 {
-  	headers = "";
+    headers = "";
     active = false;
-	headers_all_recieved = false;
-	request_line_received = false;
-	request_all_processed = false;
-	response_all_sent = false;
-	start_responding = false;
-	keepalive_requests += 1;
-	last_activity = time(NULL);
-	response.resetState();
+    headers_all_recieved = false;
+    request_line_received = false;
+    request_all_processed = false;
+    response_all_sent = false;
+    start_responding = false;
+    keepalive_requests += 1;
+    last_activity = time(NULL);
+    response.resetState();
+}
+
+void Client::setCookie(std::string &cookie)
+{
+    std::transform(cookie.begin(), cookie.end(), cookie.begin(), tolower);
+    fields.insert(std::make_pair("Cookie", cookie));
 }
 
 void Client::setTransferEncoding(std::string &encoding)
@@ -44,9 +50,9 @@ void Client::setTransferEncoding(std::string &encoding)
 void Client::setContentType(std::string &content_type)
 {
     std::map<std::string, std::string>::iterator it, ite;
-    std::stringstream                               ss;
-    std::string                                     boundary;
-    size_t                                          pos;
+    std::stringstream                            ss;
+    std::string                                  boundary;
+    size_t                                       pos;
 
     ss << content_type;
     getline(ss, content_type, ';');
@@ -55,21 +61,21 @@ void Client::setContentType(std::string &content_type)
     {
         ss.clear();
         ss << boundary.substr(pos + strlen("boundary="));
-        getline(ss,  fields["boundary"], ';');
+        getline(ss, fields["boundary"], ';');
     }
     std::transform(content_type.begin(), content_type.end(), content_type.begin(), tolower);
-    it = Multiplexer::mime_types.begin();
-    ite = Multiplexer::mime_types.end();
-    while (it != ite)
-    {
-        if (it->second == content_type)
-            break;
-        it++;
-    }
-    if (it == ite)
-        fields.insert(std::make_pair("Content-Type", "application/octet-stream"));
-    else
-        fields.insert(std::make_pair("Content-Type", content_type));
+    // it = Multiplexer::mime_types.begin();
+    // ite = Multiplexer::mime_types.end();
+    // while (it != ite)
+    // {
+    //     if (it->second == content_type)
+    //         break;
+    //     it++;
+    // }
+    // if (it == ite)
+    //     fields.insert(std::make_pair("Content-Type", "application/octet-stream"));
+    // else
+    fields.insert(std::make_pair("Content-Type", content_type));
     /*
         in case Content-Type wasnt specified
         the media is defaulted to application/octet-stream
@@ -111,22 +117,22 @@ void Client::setHost(std::string &host)
 
 void Client::setContentLength(std::string &content_length)
 {
-	if (content_length.empty() 
-		|| find_if(content_length.begin(), content_length.end(), not_digit) != content_length.end())
-		throw RequestParsingException(STATUS_400);
-	fields.insert(std::make_pair("Content-Length", content_length));
-	/*
-	 Content-Length = 1*DIGIT
-	*/
+    if (content_length.empty() ||
+        find_if(content_length.begin(), content_length.end(), not_digit) != content_length.end())
+        throw RequestParsingException(STATUS_400);
+    fields.insert(std::make_pair("Content-Length", content_length));
+    /*
+     Content-Length = 1*DIGIT
+    */
 }
- 
-void	Client::setConnection(std::string &connection)
+
+void Client::setConnection(std::string &connection)
 {
-	std::transform(connection.begin(), connection.end(), connection.begin(), tolower);
-	if (connection == "keep-alive" || connection == "close")
-		fields.insert(std::make_pair("Connection", connection));
-	else
-		throw RequestParsingException(STATUS_400);
+    std::transform(connection.begin(), connection.end(), connection.begin(), tolower);
+    if (connection == "keep-alive" || connection == "close")
+        fields.insert(std::make_pair("Connection", connection));
+    else
+        throw RequestParsingException(STATUS_400);
 }
 
 void Client::setProtocolVersion(std::string &protocol_version) // HTTP-version = HTTP-name "/" DIGIT "." DIGIT
@@ -213,9 +219,9 @@ std::string Client::generateFileName(std::string &contentType)
 
     return ("/" + ss.str() + getFileExtension(contentType));
 }
-void	Client::setUri(std::string &uri)
+void Client::setUri(std::string &uri)
 {
-	if (uri[0] != '/')
-		throw  RequestParsingException(STATUS_400);
-	fields["request_target"] = uri;
+    if (uri[0] != '/')
+        throw RequestParsingException(STATUS_400);
+    fields["request_target"] = uri;
 }

@@ -29,6 +29,7 @@ public:
   	void        	setProtocolVersion(std::string &protocol_version);
   	void        	setMethod(std::string &method);
   	void			setUri(std::string &uri);
+    void        	setCookie(std::string &cookie);
   	void        	setHost(std::string &host);
   	void        	setContentType(std::string &content_type);
   	void        	setContentLength(std::string &content_length);

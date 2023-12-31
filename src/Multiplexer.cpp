@@ -16,12 +16,12 @@ const char *Multiplexer::defErrorPagesStrings[NUM_DEF_ERROR] = {
     STATUS_501, STATUS_502, STATUS_503, STATUS_504, STATUS_505};
 
 const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {
-    "host", "content-type", "content-length", "connection", "transfer-encoding",
+    "host", "content-type", "content-length", "connection", "transfer-encoding", "cookie"
 };
 
 void (Client::*Multiplexer::fields_setters[HEADERS_FIELDS_SIZE])(std::string &field) = {
     &Client::setHost,       &Client::setContentType,      &Client::setContentLength,
-    &Client::setConnection, &Client::setTransferEncoding,
+    &Client::setConnection, &Client::setTransferEncoding, &Client::setCookie,
 };
 
 Multiplexer::Multiplexer(SERVVECT &servers, char **env) : servers(servers)
