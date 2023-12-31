@@ -22,6 +22,8 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     {
         if (request_size <= 0)
         {
+            clientIt->response.outFile->close();
+            delete clientIt->response.outFile;
             if (postCgi)
             {
                 Multiplexer::env = setPostCgiEnv(Multiplexer::env, clientIt);
@@ -50,13 +52,13 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         }
         else
         {
-            char buffer[BUFFER_SIZE];
-            int  rc = 0;
+            char        buffer[BUFFER_SIZE];
+            int         rc = 0;
             std::string boundary;
             std::size_t found = std::string::npos;
 
             rc = recv(clientIt->connect_socket, buffer, BUFFER_SIZE, 0);
-            if(!clientIt->fields["boundary"].empty())
+            if (!clientIt->fields["boundary"].empty())
             {
                 boundary = "--" + clientIt->fields["boundary"] + "--";
                 std::string tmp(buffer, rc);
@@ -130,7 +132,8 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         ss >> request_size;
         if (request_size >= clientIt->serverIt->client_max_body_size)
             throw std::runtime_error(STATUS_413);
-        checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile, clientIt->response.request_read);
+        checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile,
+                             clientIt->response.request_read);
         this->filePathParsed = true;
     }
     else

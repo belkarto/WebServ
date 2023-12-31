@@ -15,9 +15,8 @@ const char *Multiplexer::defErrorPagesStrings[NUM_DEF_ERROR] = {
     STATUS_410, STATUS_411, STATUS_412, STATUS_413, STATUS_414, STATUS_415, STATUS_416, STATUS_417, STATUS_500,
     STATUS_501, STATUS_502, STATUS_503, STATUS_504, STATUS_505};
 
-const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {
-    "host", "content-type", "content-length", "connection", "transfer-encoding", "cookie"
-};
+const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {"host",       "content-type",      "content-length",
+                                                        "connection", "transfer-encoding", "cookie"};
 
 void (Client::*Multiplexer::fields_setters[HEADERS_FIELDS_SIZE])(std::string &field) = {
     &Client::setHost,       &Client::setContentType,      &Client::setContentLength,
@@ -109,7 +108,7 @@ void Multiplexer::connectionListener()
             {
                 if ((events[i].events & EPOLLIN))
                 {
-                    // note it always enter here causing problems in post request 
+                    // note it always enter here causing problems in post request
                     // i did quick fix by adding if statement in the beginning of the function
                     if (!getClientRequest(clientIt))
                         continue;
@@ -179,7 +178,7 @@ bool Multiplexer::getClientRequest(CLIENTIT &clientIt)
 {
     ssize_t r;
 
-    // if statement i did add 
+    // if statement i did add
     if (clientIt->request_all_processed)
         return true;
     // end of if statement
@@ -248,6 +247,9 @@ void Multiplexer::loadMimeTypes()
         ss >> key;
         ss >> value;
         mime_types[key] = value;
+        key.clear();
+        value.clear();
+        ss.clear();
         ss.str("");
     }
     infile.close();

@@ -228,7 +228,6 @@ void Response::handleCgi(CLIENTIT &clientIt)
                 std::freopen(outFilePath.c_str(), "r", stdin);
             }
             dup2(fds[1], 1);
-            dup2(fds[1], 2);
             close(fds[0]);
             execve(cmds[0], cmds, Multiplexer::env);
         }
