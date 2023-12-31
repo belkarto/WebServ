@@ -43,12 +43,10 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
 
         if (clientIt->header_buffer == NULL)
         {
-            std::cout << "header buffer is null" << std::endl;
             clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
             rc = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
             request_read = rc;
             clientIt->header_buffer[rc] = 0;
-            std::cout << "rc = " << rc << std::endl;
         }
         tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
         if (tmp == NULL)
