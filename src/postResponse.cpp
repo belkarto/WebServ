@@ -23,7 +23,6 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         if (request_size <= 0)
         {
             clientIt->response.outFile->close();
-            delete clientIt->response.outFile;
             if (postCgi)
             {
                 Multiplexer::env = setPostCgiEnv(Multiplexer::env, clientIt);
