@@ -17,16 +17,14 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
             return;
         }
         startPos += 4;
-        leftData = (request_read + 1) - (startPos - clientIt->header_buffer);
+        leftData = (request_read) - (startPos - clientIt->header_buffer);
         if (leftData > 0)
         {
+            request_read = leftData;
             tmp = new char[leftData + 1];
-            std::memset(tmp, 0, leftData + 1);
             std::memcpy(tmp, startPos, leftData);
-            delete[] clientIt->header_buffer;
-            clientIt->header_buffer = tmp;
-            clientIt->header_buffer[leftData] = 0;
-            tmp = NULL;
+            std::memcpy(clientIt->header_buffer, tmp, leftData);
+            delete[] tmp;
         }
         tmp = std::strstr(clientIt->header_buffer, "\r\n\r\n");
         if (tmp == NULL)
@@ -39,14 +37,12 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
     else
     {
         char *tmp = NULL;
-        int   rc = 0;
 
         if (clientIt->header_buffer == NULL)
         {
             clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
-            rc = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
-            request_read = rc;
-            clientIt->header_buffer[rc] = 0;
+            request_read = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
+            clientIt->header_buffer[request_read] = '\0';
         }
         tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
         if (tmp == NULL)

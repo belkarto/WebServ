@@ -68,6 +68,7 @@ class Response
     std::string outFilePath;
     std::string fileLocation;
     bool        filePathParsed;
+    char       *cgiEnv[9];
 
     void   postParseFilePath(CLIENTIT &);
     void   parseUploadPath();
@@ -78,7 +79,7 @@ class Response
     void   handleResourceDire(CLIENTIT &);
     void   parsePostFilePath(CLIENTIT &);
     void   getUnprocessedHeaders(CLIENTIT &);
-    char **setPostCgiEnv(char **envp, CLIENTIT &clientIt);
+    char **setPostCgiEnv(CLIENTIT &clientIt);
 
 
     bool   unprocessedHeadersDone;

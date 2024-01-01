@@ -23,10 +23,10 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         if (request_size <= 0)
         {
             clientIt->response.outFile->close();
+            delete clientIt->response.outFile;
             if (postCgi)
             {
-                clientIt->response.outFile->close();
-                Multiplexer::env = setPostCgiEnv(Multiplexer::env, clientIt);
+                Multiplexer::env = setPostCgiEnv(clientIt);
                 cgiExecutable = clientIt->serverIt->findCgi(clientIt, filePath);
                 if (!cgiExecutable.empty())
                 {
@@ -43,7 +43,6 @@ void Response::setPostResponse(CLIENTIT &clientIt)
             }
             else
             {
-                clientIt->response.outFile->close();
                 this->resetState();
                 status = STATUS_201;
                 this->setErrorResponse(clientIt);
@@ -92,6 +91,7 @@ static void checkUnprocessedData(char *buffer, std::streamsize &size, std::ostre
     outFile->write(startPos, leftDataLen);
     size -= leftDataLen;
     delete[] buffer;
+    buffer = NULL;
 }
 
 void Response::postParseFilePath(CLIENTIT &clientIt)
