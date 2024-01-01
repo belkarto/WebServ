@@ -60,56 +60,20 @@ void Response::sendResponseBuffer(CLIENTIT &clientIt)
     std::streamsize rd;
 
     if (!transferEncoding.empty())
-    {
-        if (!cgi)
             return (sendAutoIndexBuffer(clientIt));
-        return (sendPipeBuffer(clientIt));
-    }
-    else
+    if (readbytes < response_size)
     {
-        if (readbytes < response_size)
-        {
-
-            fileContent->read(buffer, CLIENT_RESPONSE_BUFFER_SIZE);
-            rd = fileContent->gcount();
-            readbytes += rd;
-            send(clientIt->connect_socket, &buffer, rd, 0);
-        }
-        if (readbytes == response_size)
-        {
-            fileContent->close();
-            delete fileContent;
-            clientIt->response_all_sent = true;
-        }
+        fileContent->read(buffer, CLIENT_RESPONSE_BUFFER_SIZE);
+        rd = fileContent->gcount();
+        readbytes += rd;
+        send(clientIt->connect_socket, &buffer, rd, 0);
     }
-}
-
-void Response::sendPipeBuffer(CLIENTIT &clientIt)
-{
-    char              buffer[CLIENT_RESPONSE_BUFFER_SIZE];
-    std::streamsize   rd;
-    std::string       chunk_size;
-    std::string       chunk_data;
-    std::stringstream ss;
-
-    if ((rd = read(fd, buffer, CLIENT_RESPONSE_BUFFER_SIZE)) > 0)
+    if (readbytes == response_size)
     {
-        chunk_data = "";
-        chunk_data.append(buffer, rd);
-        ss << std::hex << chunk_data.length();
-        ss >> chunk_size;
-        chunk_data += CRLF;
-        chunk_size += CRLF;
-        send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
-        send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
-    }
-    else
-    {
-        chunk_data = CRLF;
-        chunk_size = "0" + chunk_data;
-        send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
-        send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
-        close(fd);
+        fileContent->close();
+        delete fileContent;
+        fileContent = NULL;
+        unlink(CgiFilePath.c_str());
         clientIt->response_all_sent = true;
     }
 }

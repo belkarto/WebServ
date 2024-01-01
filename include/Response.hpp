@@ -16,16 +16,15 @@ class Response
     std::string filePath;
     std::string root;
     std::string cgiExecutable;
+    std::string CgiFilePath;
     STRINGVECT *index;
     bool        autoindex;
 
     bool   cgi;
     time_t counter;
-    int    fds[2];
     pid_t  pid;
 
     std::string     special_response;
-    int             fd;
     std::ifstream  *fileContent;
     std::ofstream  *outFile;
     DIR            *directory;
@@ -58,7 +57,6 @@ class Response
     void        sendHeaders(CLIENTIT &clientIt);
     void        sendResponseBuffer(CLIENTIT &clientIt);
     void        sendAutoIndexBuffer(CLIENTIT &clientIt);
-    void        sendPipeBuffer(CLIENTIT &clientIt);
     void        handleDelete(CLIENTIT &clientIt);
     void        handleCgi(CLIENTIT &clientIt);
     void        checkCgiTimeout(CLIENTIT &clientIt);
@@ -66,7 +64,6 @@ class Response
 
     // post
     bool        postCgi;
-    bool       *envCgi[10];
     std::string outFilePath;
     std::string fileLocation;
     bool        filePathParsed;
@@ -83,7 +80,7 @@ class Response
     char **setPostCgiEnv(char **envp, CLIENTIT &clientIt);
 
 
-    bool unprocessedHeadersDone;
+    bool   unprocessedHeadersDone;
     bool   firstBuffer;
 };
 int remove_all(const char *path, int &ecode);

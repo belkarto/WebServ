@@ -83,19 +83,17 @@ void Response::handleFile(CLIENTIT &clientIt)
 {
     if (status.empty())
 		status = STATUS_200;
-    if (!cgi)
-    {
-        fileContent = new std::ifstream(filePath.c_str());
-        if (!fileContent || !fileContent->is_open())
-        {
-            status = STATUS_500;
-            return (handleDefaultErrorPage(clientIt));
-        }
-        response_size = getFileSize(fileContent);
-        contentLength = toString(response_size);
-    }
+    if (cgi)
+        fileContent = new std::ifstream(CgiFilePath.c_str());
     else
-        transferEncoding = "chunked";
+        fileContent = new std::ifstream(filePath.c_str());
+    if (!fileContent || !fileContent->is_open())
+    {
+        status = STATUS_500;
+        return (handleDefaultErrorPage(clientIt));
+    }
+    response_size = getFileSize(fileContent);
+    contentLength = toString(response_size);
     contentType = clientIt->getMimeType(filePath);
     sendHeaders(clientIt);
 }
@@ -186,12 +184,15 @@ void Response::parsePostFilePath(CLIENTIT &clientIt)
 
 void Response::handleCgi(CLIENTIT &clientIt)
 {
-
-    char *cmds[3];
+    std::string content_type;
+    char        *cmds[3];
 
     cmds[0] = const_cast<char *>(cgiExecutable.c_str());
     cmds[1] = const_cast<char *>(filePath.c_str());
     cmds[2] = NULL;
+    content_type = "text/plain";
+    CgiFilePath = "/tmp";
+    CgiFilePath.append(clientIt->generateFileName(content_type)).append(".cgi");
     if (access(cmds[0], F_OK))
     {
         resetState();
@@ -206,35 +207,26 @@ void Response::handleCgi(CLIENTIT &clientIt)
     }
     else
     {
-        if (pipe(fds) < 0)
-        {
-            resetState();
-            status = STATUS_500;
-            return (setErrorResponse(clientIt));
-        }
         if ((pid = fork()) < 0)
         {
-            close(fds[0]);
-            close(fds[1]);
             resetState();
             status = STATUS_500;
             return (setErrorResponse(clientIt));
         }
         if (!pid)
         {
-             if (clientIt->fields["method"] == "POST")
+            if (clientIt->fields["method"] == "POST")
             {
                 Multiplexer::env = setPostCgiEnv(Multiplexer::env, clientIt);
                 std::freopen(outFilePath.c_str(), "r", stdin);
             }
-            dup2(fds[1], 1);
-            close(fds[0]);
+            std::freopen(CgiFilePath.c_str(), "w+", stdout);
+            std::freopen(CgiFilePath.c_str(), "w+", stderr);
             execve(cmds[0], cmds, Multiplexer::env);
         }
         else
         {
             counter = time(NULL);
-            close(fds[1]);
             checkCgiTimeout(clientIt);
         }
     }
@@ -242,7 +234,6 @@ void Response::handleCgi(CLIENTIT &clientIt)
 
 void Response::checkCgiTimeout(CLIENTIT &clientIt)
 {
-
     int wstatus;
     int wpid;
 
@@ -251,7 +242,7 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
     {
         kill(pid, SIGKILL);
         wait(NULL);
-        close(fds[0]);
+        unlink(CgiFilePath.c_str());
         resetState();
         status = STATUS_500;
         setErrorResponse(clientIt);
@@ -262,12 +253,11 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
         {
             if (WEXITSTATUS(wstatus))
             {
-                close(fds[0]);
+                unlink(CgiFilePath.c_str());
                 resetState();
                 status = STATUS_500;
-                setErrorResponse(clientIt);
+                return (setErrorResponse(clientIt));
             }
-            fd = fds[0];
             handleFile(clientIt);
         }
     }
@@ -275,7 +265,7 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
     {
         kill(pid, SIGKILL);
         wait(NULL);
-        close(fds[0]);
+        unlink(CgiFilePath.c_str());
         resetState();
         status = STATUS_408;
         setErrorResponse(clientIt);

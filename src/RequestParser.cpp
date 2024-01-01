@@ -72,10 +72,9 @@ void	Multiplexer::reviewHeaders(CLIENTIT& clientIt)
 	if (clientIt->fields.find("Connection") == clientIt->fields.end())
 		clientIt->fields["Connection"] = "keep-alive";
 	if (!KEEPALIVE_CONN)
-	clientIt->fields["Connection"] = "close";
-	clientIt->headers_all_recieved = true;
-	setServerByHost(clientIt);
+        clientIt->fields["Connection"] = "close";
     clientIt->request_all_processed = true;
+	setServerByHost(clientIt);
 }
 
 

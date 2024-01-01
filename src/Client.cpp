@@ -3,9 +3,7 @@
 Client::Client()
 {
     headers = "";
-    active = false;
     request_line_received = false;
-    headers_all_recieved = false;
     request_all_processed = false;
     start_responding = false;
     response_all_sent = false;
@@ -17,8 +15,6 @@ Client::Client()
 void Client::resetState()
 {
     headers = "";
-    active = false;
-    headers_all_recieved = false;
     request_line_received = false;
     request_all_processed = false;
     response_all_sent = false;

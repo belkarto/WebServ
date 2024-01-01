@@ -3,6 +3,7 @@
 Response::Response(void)
 {
 	status 			= "";   
+    connection      = "";
 	contentType 	= "text/html";
 	contentLength 	= "";
 	transferEncoding = "";
@@ -11,6 +12,7 @@ Response::Response(void)
 	filePath 		= "";
 	root 			= "";
 	cgiExecutable	= "";
+    CgiFilePath     = "";
 	index 			= NULL;
     autoindex 		= false;
 
@@ -32,6 +34,7 @@ Response::Response(void)
 void	Response::resetState()
 {
 	status 			= "";   
+    connection      = "";
 	contentType 	= "text/html";
 	contentLength 	= "";
 	transferEncoding = "";
@@ -40,6 +43,7 @@ void	Response::resetState()
 	filePath 		= "";
 	root 			= "";
 	cgiExecutable	= "";
+    CgiFilePath     = "";
 	index 			= NULL;
     autoindex 		= false;
 	

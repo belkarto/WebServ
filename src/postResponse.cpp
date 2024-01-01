@@ -80,14 +80,14 @@ void Response::setPostResponse(CLIENTIT &clientIt)
 
 static void checkUnprocessedData(char *buffer, std::streamsize &size, std::ostream *outFile, std::streamsize readed)
 {
-    char *startPos;
-    int   leftDataLen;
+    char           *startPos;
+    std::streamsize leftDataLen;
 
     startPos = std::strstr(buffer, "\r\n\r\n");
-    if (startPos == NULL || (startPos + 4) - buffer == readed)
+    if (startPos == NULL || (std::streamsize)((startPos + 4) - buffer) == readed)
         return;
     startPos += 4;
-    leftDataLen = readed - (startPos - buffer);
+    leftDataLen = (std::streamsize)(readed - (startPos - buffer));
     outFile->write(startPos, leftDataLen);
     size -= leftDataLen;
     delete[] buffer;
