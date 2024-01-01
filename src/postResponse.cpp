@@ -1,4 +1,6 @@
 #include "../include/Multiplexer.hpp"
+#include <ios>
+#include <unistd.h>
 
 void Response::setPostResponse(CLIENTIT &clientIt)
 {
@@ -20,6 +22,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     {
         if (request_size <= 0)
         {
+            clientIt->response.outFile->close();
             if (postCgi)
             {
                 clientIt->response.outFile->close();
@@ -76,13 +79,13 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     }
 }
 
-static void checkUnprocessedData(char *buffer, std::streamsize &size, std::ostream *outFile, int readed)
+static void checkUnprocessedData(char *buffer, std::streamsize &size, std::ostream *outFile, std::streamsize readed)
 {
-    char *startPos;
-    int   leftDataLen;
+    char           *startPos;
+    std::streamsize leftDataLen;
 
     startPos = std::strstr(buffer, "\r\n\r\n");
-    if (startPos == NULL || (startPos + 4) - buffer == CLIENT_HEADER_BUFFER_SIZE)
+    if (startPos == NULL || (std::streamsize)((startPos + 4) - buffer) == readed)
         return;
     startPos += 4;
     leftDataLen = readed - (startPos - buffer);
@@ -97,7 +100,6 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
     std::stringstream ss;
     std::string       fileName;
     STRINGVECTIT      it;
-    int               readed;
 
     uri = clientIt->fields[URI];
     if (!clientIt->fields["boundary"].empty())
@@ -127,11 +129,11 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         if (!clientIt->response.outFile->is_open())
             throw std::runtime_error(STATUS_500);
         ss << clientIt->fields["Content-Length"];
-        readed = request_size;
         ss >> request_size;
         if (request_size >= clientIt->serverIt->client_max_body_size)
             throw std::runtime_error(STATUS_413);
-        checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile, readed);
+        checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile,
+                             clientIt->response.request_read);
         this->filePathParsed = true;
     }
     else

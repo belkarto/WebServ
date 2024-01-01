@@ -190,9 +190,9 @@ void Response::handleCgi(CLIENTIT &clientIt)
     cmds[0] = const_cast<char *>(cgiExecutable.c_str());
     cmds[1] = const_cast<char *>(filePath.c_str());
     cmds[2] = NULL;
-    CgiFilePath = "/tmp";
     content_type = "text/plain";
-    CgiFilePath.append(clientIt->generateFileName(content_type));
+    CgiFilePath = "/tmp";
+    CgiFilePath.append(clientIt->generateFileName(content_type)).append(".cgi");
     if (access(cmds[0], F_OK))
     {
         resetState();
@@ -207,16 +207,8 @@ void Response::handleCgi(CLIENTIT &clientIt)
     }
     else
     {
-        if (pipe(fds) < 0)
-        {
-            resetState();
-            status = STATUS_500;
-            return (setErrorResponse(clientIt));
-        }
         if ((pid = fork()) < 0)
         {
-            close(fds[0]);
-            close(fds[1]);
             resetState();
             status = STATUS_500;
             return (setErrorResponse(clientIt));
@@ -228,16 +220,13 @@ void Response::handleCgi(CLIENTIT &clientIt)
                 Multiplexer::env = setPostCgiEnv(Multiplexer::env, clientIt);
                 std::freopen(outFilePath.c_str(), "r", stdin);
             }
-            std::ofstream(CgiFilePath.c_str());
             std::freopen(CgiFilePath.c_str(), "w+", stdout);
             std::freopen(CgiFilePath.c_str(), "w+", stderr);
-            close(fds[0]);
             execve(cmds[0], cmds, Multiplexer::env);
         }
         else
         {
             counter = time(NULL);
-            close(fds[1]);
             checkCgiTimeout(clientIt);
         }
     }
@@ -245,7 +234,6 @@ void Response::handleCgi(CLIENTIT &clientIt)
 
 void Response::checkCgiTimeout(CLIENTIT &clientIt)
 {
-
     int wstatus;
     int wpid;
 
@@ -255,7 +243,6 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
         kill(pid, SIGKILL);
         wait(NULL);
         unlink(CgiFilePath.c_str());
-        close(fds[0]);
         resetState();
         status = STATUS_500;
         setErrorResponse(clientIt);
@@ -267,7 +254,6 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
             if (WEXITSTATUS(wstatus) != 0)
             {
                 unlink(CgiFilePath.c_str());
-                close(fds[0]);
                 resetState();
                 status = STATUS_500;
                 return (setErrorResponse(clientIt));
@@ -280,7 +266,6 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
         kill(pid, SIGKILL);
         wait(NULL);
         unlink(CgiFilePath.c_str());
-        close(fds[0]);
         resetState();
         status = STATUS_408;
         setErrorResponse(clientIt);

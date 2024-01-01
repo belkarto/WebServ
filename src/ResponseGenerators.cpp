@@ -10,7 +10,6 @@ static std::string cookieGenerator(CLIENTIT &clientIt)
     cookie = "user_id=";
     currentTime = std::time(NULL);
 
-
     int randomUserId = std::rand();
 
     ss << randomUserId << "_" << currentTime;

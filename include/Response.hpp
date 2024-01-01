@@ -23,7 +23,6 @@ class Response
     std::string CgiFilePath;
     bool   cgi;
     time_t counter;
-    int    fds[2];
     pid_t  pid;
 
     std::string     special_response; // response
@@ -32,6 +31,7 @@ class Response
     DIR            *directory;
     std::streamsize response_size;
     std::streamsize request_size;
+    std::streamsize request_read;
     std::streamsize readbytes;
 
     Response(void);
@@ -65,12 +65,9 @@ class Response
 
     // post
     bool        postCgi;
-    bool       *envCgi[10];
     std::string outFilePath;
     std::string fileLocation;
     bool        filePathParsed;
-    bool    unprocessedHeadersDone;
-    bool   firstBuffer;
 
     void   postParseFilePath(CLIENTIT &);
     void   parseUploadPath();
@@ -83,6 +80,9 @@ class Response
     void   getUnprocessedHeaders(CLIENTIT &);
     char **setPostCgiEnv(char **envp, CLIENTIT &clientIt);
 
+
+    bool   unprocessedHeadersDone;
+    bool   firstBuffer;
 };
 int remove_all(const char *path, int &ecode);
 #endif

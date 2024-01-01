@@ -14,9 +14,7 @@ public:
 	std::string                         headers; 
 	time_t                              last_activity;
 	time_t                              header_timeout;
-	bool								active;
 	bool                                request_line_received;
-	bool                                headers_all_recieved;
 	bool                                request_all_processed;
     bool                                start_responding;
 	bool                                response_all_sent;
@@ -29,7 +27,7 @@ public:
   	void        	setProtocolVersion(std::string &protocol_version);
   	void        	setMethod(std::string &method);
   	void			setUri(std::string &uri);
-	void			setCookie(std::string &cookie);
+    void        	setCookie(std::string &cookie);
   	void        	setHost(std::string &host);
   	void        	setContentType(std::string &content_type);
   	void        	setContentLength(std::string &content_length);
