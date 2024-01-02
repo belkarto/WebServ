@@ -12,6 +12,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         }
         catch (std::exception &e)
         {
+            delete[] clientIt->header_buffer;
             this->resetState();
             status = e.what();
             this->setErrorResponse(clientIt);
@@ -127,11 +128,23 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
             this->processResourceRequest(clientIt);
 
         if (!clientIt->response.outFile->is_open())
+        {
+            clientIt->response.outFile->close();
+            delete clientIt->response.outFile;
+            unlink(outFilePath.c_str());
+            unlink(filePath.c_str());
             throw std::runtime_error(STATUS_500);
+        }
         ss << clientIt->fields["Content-Length"];
         ss >> request_size;
         if (request_size >= clientIt->serverIt->client_max_body_size)
+        {
+            clientIt->response.outFile->close();
+            delete clientIt->response.outFile;
+            unlink(filePath.c_str());
+            unlink(outFilePath.c_str());
             throw std::runtime_error(STATUS_413);
+        }
         checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile,
                              clientIt->response.request_read);
         delete[] clientIt->header_buffer;
