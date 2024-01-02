@@ -12,6 +12,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         }
         catch (std::exception &e)
         {
+            delete[] clientIt->header_buffer;
             this->resetState();
             status = e.what();
             this->setErrorResponse(clientIt);
@@ -20,7 +21,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     }
     else
     {
-        if (request_size <= 0)
+        if (request_size == 0)
         {
             clientIt->response.outFile->close();
             delete clientIt->response.outFile;
@@ -51,29 +52,31 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         }
         else
         {
-            char        buffer[BUFFER_SIZE];
-            int         rc = 0;
             std::string boundary;
             std::size_t found = std::string::npos;
 
-            rc = recv(clientIt->connect_socket, buffer, BUFFER_SIZE, 0);
             if (!clientIt->fields["boundary"].empty())
             {
                 boundary = "--" + clientIt->fields["boundary"] + "--";
-                std::string tmp(buffer, rc);
+                std::string tmp(clientIt->header_buffer, clientIt->response.request_read);
                 found = tmp.find(boundary);
                 if (found != std::string::npos)
                 {
                     tmp = tmp.substr(0, found);
-                    rc = tmp.size();
+                    clientIt->response.request_read = tmp.size();
                 }
             }
-            clientIt->response.outFile->write(buffer, rc);
-            clientIt->response.outFile->flush();
-            if (found != std::string::npos)
-                request_size = 0;
-            else
-                request_size -= rc;
+            if (clientIt->header_buffer != NULL)
+            {
+                clientIt->response.outFile->write(clientIt->header_buffer, clientIt->response.request_read);
+                clientIt->response.outFile->flush();
+                if (found != std::string::npos)
+                    request_size = 0;
+                else
+                    request_size -= request_read;
+                delete[] clientIt->header_buffer;
+                clientIt->header_buffer = NULL;
+            }
         }
     }
 }
@@ -90,8 +93,6 @@ static void checkUnprocessedData(char *buffer, std::streamsize &size, std::ostre
     leftDataLen = readed - (startPos - buffer);
     outFile->write(startPos, leftDataLen);
     size -= leftDataLen;
-    delete[] buffer;
-    buffer = NULL;
 }
 
 void Response::postParseFilePath(CLIENTIT &clientIt)
@@ -127,13 +128,27 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
             this->processResourceRequest(clientIt);
 
         if (!clientIt->response.outFile->is_open())
+        {
+            clientIt->response.outFile->close();
+            delete clientIt->response.outFile;
+            unlink(outFilePath.c_str());
+            unlink(filePath.c_str());
             throw std::runtime_error(STATUS_500);
+        }
         ss << clientIt->fields["Content-Length"];
         ss >> request_size;
         if (request_size >= clientIt->serverIt->client_max_body_size)
+        {
+            clientIt->response.outFile->close();
+            delete clientIt->response.outFile;
+            unlink(filePath.c_str());
+            unlink(outFilePath.c_str());
             throw std::runtime_error(STATUS_413);
+        }
         checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile,
                              clientIt->response.request_read);
+        delete[] clientIt->header_buffer;
+        clientIt->header_buffer = NULL;
         this->filePathParsed = true;
     }
     else

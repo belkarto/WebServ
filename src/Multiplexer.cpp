@@ -118,6 +118,7 @@ void Multiplexer::connectionListener()
             {
                 if ((events[i].events & EPOLLIN))
                 {
+                    clientIt->getBuffer();
                     if (!clientIt->request_all_processed && !getClientRequest(clientIt))
                         continue;
                 }
@@ -184,15 +185,9 @@ CLIENTIT Multiplexer::findConnectSocket(int socket, CLIENTVECT &sockets)
 
 bool Multiplexer::getClientRequest(CLIENTIT &clientIt)
 {
-    ssize_t r;
-
     try
     {
-        clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
-        r = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
-        clientIt->response.request_read = r;
-        clientIt->header_buffer[r] = 0;
-        if (r < 1)
+        if (clientIt->response.request_read < 1)
         {
             delete[] clientIt->header_buffer;
             dropClient(clientIt);
@@ -200,7 +195,7 @@ bool Multiplexer::getClientRequest(CLIENTIT &clientIt)
         }
         else
         {
-            clientIt->headers.append(clientIt->header_buffer, r);
+            clientIt->headers.append(clientIt->header_buffer, clientIt->response.request_read);
             if (!clientIt->request_line_received)
                 parseRequestLine(clientIt);
             if (!clientIt->headers.empty())
@@ -214,7 +209,10 @@ bool Multiplexer::getClientRequest(CLIENTIT &clientIt)
         clientIt->response.setErrorResponse(clientIt);
     }
     if (clientIt->fields["method"] != "POST")
+    {
         delete[] clientIt->header_buffer;
+        clientIt->header_buffer = NULL;
+    }
     return true;
 }
 
