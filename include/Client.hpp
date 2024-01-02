@@ -36,5 +36,6 @@ public:
   	std::string		getMimeType(std::string &filepath);
 	std::string		getFileExtension(std::string &);
 	std::string   	generateFileName(std::string &);
+    void            getBuffer();
 };
 #endif

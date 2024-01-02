@@ -10,6 +10,7 @@ Client::Client()
     keepalive_requests = 0;
     header_timeout = time(NULL);
     last_activity = header_timeout;
+    header_buffer = NULL;
 }
 
 void Client::resetState()
@@ -22,6 +23,7 @@ void Client::resetState()
     keepalive_requests += 1;
     last_activity = time(NULL);
     response.resetState();
+    header_buffer = NULL;
 }
 
 void Client::setCookie(std::string &cookie)
@@ -220,4 +222,14 @@ void Client::setUri(std::string &uri)
     if (uri[0] != '/')
         throw RequestParsingException(STATUS_400);
     fields["request_target"] = uri;
+}
+
+void Client::getBuffer()
+{
+    if (header_buffer == NULL)
+    {
+        header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
+        response.request_read = recv(connect_socket, header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
+        header_buffer[response.request_read] = 0;
+    }
 }

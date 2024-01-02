@@ -38,12 +38,6 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
     {
         char *tmp = NULL;
 
-        if (clientIt->header_buffer == NULL)
-        {
-            clientIt->header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
-            request_read = recv(clientIt->connect_socket, clientIt->header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
-            clientIt->header_buffer[request_read] = '\0';
-        }
         tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
         if (tmp == NULL)
         {
