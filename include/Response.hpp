@@ -13,6 +13,7 @@ class Response
     std::string contentLength;
     std::string transferEncoding;
     std::string location;
+    std::vector<std::string>	cookies;
 
     std::string filePath;
     std::string root;
@@ -21,7 +22,7 @@ class Response
 
     std::string cgiExecutable; // cgi
     std::string CgiFilePath;
-    bool   cgi;
+    bool    cgi;
     time_t counter;
     pid_t  pid;
 
@@ -61,6 +62,7 @@ class Response
     void        handleDelete(CLIENTIT &clientIt);
     void        handleCgi(CLIENTIT &clientIt);
     void        checkCgiTimeout(CLIENTIT &clientIt);
+    void        parseCgi(void);
     std::string getErrorPage(int errorCode);
 
     // post

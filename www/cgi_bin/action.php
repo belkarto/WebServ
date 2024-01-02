@@ -1,13 +1,6 @@
 <?php
 // Your PHP script
 
-$f = fopen( 'php://stdin', 'r' );
-
-$inputData = fgets($f);
-echo $inputData;
-
-// Parse the raw POST data
-parse_str($inputData, $postData);
 // Check if 'nom' and 'age' are set in the parsed POST data
 if (isset($postData['nom']) && isset($postData['age'])) {
     // Output the greeting with sanitized input

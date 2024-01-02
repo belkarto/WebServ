@@ -4,7 +4,7 @@ Response::Response(void)
 {
 	status 			= "";
 	connection		= "";
-	contentType 	= "text/html";
+	contentType 	= "";
 	contentLength 	= "";
 	transferEncoding = "";
 	location 		= "";
@@ -35,7 +35,7 @@ void	Response::resetState()
 {
 	status 			= "";
 	connection		= "";
-	contentType 	= "text/html";
+	contentType 	= "";
 	contentLength 	= "";
 	transferEncoding = "";
 	location 		= "";
