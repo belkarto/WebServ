@@ -230,7 +230,6 @@ void Client::getBuffer()
 {
     if (header_buffer == NULL)
     {
-        std::cout << "1" << std::endl;
         header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
         response.request_read = recv(connect_socket, header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
         header_buffer[response.request_read] = 0;

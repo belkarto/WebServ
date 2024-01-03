@@ -81,7 +81,7 @@ class Response
     void   handleResourceDire(CLIENTIT &);
     void   parsePostFilePath(CLIENTIT &);
     void   getUnprocessedHeaders(CLIENTIT &);
-    char **setPostCgiEnv(CLIENTIT &clientIt);
+    char **setCgiEnv(CLIENTIT &clientIt);
 
 
     bool   unprocessedHeadersDone;

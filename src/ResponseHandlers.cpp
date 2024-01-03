@@ -217,7 +217,7 @@ void Response::handleCgi(CLIENTIT &clientIt)
         }
         if (!pid)
         {
-            Multiplexer::env = setPostCgiEnv(clientIt);
+            Multiplexer::env = setCgiEnv(clientIt);
             if (clientIt->fields["method"] == "POST")
             {
                 std::freopen(outFilePath.c_str(), "r", stdin);
