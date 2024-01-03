@@ -117,60 +117,6 @@ void    Response::parseCgi(void)
     }
 }
 
-void    Response::parseCgi(void)
-{
-    std::string     line, key, value;
-    bool            found;
-    size_t          pos;
-
-    found = false;
-    contentType = "text/html";
-    while(std::getline(*fileContent, line))
-    {
-        if (line == "\r")
-            break;
-        if ((pos = line.find(':')) != std::string::npos)
-        {
-            key = line.substr(0, pos);
-            value = line.substr(pos + 1);
-            std::transform(key.begin(), key.end(), key.begin(), tolower);
-        }
-        if (key == "status")
-        {
-            found = true;
-            status = value;
-        }
-        if (key == "location")
-        {
-            found = true;
-            location = value;
-        }
-        if (key == "content-type")
-        {
-            found = true;
-            contentType = value;
-        }
-        if (key == "set-cookie")
-        {
-            found = true;
-            cookies.push_back(value);
-        }
-    }
-    if (!found)
-    {
-        fileContent->clear();
-        fileContent->seekg(0, std::ios::beg);
-    }
-    else
-    {
-        std::stringstream   ss(contentLength);
-        std::streamsize size;
-        ss >> size;
-        response_size = size - fileContent->tellg();
-        contentLength = toString(response_size);
-    }
-}
-
 void Response::sendResponseBuffer(CLIENTIT &clientIt)
 {
     char            buffer[CLIENT_RESPONSE_BUFFER_SIZE];

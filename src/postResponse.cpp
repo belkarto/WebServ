@@ -27,7 +27,6 @@ void Response::setPostResponse(CLIENTIT &clientIt)
             delete clientIt->response.outFile;
             if (postCgi)
             {
-                Multiplexer::env = setPostCgiEnv(clientIt);
                 cgiExecutable = clientIt->serverIt->findCgi(clientIt, filePath);
                 if (!cgiExecutable.empty())
                 {

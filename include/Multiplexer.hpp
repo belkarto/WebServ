@@ -23,7 +23,7 @@ class Multiplexer
     void		  registerClient(SERVIT &serverIt);
     void		  dropClient(CLIENTIT &clientIt);
     void		  connectionListener();
-    bool		  getClientRequest(CLIENTIT &clientIt);
+    void		  getClientRequest(CLIENTIT &clientIt);
     bool	    ConnectionTimedOut(CLIENTIT& clientIt);
     void		  parseRequestLine(CLIENTIT &clientIt);
     void		  parseRequestHeaders(CLIENTIT &clientIt);

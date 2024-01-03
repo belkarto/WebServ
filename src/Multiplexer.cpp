@@ -129,8 +129,14 @@ void Multiplexer::connectionListener()
                 if ((events[i].events & EPOLLIN))
                 {
                     clientIt->getBuffer();
-                    if (!clientIt->request_all_processed && !getClientRequest(clientIt))
-                        continue;
+                    if (clientIt->response.request_read < 1)
+                    {
+                        delete[] clientIt->header_buffer;
+                        dropClient(clientIt);
+                        continue ;
+                    }
+                    if (!clientIt->request_all_processed)
+                            getClientRequest(clientIt);
                 }
                 if (ConnectionTimedOut(clientIt))
                     dropClient(clientIt);
@@ -202,23 +208,19 @@ CLIENTIT Multiplexer::findConnectSocket(int socket, CLIENTVECT &sockets)
     return clientIt;
 }
 
-bool Multiplexer::getClientRequest(CLIENTIT &clientIt)
+void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 {
     try
     {
-        if (clientIt->response.request_read < 1)
+        clientIt->headers.append(clientIt->header_buffer, clientIt->response.request_read);
+        if (!clientIt->request_line_received)
+            parseRequestLine(clientIt);
+        if (!clientIt->headers.empty())
+            parseRequestHeaders(clientIt);
+        if (clientIt->fields["method"] != "POST")
         {
             delete[] clientIt->header_buffer;
-            dropClient(clientIt);
-            return false;
-        }
-        else
-        {
-            clientIt->headers.append(clientIt->header_buffer, clientIt->response.request_read);
-            if (!clientIt->request_line_received)
-                parseRequestLine(clientIt);
-            if (!clientIt->headers.empty())
-                parseRequestHeaders(clientIt);
+            clientIt->header_buffer = NULL;
         }
     }
     catch (RequestParsingException &e)
@@ -226,13 +228,9 @@ bool Multiplexer::getClientRequest(CLIENTIT &clientIt)
         clientIt->request_all_processed = true;
         clientIt->response.status = e.what();
         clientIt->response.setErrorResponse(clientIt);
-    }
-    if (clientIt->fields["method"] != "POST")
-    {
         delete[] clientIt->header_buffer;
         clientIt->header_buffer = NULL;
     }
-    return true;
 }
 
 bool Multiplexer::ConnectionTimedOut(CLIENTIT &clientIt)
