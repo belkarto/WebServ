@@ -55,6 +55,7 @@ void	Multiplexer::parseRequestLine(CLIENTIT& clientIt)
 	clientIt->setMethod(method);
 	clientIt->setUri(request_target);
 	clientIt->setProtocolVersion(protocol_version);
+    std::cout << "request line == > " << ss.str() << std::endl;
 	clientIt->headers = clientIt->headers.substr(pos + delim.length());
 	clientIt->request_line_received = true;
 }

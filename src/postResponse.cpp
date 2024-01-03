@@ -102,6 +102,8 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
     STRINGVECTIT      it;
 
     uri = clientIt->fields[URI];
+    if (clientIt->fields["Transfer-Encoding"] == "chunked")
+        throw std::runtime_error(STATUS_501);
     if (!clientIt->fields["boundary"].empty())
         getUnprocessedHeaders(clientIt);
     if (!unprocessedHeadersDone && !clientIt->fields["boundary"].empty())
