@@ -26,4 +26,16 @@ class RequestParsingException : public  std::exception
 		}
 		virtual const char* what() const throw();
 };
+
+class ResponseSendingException : public  std::exception
+{
+	private:
+		const char	*status;
+	public:
+		ResponseSendingException(const char *status)
+		{
+			this->status = status;
+		}
+		virtual const char* what() const throw();
+};
 #endif

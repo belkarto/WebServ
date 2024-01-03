@@ -59,7 +59,62 @@ void Response::sendHeaders(CLIENTIT &clientIt)
         cookies.pop_back();
     }
     headers += CRLF;
-    send(clientIt->connect_socket, &headers[0], headers.length(), 0);
+    if (send(clientIt->connect_socket, &headers[0], headers.length(), 0) < 1)
+        throw ResponseSendingException("ResponseSendingException");
+}
+
+void    Response::parseCgi(void)
+{
+    std::string     line, key, value;
+    bool            found;
+    size_t          pos;
+
+    found = false;
+    contentType = "text/html";
+    while(std::getline(*fileContent, line))
+    {
+        if (line == "\r")
+            break;
+        if ((pos = line.find(':')) != std::string::npos)
+        {
+            key = line.substr(0, pos);
+            value = line.substr(pos + 1);
+            std::transform(key.begin(), key.end(), key.begin(), tolower);
+        }
+        if (key == "status")
+        {
+            found = true;
+            status = value;
+        }
+        if (key == "location")
+        {
+            found = true;
+            location = value;
+        }
+        if (key == "content-type")
+        {
+            found = true;
+            contentType = value;
+        }
+        if (key == "set-cookie")
+        {
+            found = true;
+            cookies.push_back(value);
+        }
+    }
+    if (!found)
+    {
+        fileContent->clear();
+        fileContent->seekg(0, std::ios::beg);
+    }
+    else
+    {
+        std::stringstream   ss(contentLength);
+        std::streamsize size;
+        ss >> size;
+        response_size = size - fileContent->tellg();
+        contentLength = toString(response_size);
+    }
 }
 
 void    Response::parseCgi(void)
@@ -128,7 +183,8 @@ void Response::sendResponseBuffer(CLIENTIT &clientIt)
         fileContent->read(buffer, CLIENT_RESPONSE_BUFFER_SIZE);
         rd = fileContent->gcount();
         readbytes += rd;
-        send(clientIt->connect_socket, &buffer, rd, 0);
+        if (send(clientIt->connect_socket, &buffer, rd, 0) < 1)
+            throw ResponseSendingException("ResponseSendingException");
     }
     if (readbytes == response_size)
     {
@@ -170,14 +226,16 @@ void Response::sendAutoIndexBuffer(CLIENTIT &clientIt)
     ss >> chunk_size;
     chunk_data += CRLF;
     chunk_size += CRLF;
-    send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
-    send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
+    if (send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0) < 1 
+        || send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0) < 1)
+        throw ResponseSendingException("ResponseSendingException");
     if (!entry)
     {
         chunk_data = CRLF;
         chunk_size = "0" + chunk_data;
-        send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0);
-        send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0);
+        if (send(clientIt->connect_socket, &chunk_size[0], chunk_size.length(), 0) < 1 
+        || send(clientIt->connect_socket, &chunk_data[0], chunk_data.length(), 0) < 1)
+        throw ResponseSendingException("ResponseSendingException");
         closedir(directory);
         directory = NULL;
         clientIt->response_all_sent = true;

@@ -9,3 +9,8 @@ const char*  RequestParsingException::what() const throw()
 {
     return status;
 }
+
+const char*   ResponseSendingException::what() const throw()
+{
+    return status;
+}

@@ -111,7 +111,8 @@ void Response::handleExternalRedirection(CLIENTIT &clientIt)
         .append("</h1></center>" CRLF "</body></html>" CRLF);
     contentLength = toString(special_response.length());
     sendHeaders(clientIt);
-    send(clientIt->connect_socket, &special_response[0], special_response.length(), 0);
+    if (send(clientIt->connect_socket, &special_response[0], special_response.length(), 0) < 1)
+        throw ResponseSendingException("ResponseSendingException");
     clientIt->response_all_sent = true;
 }
 
@@ -149,7 +150,8 @@ void Response::handleDefaultErrorPage(CLIENTIT &clientIt)
     special_response = getErrorPage(code);
     contentLength = toString(special_response.length());
     sendHeaders(clientIt);
-    send(clientIt->connect_socket, &special_response[0], special_response.length(), 0);
+    if (send(clientIt->connect_socket, &special_response[0], special_response.length(), 0) < 1)
+         throw ResponseSendingException("ResponseSendingException");
     clientIt->response_all_sent = true;
 }
 
@@ -293,7 +295,8 @@ void Response::handleDelete(CLIENTIT &clientIt)
         status = STATUS_204;
         contentLength = contentType = "";
         sendHeaders(clientIt);
-        send(clientIt->connect_socket, &special_response[0], special_response.length(), 0);
+        if (send(clientIt->connect_socket, &special_response[0], special_response.length(), 0) < 1)
+            throw ResponseSendingException("ResponseSendingException");
         clientIt->response_all_sent = true;
     }
 }
