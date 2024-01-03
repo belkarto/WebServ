@@ -16,6 +16,7 @@ class ConfigParser
 
     public:
 		ConfigParser(const char *config_path, std::vector<Server> &servers);
+		~ConfigParser();
 
 		void		checkDirectiveSyntax();
 

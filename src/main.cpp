@@ -20,6 +20,7 @@ int	main(int ac, char **av, char **env)
 void	webServManager(const char *config_path, char **env)
 {
 	std::vector<Server>	servers;
+	SERVIT	it, ite;
 
     signal(SIGPIPE, SIG_IGN);
 	try 
@@ -31,4 +32,8 @@ void	webServManager(const char *config_path, char **env)
 	{
 		std::cerr << "Error: " << e.what() << std::endl;
 	}
+	it = servers.begin();
+	ite = servers.end();
+	for (; it != ite; it++)
+		freeaddrinfo(it->bind_addr);
 }

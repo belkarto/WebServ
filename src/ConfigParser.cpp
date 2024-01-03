@@ -91,11 +91,7 @@ ConfigParser::ConfigParser(const char *config_path, std::vector<Server> &servers
 	config.close();
 }
 
-
-
-
-
-
-
-
+ConfigParser::~ConfigParser()
+{
+}
 
