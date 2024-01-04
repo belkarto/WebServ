@@ -210,15 +210,17 @@ std::string Client::generateFileName(std::string &contentType)
 
     // format the current time
     std::ostringstream ss;
-    ss << std::setfill('0') << std::setw(4) << 1900 + localTime->tm_year;
-    ss << std::setw(2) << 1 + localTime->tm_mon;
-    ss << std::setw(2) << localTime->tm_mday;
+    ss << std::setfill('0') << std::setw(4) << 1900 + localTime->tm_year << "_";
+    ss << std::setw(2) << 1 + localTime->tm_mon << "_";
+    ss << std::setw(2) << localTime->tm_mday << "_";
     ss << std::setw(2) << localTime->tm_hour;
     ss << std::setw(2) << localTime->tm_min;
-    ss << std::setw(2) << localTime->tm_sec;
+    ss << std::setw(2) << localTime->tm_sec << '_' <<  rand();
 
     return ("/" + ss.str() + getFileExtension(contentType));
 }
+
+
 void Client::setUri(std::string &uri)
 {
     if (uri[0] != '/')

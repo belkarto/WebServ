@@ -1,22 +1,16 @@
 #include "../include/Multiplexer.hpp"
 
-static std::string cookieGenerator(CLIENTIT &clientIt)
+static std::string cookieGenerator(void)
 {
-    (void)clientIt;
     std::string cookie;
     std::time_t currentTime;
     std::stringstream ss;
+    int randomUserId;
 
     cookie = "user_id=";
     currentTime = std::time(NULL);
-
-    int randomUserId = std::rand();
-
+    randomUserId = std::rand();
     ss << randomUserId << "_" << currentTime;
-
-    // Append current time to the user_id
-    ss << "_" << currentTime;
-
     cookie += ss.str();
     return cookie;
 }
@@ -50,7 +44,7 @@ void Response::sendHeaders(CLIENTIT &clientIt)
     if (status == STATUS_201 && !fileLocation.empty())
         setHeader(headers, "Content-Location: ", fileLocation);
     if (clientIt->fields["Cookie"].empty())
-        setHeader(headers, "Set-Cookie: ", cookieGenerator(clientIt));
+        setHeader(headers, "Set-Cookie: ", cookieGenerator());
     else
         setHeader(headers, "Cookie: " ,clientIt->fields["Cookie"]);
     while (!cookies.empty())
