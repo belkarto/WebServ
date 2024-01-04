@@ -37,7 +37,7 @@ void Client::setCookie(std::string &cookie)
 void Client::setTransferEncoding(std::string &encoding)
 {
     std::transform(encoding.begin(), encoding.end(), encoding.begin(), tolower);
-    if (encoding == "chunked")
+    if (encoding == "chunked" && fields["method"] != "POST")
         fields.insert(std::make_pair("Transfer-Encoding", encoding));
     else
         throw RequestParsingException(STATUS_501);
