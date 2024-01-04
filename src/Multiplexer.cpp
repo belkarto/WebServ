@@ -105,6 +105,14 @@ void Multiplexer::dropClient(CLIENTIT &clientIt)
     }
     if (clientIt->response.directory)
         closedir(clientIt->response.directory);
+    if (clientIt->response.outFile)
+    {
+        if (clientIt->response.outFile->is_open())
+            clientIt->response.outFile->close();
+        delete clientIt->response.outFile;
+        clientIt->response.outFile = NULL;
+        unlink(clientIt->response.outFilePath.c_str());
+    }
     close(clientIt->connect_socket);
     clients.erase(clientIt);
 }

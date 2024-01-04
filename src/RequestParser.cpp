@@ -89,6 +89,9 @@ void	Multiplexer::setServerByHost(CLIENTIT& clientIt)
 		if (clientIt->listen_socket == serverIt->listen_socket
 			&& find(serverIt->server_name.begin(), serverIt->server_name.end(), clientIt->fields["Host"]) 
 			!= serverIt->server_name.end())
+		{
 			clientIt->serverIt = serverIt;
+			break ;
+		}
 	}
 }

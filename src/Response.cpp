@@ -20,6 +20,7 @@ Response::Response(void)
 
 	special_response = "";
     fileContent 	= NULL;
+	outFile			= NULL;
 	directory		= NULL;
 	response_size	= 0;
 	request_size	= 0;
@@ -51,6 +52,7 @@ void	Response::resetState()
 
 	special_response = "";
     fileContent 	= NULL;
+	outFile			= NULL;
 	directory		= NULL;
 	response_size	= 0;
 	request_size	= 0;

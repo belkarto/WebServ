@@ -25,6 +25,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         {
             clientIt->response.outFile->close();
             delete clientIt->response.outFile;
+            clientIt->response.outFile = NULL;
             if (postCgi)
             {
                 cgiExecutable = clientIt->serverIt->findCgi(clientIt, filePath);
@@ -130,6 +131,7 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         {
             clientIt->response.outFile->close();
             delete clientIt->response.outFile;
+            clientIt->response.outFile = NULL;
             unlink(outFilePath.c_str());
             unlink(filePath.c_str());
             throw std::runtime_error(STATUS_500);
@@ -140,6 +142,7 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         {
             clientIt->response.outFile->close();
             delete clientIt->response.outFile;
+            clientIt->response.outFile = NULL;
             unlink(filePath.c_str());
             unlink(outFilePath.c_str());
             throw std::runtime_error(STATUS_413);
