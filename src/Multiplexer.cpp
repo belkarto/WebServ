@@ -160,6 +160,7 @@ void Multiplexer::connectionListener()
                     try
                     {
                         handleResponse(clientIt);
+                        
                     }
                     catch(ResponseSendingException& e)
                     {
@@ -193,6 +194,7 @@ void Multiplexer::handleResponse(CLIENTIT &clientIt)
         }
         else
             clientIt->response.sendResponseBuffer(clientIt);
+        clientIt->last_activity = time(NULL);
     }
 }
 
@@ -243,21 +245,8 @@ void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 
 bool Multiplexer::ConnectionTimedOut(CLIENTIT &clientIt)
 {
-    if (KEEPALIVE_CONN && !clientIt->request_line_received)
-    {
-        time_t elapsed = time(NULL) - clientIt->last_activity;
-        if (!clientIt->keepalive_requests)
-        {
-            if (elapsed >= CLIENT_HEADER_TIMEOUT)
-                return true;
-        }
-        else
-        {
-            if (elapsed >= KEEPALIVE_TIMEOUT)
-                return true;
-        }
-    }
-    return false;
+    time_t elapsed = time(NULL) - clientIt->last_activity;
+    return (elapsed >= CLIENT_SEND_TIMEOUT);
 }
 
 void Multiplexer::loadMimeTypes()

@@ -1,8 +1,10 @@
 #================================= Files to compile ===================================
 SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer  Exception RequestParser \
- Response ResponseHandlers ResponseGenerators postResponse postResponseUtils
+ 			  Response ResponseHandlers ResponseGenerators postResponse postResponseUtils
 LIB_FILES 	= signal split trim  addr_resolver ft_stoll ft_stoi socket_addr_ntop displayConfig epoll_add \
-						getFileSize	is_directory
+			  getFileSize	is_directory
+INC_FILES	= Client define Multiplexer Server ConfigParser \
+			  Exception Response webserv
 # #======================================================================================
 
 # #====================================== Colors ========================================
@@ -19,6 +21,7 @@ BLUE		= \033[0;1;3;34m
 SRC_DIR		= src/
 LIB_DIR		= lib/
 OBJ_DIR		= objs/
+INC_DIR		= include/
 # #======================================================================================
 
 
@@ -42,18 +45,19 @@ SRC 		= 	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(SRC_FILES)))
 S_LIB 		= 	$(addprefix $(LIB_DIR), $(addsuffix .cpp, $(LIB_FILES)))
 OBJ 		= 	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_FILES)))
 OBJ_LIB 	= 	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(LIB_FILES)))
+INCLUDES	=	$(addprefix $(INC_DIR), $(addsuffix .hpp, $(INC_FILES)))
 # #===========================#
 
 all : header $(NAME)
 
 # # == Rule that compile source files into object files ==
-$(OBJ_DIR)%.o	: $(SRC_DIR)%.cpp | $(OBJF)
+$(OBJ_DIR)%.o	: $(SRC_DIR)%.cpp $(INCLUDES) | $(OBJF)
 	@$(CC) $(FLAGS) -c $< -o $@
 	@printf "$(GRAY)\r- Compiling src...⌛$(NO_COLOR)"
 	@sleep 0.01
 	@printf "$(GRAY)\r- Compiling src...⏳$(NO_COLOR)"
 	@sleep 0.01
-$(OBJ_DIR)%.o	: $(LIB_DIR)%.cpp | $(OBJF)
+$(OBJ_DIR)%.o	: $(LIB_DIR)%.cpp $(INCLUDES) | $(OBJF)
 	@$(CC) $(FLAGS) -c $< -o $@
 	@printf "$(GRAY)\r- Compiling lib...⌛$(NO_COLOR)"
 	@sleep 0.01

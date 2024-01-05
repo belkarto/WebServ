@@ -235,6 +235,9 @@ void Client::getBuffer()
         header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
         response.request_read = recv(connect_socket, header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
         if (response.request_read >= 0)
+        {
+            last_activity = time(NULL);
             header_buffer[response.request_read] = '\0';
+        }
     }
 }

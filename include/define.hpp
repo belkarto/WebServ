@@ -37,8 +37,7 @@
 #define BUFFER_SIZE                 1024
 #define CLIENT_HEADER_BUFFER_SIZE   1024
 #define CLIENT_RESPONSE_BUFFER_SIZE 1024
-#define CLIENT_HEADER_TIMEOUT       30
-#define KEEPALIVE_TIMEOUT           10
+#define CLIENT_SEND_TIMEOUT         30
 #define BACKLOG                     100
 #define CONNECTIONS                 400
 #define MIMETYPE_PATH               "./config/mimes.txt"

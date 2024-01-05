@@ -42,6 +42,7 @@ class Multiplexer;
 
 /*					main										*/
 void				webServManager(const char *config_path, char **env);
+void				freeServers(std::vector<Server> &servers);
 
 /*                  lib                                         */
 void            	split(std::vector<std::string>& fields, std::stringstream& ss);
@@ -58,7 +59,6 @@ void	        	epoll_add(int epfd, int fd);
 void	        	epoll_add2(int epfd, int fd);
 void	        	epoll_delete(int epfd, int fd);
 std::streamsize		getFileSize(std::ifstream *file);
-std::streamsize		getFileSize(int fd);
 bool				is_directory(const char* path);
 
 /*                  debug                                       */

@@ -314,6 +314,8 @@ int remove_all(const char *path, int &ecode)
     struct dirent *entry;
     std::string    new_path;
 
+    if (access(path, W_OK))
+        return (setEcode(ecode));
     if (stat(path, &statbuf) < 0)
         return (setEcode(ecode));
     if (S_ISDIR(statbuf.st_mode))
