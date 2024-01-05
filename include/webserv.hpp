@@ -83,4 +83,6 @@ std::string	toString(T number)
 	return convert.str();
 }
 
+/*                log                                       */
+void log(const std::string method, const std::string s);
 #endif
