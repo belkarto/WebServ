@@ -115,7 +115,8 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
     {
         char *tmp = NULL;
 
-        tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
+        // if (clientIt->header_buffer)
+            tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
         if (tmp == NULL)
         {
             delete[] clientIt->header_buffer;
