@@ -54,24 +54,36 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         {
             std::string boundary;
             std::size_t found = std::string::npos;
+            std::string tmp;
 
             if (!clientIt->fields["boundary"].empty())
             {
                 boundary = "--" + clientIt->fields["boundary"] + "--";
-                std::string tmp(clientIt->header_buffer, clientIt->response.request_read);
+                tmp.assign(clientIt->header_buffer, clientIt->response.request_read);
                 found = tmp.find(boundary);
                 if (found != std::string::npos)
                 {
+                    std::cout << "close boundary recived" << std::endl;
+                    std::cout << clientIt->fields["boundary"] << "\n" << tmp.substr(found) << std::endl;
                     tmp = tmp.substr(0, found);
                     clientIt->response.request_read = tmp.size();
                 }
+                tmp.clear();
             }
             if (clientIt->header_buffer != NULL)
             {
                 clientIt->response.outFile->write(clientIt->header_buffer, clientIt->response.request_read);
                 clientIt->response.outFile->flush();
                 if (found != std::string::npos)
+                {
                     request_size = 0;
+                    // if (tmp.find(clientIt->fields["boundary"]) == std::string::npos)
+                    // {
+                    //     clientIt->response.outFile->close();
+                    //     delete clientIt->response.outFile;
+                    //     this->filePathParsed = false;
+                    // }
+                }
                 else
                     request_size -= request_read;
                 delete[] clientIt->header_buffer;

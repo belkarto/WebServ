@@ -230,10 +230,12 @@ void Client::setUri(std::string &uri)
 
 void Client::getBuffer()
 {
+    std::cerr << "got request" << std::endl;
     if (header_buffer == NULL)
     {
         header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
         response.request_read = recv(connect_socket, header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
+        std::cout.write(header_buffer, response.request_read);
         if (response.request_read >= 0)
         {
             last_activity = time(NULL);
