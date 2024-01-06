@@ -6,7 +6,7 @@ Server::Server()
     client_max_body_size	= DEFAULT_CLIENT_MAX_BODY_SIZE;
     autoindex 				= DEFAULT_AUTOINDEX;
     addr_resolver(&bind_addr, DEFAULT_HOST, DEFAULT_PORT);
-    // index.push_back(DEFAULT_INDEX);
+	bind_addr_str = socket_addr_ntop(bind_addr);
 }
 
 

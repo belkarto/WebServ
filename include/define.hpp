@@ -2,8 +2,6 @@
 #define DEFINE_HPP
 
 #define SERVER        "webserv"
-#define DEF_ERR_PATH  "www/error_pages/"
-#define DEF_FILE_TYPE "text/plain"
 #define PROTOCOL_VERS "HTTP/1.1 "
 #define URI           "request_target"
 #define NUM_DEF_ERROR 41
@@ -14,7 +12,6 @@
 #define DEFAULT_HOST                 "localhost"
 #define DEFAULT_PORT                 "1337"
 #define DEFAULT_ROOT                 "./www"
-#define DEFAULT_INDEX                "index.html"
 #define DEFAULT_AUTOINDEX            false
 #define DEFAULT_CLIENT_MAX_BODY_SIZE 1048576 // 1M
 #define MAX_REQUEST_SIZE             107374182400 //  10GB --> 107374182400B // 5GB --> 5368709120 // 1GB --> 1073741824 // 9223372036GB --> MAX LONG LONG 9223372036854775807
@@ -40,7 +37,7 @@
 #define CLIENT_SEND_TIMEOUT         30
 #define BACKLOG                     100
 #define CONNECTIONS                 400
-#define MIMETYPE_PATH               "./config/mimes.txt"
+#define MIMETYPE_PATH               "./config/mimes"
 
 /*              Response                */
 #define CGI_TIMEOUT                 4

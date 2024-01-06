@@ -27,7 +27,7 @@ void Response::sendHeaders(CLIENTIT &clientIt)
     clientIt->start_responding = true;
     if (cgi)
         parseCgi();
-    headers = "HTTP/1.1 ";
+    headers = PROTOCOL_VERS;
     headers += status + CRLF;
     if (!contentType.empty())
         setHeader(headers, "Content-Type: ", contentType);
@@ -47,6 +47,7 @@ void Response::sendHeaders(CLIENTIT &clientIt)
         setHeader(headers, "Set-Cookie: ", cookieGenerator());
     else
         setHeader(headers, "Cookie: " ,clientIt->fields["Cookie"]);
+    setHeader(headers, "Server: ", SERVER);
     while (!cookies.empty())
     {
         setHeader(headers, "Set-Cookie: ", cookies.back());
