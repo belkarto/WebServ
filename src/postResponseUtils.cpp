@@ -124,8 +124,8 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
         tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
         if (tmp == NULL)
         {
-            request_size -= std::strlen(clientIt->header_buffer);
-            std::cerr << request_size << std::endl;
+            // request_size -= std::strlen(clientIt->header_buffer);
+            std::cerr << YELLOW << "REQ "<< request_size << RESET << std::endl;
             delete[] clientIt->header_buffer;
             if (!std::strstr(clientIt->header_buffer, "\r\n\r\n"))
             {
@@ -139,11 +139,21 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
         }
         else
         {
+            char *crlf;
             ss << tmp;
             ss >> line >> line;
             if (it != clientIt->fields.end())
                 clientIt->fields.erase(it);
             clientIt->setContentType(line);
+            crlf = std::strstr(clientIt->header_buffer, "\r\n\r\n");
+            if (crlf == NULL)
+            {
+                request_size -= std::strlen(clientIt->header_buffer);
+                delete[] clientIt->header_buffer;
+                clientIt->header_buffer = NULL;
+            }
+            else
+                request_size -= (crlf + 4) - clientIt->header_buffer;
             unprocessedHeadersDone = true;
         }
     }
