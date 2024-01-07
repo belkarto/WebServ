@@ -160,7 +160,6 @@ void Multiplexer::connectionListener()
                     try
                     {
                         handleResponse(clientIt);
-                        
                     }
                     catch(ResponseSendingException& e)
                     {

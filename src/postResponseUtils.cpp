@@ -124,7 +124,6 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
         tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
         if (tmp == NULL)
         {
-            // request_size -= std::strlen(clientIt->header_buffer);
             std::cerr << YELLOW << "REQ " << request_size << RESET << std::endl;
             if (std::strstr(clientIt->header_buffer, "\r\n\r\n"))
             {
@@ -159,4 +158,11 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
             unprocessedHeadersDone = true;
         }
     }
+}
+
+void Response::prossesBoundaryBuffer(CLIENTIT &clientIT)
+{
+    (void)clientIT;
+    std::cout.write(clientIT->header_buffer, request_size);
+    exit(1);
 }

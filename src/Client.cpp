@@ -64,17 +64,6 @@ void Client::setContentType(std::string &content_type)
         getline(ss, fields["boundary"], ';');
     }
     std::transform(content_type.begin(), content_type.end(), content_type.begin(), tolower);
-    // it = Multiplexer::mime_types.begin();
-    // ite = Multiplexer::mime_types.end();
-    // while (it != ite)
-    // {
-    //     if (it->second == content_type)
-    //         break;
-    //     it++;
-    // }
-    // if (it == ite)
-    //     fields.insert(std::make_pair("Content-Type", "application/octet-stream"));
-    // else
     fields.insert(std::make_pair("Content-Type", content_type));
     /*
         in case Content-Type wasnt specified
@@ -124,7 +113,6 @@ void Client::setContentLength(std::string &content_length)
     std::stringstream ss;
     ss << content_length;
     ss >> response.request_size;
-    std::cout << RED << "request_size: " << response.request_size << RESET << std::endl;
     /*
      Content-Length = 1*DIGIT
     */
