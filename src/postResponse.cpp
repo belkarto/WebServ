@@ -97,21 +97,21 @@ static void checkUnprocessedData(CLIENTIT &cliIt)
         {
             if (found != tmp_str.find(boundary + "--"))
             {
-                cliIt->response.outFile->write(startPos, found);
+                cliIt->response.outFile->write(startPos, found - 2);
                 cliIt->response.outFile->flush();
-                cliIt->response.request_size -= found;
                 cliIt->response.outFile->close();
-                char *holder = new char[cliIt->response.request_size];
-                std::memcpy(holder, startPos + found, cliIt->response.request_size);
-                std::memset(cliIt->header_buffer, 0, cliIt->response.request_read);
-                std::memcpy(cliIt->header_buffer, holder, cliIt->response.request_size);
+                char *holder = new char[cliIt->response.request_read];
+                std::memcpy(holder, startPos + found, cliIt->response.request_read - found);
+                std::memset(cliIt->header_buffer, 0, CLIENT_HEADER_BUFFER_SIZE);
+                std::memcpy(cliIt->header_buffer, holder, cliIt->response.request_read - found);
+                cliIt->response.request_read -= found;
                 delete[] holder;
                 delete cliIt->response.outFile;
                 return;
             }
             else
             {
-                cliIt->response.outFile->write(startPos, found);
+                cliIt->response.outFile->write(startPos, found - 2);
                 cliIt->response.outFile->flush();
                 cliIt->response.request_size -= (found + cliIt->fields["boundary"].size() + 4);
                 std::cout << GREEN << cliIt->response.request_size << RESET << std::endl;
