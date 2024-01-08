@@ -88,6 +88,7 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
         startPos = std::strstr(clientIt->header_buffer, "\r\n\r\n");
         if (startPos == NULL || (startPos + 4) - clientIt->header_buffer == request_read)
         {
+            request_size -= request_read;
             delete[] clientIt->header_buffer;
             clientIt->header_buffer = NULL;
             firstBuffer = false;
@@ -98,6 +99,7 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
         if (leftData > 0)
         {
             request_read = leftData;
+            request_size -= leftData;
             tmp = new char[leftData + 1];
             std::memcpy(tmp, startPos, leftData);
             std::memcpy(clientIt->header_buffer, tmp, leftData);
@@ -124,7 +126,9 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
         tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
         if (tmp == NULL)
         {
-            std::cerr << YELLOW << "REQ " << request_size << RESET << std::endl;
+            std::cerr << YELLOW << "REQ " << request_size << " " << request_read << RESET << std::endl;
+            std::cout.write(clientIt->header_buffer, request_read) << std::endl << std::endl;
+            // exit(22);
             if (std::strstr(clientIt->header_buffer, "\r\n\r\n"))
             {
                 if (it != clientIt->fields.end())
@@ -136,6 +140,7 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
                 request_size -= std::strlen(clientIt->header_buffer);
                 delete[] clientIt->header_buffer;
                 clientIt->header_buffer = NULL;
+                unprocessedHeadersDone = false;
             }
         }
         else
@@ -162,7 +167,48 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
 
 void Response::prossesBoundaryBuffer(CLIENTIT &clientIT)
 {
-    (void)clientIT;
-    std::cout.write(clientIT->header_buffer, request_size);
-    exit(1);
+    std::string boundary = "--" + clientIT->fields["boundary"];
+    std::string tmp_str;
+    std::size_t found;
+
+    tmp_str.assign(clientIT->header_buffer, request_read);
+    found = tmp_str.find(boundary);
+    if (found != std::string::npos)
+    {
+        if (found != tmp_str.find(boundary + "--"))
+        {
+            clientIT->response.outFile->write(clientIT->header_buffer, found - 2);
+            clientIT->response.outFile->flush();
+            clientIT->response.request_size -= (found + clientIT->fields["boundary"].size() + 2);
+            char *holder = new char[request_read];
+            std::memcpy(holder, clientIT->header_buffer + found, request_read - found);
+            std::memset(clientIT->header_buffer, 0, CLIENT_HEADER_BUFFER_SIZE);
+            std::memcpy(clientIT->header_buffer, holder, request_read - found);
+            request_read -= found;
+            delete[] holder;
+            clientIT->response.outFile->close();
+            delete clientIT->response.outFile;
+            clientIT->response.outFile = NULL;
+            clientIT->response.filePathParsed = false;
+            return;
+        }
+        else
+        {
+            clientIT->response.outFile->write(clientIT->header_buffer, found - 2);
+            clientIT->response.outFile->flush();
+            clientIT->response.request_size -= (found + clientIT->fields["boundary"].size() + 4);
+            clientIT->response.request_size = 0;
+            delete[] clientIT->header_buffer;
+            clientIT->header_buffer = NULL;
+            return;
+        }
+    }
+    else
+    {
+        clientIT->response.outFile->write(clientIT->header_buffer, request_read);
+        clientIT->response.outFile->flush();
+        clientIT->response.request_size -= request_read;
+        delete[] clientIT->header_buffer;
+        clientIT->header_buffer = NULL;
+    }
 }

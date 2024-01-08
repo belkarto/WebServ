@@ -54,7 +54,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
                 return;
             if (!clientIt->fields["boundary"].empty())
             {
-                //function to handle boundary
+                // function to handle boundary
                 this->prossesBoundaryBuffer(clientIt);
             }
             else
@@ -75,10 +75,17 @@ static void checkUnprocessedData(CLIENTIT &cliIt)
     std::streamsize leftDataLen;
     std::string     tmp_str;
 
+    if (!cliIt->header_buffer)
+        return;
     startPos = std::strstr(cliIt->header_buffer, "\r\n\r\n");
-    // std::cout << startPos << std::endl;
-    // if (startPos == NULL || (std::streamsize)((startPos + 4) - cliIt->header_buffer) == cliIt->response.request_read)
-    //     return;
+    if (startPos == NULL || (std::streamsize)((startPos + 4) - cliIt->header_buffer) == cliIt->response.request_read)
+    {
+        std::cout << RED << "no boundary found" << RESET << std::endl;
+        cliIt->response.filePathParsed = true;
+        delete[] cliIt->header_buffer;
+        cliIt->header_buffer = NULL;
+        return;
+    }
     startPos += 4;
     leftDataLen = cliIt->response.request_read - (startPos - cliIt->header_buffer);
     if (!cliIt->fields["boundary"].empty())
