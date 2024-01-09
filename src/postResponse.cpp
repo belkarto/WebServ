@@ -81,6 +81,7 @@ static void checkUnprocessedData(CLIENTIT &cliIt)
     if (startPos == NULL || (std::streamsize)((startPos + 4) - cliIt->header_buffer) == cliIt->response.request_read)
     {
         std::cout << RED << "no boundary found" << RESET << std::endl;
+        cliIt->response.request_size -= cliIt->response.request_read;
         cliIt->response.filePathParsed = true;
         delete[] cliIt->header_buffer;
         cliIt->header_buffer = NULL;
@@ -97,14 +98,18 @@ static void checkUnprocessedData(CLIENTIT &cliIt)
         {
             if (found != tmp_str.find(boundary + "--"))
             {
+                /* 
+                 * if boundary is found but not the last one
+                 */
                 cliIt->response.outFile->write(startPos, found - 2);
                 cliIt->response.outFile->flush();
                 cliIt->response.outFile->close();
                 char *holder = new char[cliIt->response.request_read];
-                std::memcpy(holder, startPos + found, cliIt->response.request_read - found);
-                std::memset(cliIt->header_buffer, 0, CLIENT_HEADER_BUFFER_SIZE);
-                std::memcpy(cliIt->header_buffer, holder, cliIt->response.request_read - found);
+                cliIt->response.request_size -= (found + cliIt->fields["boundary"].size() + 4);
                 cliIt->response.request_read -= found;
+                std::memcpy(holder, startPos + found, cliIt->response.request_read);
+                std::memset(cliIt->header_buffer, 0, CLIENT_HEADER_BUFFER_SIZE);
+                std::memcpy(cliIt->header_buffer, holder, cliIt->response.request_read);
                 delete[] holder;
                 delete cliIt->response.outFile;
                 return;
@@ -114,7 +119,7 @@ static void checkUnprocessedData(CLIENTIT &cliIt)
                 cliIt->response.outFile->write(startPos, found - 2);
                 cliIt->response.outFile->flush();
                 cliIt->response.request_size -= (found + cliIt->fields["boundary"].size() + 4);
-                std::cout << GREEN << cliIt->response.request_size << RESET << std::endl;
+                std::cout << GREEN <<  cliIt->response.request_size << RESET << std::endl;
                 cliIt->response.request_size = 0;
                 cliIt->response.filePathParsed = true;
                 delete[] cliIt->header_buffer;

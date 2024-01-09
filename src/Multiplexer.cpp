@@ -16,21 +16,12 @@ const char *Multiplexer::defErrorPagesStrings[NUM_DEF_ERROR] = {
     STATUS_501, STATUS_502, STATUS_503, STATUS_504, STATUS_505};
 
 const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {
-	"host",
-	"content-type",
-	"content-length",
-	"connection",
-	"transfer-encoding",
-	"cookie",
+    "host", "content-type", "content-length", "connection", "transfer-encoding", "cookie",
 };
 
 void (Client::*Multiplexer::fields_setters[HEADERS_FIELDS_SIZE])(std::string &field) = {
-	&Client::setHost,
-	&Client::setContentType,
-	&Client::setContentLength,
-	&Client::setConnection,
-	&Client::setTransferEncoding,
-    &Client::setCookie,
+    &Client::setHost,       &Client::setContentType,      &Client::setContentLength,
+    &Client::setConnection, &Client::setTransferEncoding, &Client::setCookie,
 };
 
 Multiplexer::Multiplexer(SERVVECT &servers, char **env) : servers(servers)
@@ -141,10 +132,10 @@ void Multiplexer::connectionListener()
                     {
                         delete[] clientIt->header_buffer;
                         dropClient(clientIt);
-                        continue ;
+                        continue;
                     }
                     if (!clientIt->request_all_processed)
-                            getClientRequest(clientIt);
+                        getClientRequest(clientIt);
                 }
                 if (ConnectionTimedOut(clientIt))
                     dropClient(clientIt);
@@ -161,7 +152,7 @@ void Multiplexer::connectionListener()
                     {
                         handleResponse(clientIt);
                     }
-                    catch(ResponseSendingException& e)
+                    catch (ResponseSendingException &e)
                     {
                         dropClient(clientIt);
                     }
@@ -254,19 +245,19 @@ void Multiplexer::loadMimeTypes()
     std::stringstream ss;
     std::ifstream     infile(MIMETYPE_PATH);
 
-	if (!infile.is_open())
-		return;
-	while (getline(infile, line))
-	{
-		ss << line;
-		ss >> key;
-		ss >> value;
-		mime_types[key] = value;
+    if (!infile.is_open())
+        return;
+    while (getline(infile, line))
+    {
+        ss << line;
+        ss >> key;
+        ss >> value;
+        mime_types[key] = value;
         key.clear();
         value.clear();
         ss.clear();
-		ss.str("");
-	}
+        ss.str("");
+    }
     infile.close();
 }
 

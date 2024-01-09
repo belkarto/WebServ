@@ -113,6 +113,7 @@ void Client::setContentLength(std::string &content_length)
     std::stringstream ss;
     ss << content_length;
     ss >> response.request_size;
+    std::cout << GREEN << "request size ==> " << response.request_size << RESET << std::endl;
     /*
      Content-Length = 1*DIGIT
     */
@@ -224,6 +225,7 @@ void Client::getBuffer()
 {
     if (header_buffer == NULL)
     {
+        // sleep(1);
         header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
         response.request_read = recv(connect_socket, header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
         // std::cout.write(header_buffer, response.request_read);
