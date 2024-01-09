@@ -106,7 +106,6 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
         tmp = std::strstr(clientIt->header_buffer, "\r\n\r\n");
         if (tmp == NULL)
         {
-            request_size -= std::strlen(clientIt->header_buffer);
             delete[] clientIt->header_buffer;
             clientIt->header_buffer = NULL;
         }
@@ -114,48 +113,24 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
     }
     else
     {
-        char                                        *tmp = NULL;
-        std::stringstream                            ss;
-        std::string                                  line;
-        std::map<std::string, std::string>::iterator it = clientIt->fields.find("Content-Type");
+        char *tmp = NULL;
 
-        if (!clientIt->header_buffer)
-            return;
-        tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
+        if (clientIt->header_buffer)
+            tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
         if (tmp == NULL)
         {
-            // request_size -= std::strlen(clientIt->header_buffer);
-            std::cerr << YELLOW << "REQ " << request_size << RESET << std::endl;
-            if (std::strstr(clientIt->header_buffer, "\r\n\r\n"))
-            {
-                if (it != clientIt->fields.end())
-                    clientIt->fields.erase(it);
-                clientIt->setContentType(line);
-                unprocessedHeadersDone = true;
-            }
-            {
-                request_size -= std::strlen(clientIt->header_buffer);
-                delete[] clientIt->header_buffer;
-                clientIt->header_buffer = NULL;
-            }
+            delete[] clientIt->header_buffer;
+            clientIt->header_buffer = NULL;
         }
         else
         {
-            char *crlf;
-            ss << tmp;
+            std::stringstream ss(tmp);
+            std::string       line;
             ss >> line >> line;
+            std::map<std::string, std::string>::iterator it = clientIt->fields.find("Content-Type");
             if (it != clientIt->fields.end())
                 clientIt->fields.erase(it);
             clientIt->setContentType(line);
-            crlf = std::strstr(clientIt->header_buffer, "\r\n\r\n");
-            if (crlf == NULL)
-            {
-                request_size -= std::strlen(clientIt->header_buffer);
-                delete[] clientIt->header_buffer;
-                clientIt->header_buffer = NULL;
-            }
-            else
-                request_size -= (crlf + 4) - clientIt->header_buffer;
             unprocessedHeadersDone = true;
         }
     }
