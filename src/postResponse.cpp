@@ -48,28 +48,11 @@ void Response::handleRequestBody(CLIENTIT &clientIt)
     }
     else
     {
-        std::string boundary;
-        std::size_t found = std::string::npos;
-
-        if (!clientIt->fields["boundary"].empty())
-        {
-            boundary = "--" + clientIt->fields["boundary"] + "--";
-            std::string tmp(clientIt->header_buffer, clientIt->response.request_read);
-            found = tmp.find(boundary);
-            if (found != std::string::npos)
-            {
-                tmp = tmp.substr(0, found);
-                clientIt->response.request_read = tmp.size();
-            }
-        }
         if (clientIt->header_buffer != NULL)
         {
             clientIt->response.outFile->write(clientIt->header_buffer, clientIt->response.request_read);
             clientIt->response.outFile->flush();
-            if (found != std::string::npos)
-                request_body_size = 0;
-            else
-                request_body_size -= request_read;
+            request_body_size -= request_read;
             delete[] clientIt->header_buffer;
             clientIt->header_buffer = NULL;
         }
