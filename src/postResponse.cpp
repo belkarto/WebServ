@@ -4,79 +4,74 @@
 
 void Response::setPostResponse(CLIENTIT &clientIt)
 {
-    if (!this->filePathParsed)
+    try
     {
-        try
+        if (!this->filePathParsed)
         {
             this->postParseFilePath(clientIt);
         }
-        catch (std::exception &e)
+        else
         {
-            delete[] clientIt->header_buffer;
-            this->resetState();
-            status = e.what();
-            this->setErrorResponse(clientIt);
-            return;
+            this->handleRequestBody(clientIt);
         }
+    }
+    catch (std::exception &e)
+    {
+        delete[] clientIt->header_buffer;
+        this->resetState();
+        status = e.what();
+        this->setErrorResponse(clientIt);
+        return;
+    }
+}
+
+void Response::handleRequestBody(CLIENTIT &clientIt)
+{
+    if (request_body_size == 0)
+    {
+        clientIt->response.outFile->close();
+        delete clientIt->response.outFile;
+        clientIt->response.outFile = NULL;
+        if (postCgi)
+        {
+            cgiExecutable = clientIt->serverIt->findCgi(clientIt, filePath);
+            if (!cgiExecutable.empty())
+            {
+                cgi = true;
+                handleCgi(clientIt);
+            }
+            else
+                throw std::runtime_error(STATUS_403);
+        }
+        else
+            throw std::runtime_error(STATUS_201);
     }
     else
     {
-        if (request_size == 0)
+        std::string boundary;
+        std::size_t found = std::string::npos;
+
+        if (!clientIt->fields["boundary"].empty())
         {
-            clientIt->response.outFile->close();
-            delete clientIt->response.outFile;
-            clientIt->response.outFile = NULL;
-            if (postCgi)
+            boundary = "--" + clientIt->fields["boundary"] + "--";
+            std::string tmp(clientIt->header_buffer, clientIt->response.request_read);
+            found = tmp.find(boundary);
+            if (found != std::string::npos)
             {
-                cgiExecutable = clientIt->serverIt->findCgi(clientIt, filePath);
-                if (!cgiExecutable.empty())
-                {
-                    cgi = true;
-                    handleCgi(clientIt);
-                }
-                else
-                {
-                    resetState();
-                    status = STATUS_403;
-                    this->setErrorResponse(clientIt);
-                    return;
-                }
-            }
-            else
-            {
-                this->resetState();
-                status = STATUS_201;
-                this->setErrorResponse(clientIt);
-                return;
+                tmp = tmp.substr(0, found);
+                clientIt->response.request_read = tmp.size();
             }
         }
-        else
+        if (clientIt->header_buffer != NULL)
         {
-            std::string boundary;
-            std::size_t found = std::string::npos;
-
-            if (!clientIt->fields["boundary"].empty())
-            {
-                boundary = "--" + clientIt->fields["boundary"] + "--";
-                std::string tmp(clientIt->header_buffer, clientIt->response.request_read);
-                found = tmp.find(boundary);
-                if (found != std::string::npos)
-                {
-                    tmp = tmp.substr(0, found);
-                    clientIt->response.request_read = tmp.size();
-                }
-            }
-            if (clientIt->header_buffer != NULL)
-            {
-                clientIt->response.outFile->write(clientIt->header_buffer, clientIt->response.request_read);
-                clientIt->response.outFile->flush();
-                if (found != std::string::npos)
-                    request_size = 0;
-                else
-                    request_size -= request_read;
-                delete[] clientIt->header_buffer;
-                clientIt->header_buffer = NULL;
-            }
+            clientIt->response.outFile->write(clientIt->header_buffer, clientIt->response.request_read);
+            clientIt->response.outFile->flush();
+            if (found != std::string::npos)
+                request_body_size = 0;
+            else
+                request_body_size -= request_read;
+            delete[] clientIt->header_buffer;
+            clientIt->header_buffer = NULL;
         }
     }
 }
@@ -137,8 +132,8 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
             throw std::runtime_error(STATUS_500);
         }
         ss << clientIt->fields["Content-Length"];
-        ss >> request_size;
-        if (request_size >= clientIt->serverIt->client_max_body_size)
+        ss >> request_body_size;
+        if (request_body_size >= clientIt->serverIt->client_max_body_size)
         {
             clientIt->response.outFile->close();
             delete clientIt->response.outFile;
@@ -147,7 +142,7 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
             unlink(outFilePath.c_str());
             throw std::runtime_error(STATUS_413);
         }
-        checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile,
+        checkUnprocessedData(clientIt->header_buffer, request_body_size, clientIt->response.outFile,
                              clientIt->response.request_read);
         delete[] clientIt->header_buffer;
         clientIt->header_buffer = NULL;

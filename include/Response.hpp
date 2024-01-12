@@ -7,13 +7,13 @@
 class Response
 {
   public:
-    std::string status; // reponse headers fields
-    std::string connection;
-    std::string contentType;
-    std::string contentLength;
-    std::string transferEncoding;
-    std::string location;
-    std::vector<std::string>	cookies;
+    std::string              status; // reponse headers fields
+    std::string              connection;
+    std::string              contentType;
+    std::string              contentLength;
+    std::string              transferEncoding;
+    std::string              location;
+    std::vector<std::string> cookies;
 
     std::string filePath;
     std::string root;
@@ -22,16 +22,16 @@ class Response
 
     std::string cgiExecutable; // cgi
     std::string CgiFilePath;
-    bool    cgi;
-    time_t counter;
-    pid_t  pid;
+    bool        cgi;
+    time_t      counter;
+    pid_t       pid;
 
     std::string     special_response; // response
     std::ifstream  *fileContent;
     std::ofstream  *outFile;
     DIR            *directory;
     std::streamsize response_size;
-    std::streamsize request_size;
+    std::streamsize request_body_size;
     std::streamsize request_read;
     std::streamsize readbytes;
 
@@ -81,11 +81,11 @@ class Response
     void   handleResourceDire(CLIENTIT &);
     void   parsePostFilePath(CLIENTIT &);
     void   getUnprocessedHeaders(CLIENTIT &);
-    char **setCgiEnv(CLIENTIT &clientIt);
+    char **setCgiEnv(CLIENTIT &);
+    void   handleRequestBody(CLIENTIT &);
 
-
-    bool   unprocessedHeadersDone;
-    bool   firstBuffer;
+    bool unprocessedHeadersDone;
+    bool firstBuffer;
 };
 int remove_all(const char *path, int &ecode);
 #endif
