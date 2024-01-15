@@ -31,7 +31,7 @@ class Response
     std::ofstream  *outFile;
     DIR            *directory;
     std::streamsize response_size;
-    std::streamsize request_size;
+    std::streamsize request_body_size;
     std::streamsize request_read;
     std::streamsize readbytes;
 

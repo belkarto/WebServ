@@ -21,7 +21,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     }
     else
     {
-        if (request_size <= 0)
+        if (request_body_size <= 0)
         {
             clientIt->response.outFile->close();
             delete clientIt->response.outFile;
@@ -69,15 +69,15 @@ void Response::setPostResponse(CLIENTIT &clientIt)
             }
             if (clientIt->header_buffer != NULL)
             {
-                if (request_size < request_read)
-                    outFile->write(clientIt->header_buffer, request_size);
+                if (request_body_size < request_read)
+                    outFile->write(clientIt->header_buffer, request_body_size);
                 else
                     clientIt->response.outFile->write(clientIt->header_buffer, clientIt->response.request_read);
                 clientIt->response.outFile->flush();
                 if (found != std::string::npos)
-                    request_size = 0;
+                    request_body_size = 0;
                 else
-                    request_size -= request_read;
+                    request_body_size -= request_read;
                 delete[] clientIt->header_buffer;
                 clientIt->header_buffer = NULL;
             }
@@ -144,8 +144,8 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
             throw std::runtime_error(STATUS_500);
         }
         ss << clientIt->fields["Content-Length"];
-        ss >> request_size;
-        if (request_size >= clientIt->serverIt->client_max_body_size)
+        ss >> request_body_size;
+        if (request_body_size >= clientIt->serverIt->client_max_body_size)
         {
             clientIt->response.outFile->close();
             delete clientIt->response.outFile;
@@ -154,7 +154,7 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
             unlink(outFilePath.c_str());
             throw std::runtime_error(STATUS_413);
         }
-        checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile,
+        checkUnprocessedData(clientIt->header_buffer, request_body_size, clientIt->response.outFile,
                              clientIt->response.request_read);
         delete[] clientIt->header_buffer;
         clientIt->header_buffer = NULL;
