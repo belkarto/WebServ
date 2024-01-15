@@ -30,6 +30,7 @@ Response::Response(void)
     postCgi         = false;
     firstBuffer     = true;
     unprocessedHeadersDone = false;
+    chunk_size = 0;
 }
 
 void	Response::resetState()
@@ -62,6 +63,7 @@ void	Response::resetState()
     postCgi         = false;
     firstBuffer     = true;
     unprocessedHeadersDone = false;
+    chunk_size = 0;
 }
 
 Response::~Response()
