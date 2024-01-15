@@ -1,32 +1,83 @@
 #include "../include/Multiplexer.hpp"
 #include <ios>
+#include <stdexcept>
 #include <unistd.h>
 
 void Response::setPostResponse(CLIENTIT &clientIt)
 {
-    if (!this->filePathParsed)
+    try
     {
-        try
-        {
+        if (!this->filePathParsed)
             this->postParseFilePath(clientIt);
-        }
-        catch (std::exception &e)
+        handleRequestBody(clientIt);
+    }
+    catch (std::exception &e)
+    {
+        delete[] clientIt->header_buffer;
+        this->resetState();
+        status = e.what();
+        this->setErrorResponse(clientIt);
+        return;
+    }
+}
+
+void Response::recvChunkedRequest(CLIENTIT &clientIt)
+{
+    if (chunk_size == 0)
+    {
+        char             *startOfChunck;
+        std::stringstream ss(clientIt->header_buffer);
+        startOfChunck = std::strstr(clientIt->header_buffer, "\r\n");
+        if (startOfChunck == NULL)
         {
-            delete[] clientIt->header_buffer;
-            this->resetState();
-            status = e.what();
-            this->setErrorResponse(clientIt);
-            return;
+            clientIt->response.outFile->close();
+            delete clientIt->response.outFile;
+            clientIt->response.outFile = NULL;
+            unlink(outFileCgiPath.c_str());
+            unlink(filePath.c_str());
+            std::cout.write(clientIt->header_buffer, 100);
+            throw std::runtime_error(STATUS_400);
         }
+        startOfChunck += 2;
+        request_read -= startOfChunck - clientIt->header_buffer;
+        std::memmove(clientIt->header_buffer, startOfChunck, request_read);
+        ss >> std::hex >> chunk_size;
+        std::cout << GREEN << chunk_size << RESET << std::endl;
+        if (chunk_size == 0)
+            throw std::runtime_error(STATUS_201);
+    }
+    if (request_read < chunk_size)
+    {
+        outFile->write(clientIt->header_buffer, request_read);
+        outFile->flush();
+        chunk_size -= request_read;
+        delete[] clientIt->header_buffer;
+        clientIt->header_buffer = NULL;
     }
     else
     {
+        outFile->write(clientIt->header_buffer, chunk_size);
+        outFile->flush();
+        request_read -= (chunk_size + 2);
+        std::memmove(clientIt->header_buffer, clientIt->header_buffer + chunk_size + 2, request_read);
+        chunk_size = 0;
+    }
+}
+
+void Response::recvRequestBody(CLIENTIT &clientIt)
+{
+    if (clientIt->header_buffer != NULL)
+    {
+        clientIt->response.outFile->write(clientIt->header_buffer, clientIt->response.request_read);
+        clientIt->response.outFile->flush();
+        request_body_size -= request_read;
+        delete[] clientIt->header_buffer;
+        clientIt->header_buffer = NULL;
         if (request_body_size <= 0)
         {
             clientIt->response.outFile->close();
             delete clientIt->response.outFile;
             clientIt->response.outFile = NULL;
-            clientIt->request_body_received = true;
             if (postCgi)
             {
                 cgiExecutable = clientIt->serverIt->findCgi(clientIt, filePath);
@@ -36,70 +87,37 @@ void Response::setPostResponse(CLIENTIT &clientIt)
                     handleCgi(clientIt);
                 }
                 else
-                {
-                    resetState();
-                    status = STATUS_403;
-                    this->setErrorResponse(clientIt);
-                    return;
-                }
+                    throw std::runtime_error(STATUS_403);
             }
             else
-            {
-                this->resetState();
-                status = STATUS_201;
-                this->setErrorResponse(clientIt);
-                return;
-            }
-        }
-        else
-        {
-            std::string boundary;
-            std::size_t found = std::string::npos;
-
-            if (!clientIt->fields["boundary"].empty())
-            {
-                boundary = "--" + clientIt->fields["boundary"] + "--";
-                std::string tmp(clientIt->header_buffer, clientIt->response.request_read);
-                found = tmp.find(boundary);
-                if (found != std::string::npos)
-                {
-                    tmp = tmp.substr(0, found);
-                    clientIt->response.request_read = tmp.size();
-                }
-            }
-            if (clientIt->header_buffer != NULL)
-            {
-                if (request_body_size < request_read)
-                    outFile->write(clientIt->header_buffer, request_body_size);
-                else
-                    clientIt->response.outFile->write(clientIt->header_buffer, clientIt->response.request_read);
-                clientIt->response.outFile->flush();
-                if (found != std::string::npos)
-                    request_body_size = 0;
-                else
-                    request_body_size -= request_read;
-                delete[] clientIt->header_buffer;
-                clientIt->header_buffer = NULL;
-            }
+                throw std::runtime_error(STATUS_201);
         }
     }
 }
 
-static void checkUnprocessedData(char *buffer, std::streamsize &size, std::ostream *outFile, std::streamsize readed)
+void Response::handleRequestBody(CLIENTIT &clientIt)
 {
-    char           *startPos;
-    std::streamsize leftDataLen;
-
-    startPos = std::strstr(buffer, "\r\n\r\n");
-    if (startPos == NULL || (std::streamsize)((startPos + 4) - buffer) == readed)
-        return;
-    startPos += 4;
-    leftDataLen = readed - (startPos - buffer);
-    if (size < leftDataLen)
-        outFile->write(startPos, size);
+    if (clientIt->fields["Transfer-Encoding"] == "chunked")
+        recvChunkedRequest(clientIt);
     else
-        outFile->write(startPos, leftDataLen);
-    size -= leftDataLen;
+        recvRequestBody(clientIt);
+}
+
+static void checkUnprocessedData(CLIENTIT &clientIt)
+{
+    char *startPos;
+
+    startPos = std::strstr(clientIt->header_buffer, "\r\n\r\n");
+    if (startPos == NULL ||
+        (std::streamsize)((startPos + 4) - clientIt->header_buffer) == clientIt->response.request_read)
+    {
+        return;
+    }
+    startPos += 4;
+    clientIt->response.request_read -= (startPos - clientIt->header_buffer);
+
+    std::memmove(clientIt->header_buffer, startPos, clientIt->response.request_read);
+    clientIt->header_buffer[clientIt->response.request_read] = '\0';
 }
 
 void Response::postParseFilePath(CLIENTIT &clientIt)
@@ -110,10 +128,6 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
     STRINGVECTIT      it;
 
     uri = clientIt->fields[URI];
-    if (!clientIt->fields["boundary"].empty())
-        getUnprocessedHeaders(clientIt);
-    if (!unprocessedHeadersDone && !clientIt->fields["boundary"].empty())
-        return;
     clientIt->serverIt->findLocation(clientIt, uri);
     if (clientIt->locatIt != clientIt->serverIt->location.end())
     {
@@ -143,21 +157,7 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
             unlink(filePath.c_str());
             throw std::runtime_error(STATUS_500);
         }
-        ss << clientIt->fields["Content-Length"];
-        ss >> request_body_size;
-        if (request_body_size >= clientIt->serverIt->client_max_body_size)
-        {
-            clientIt->response.outFile->close();
-            delete clientIt->response.outFile;
-            clientIt->response.outFile = NULL;
-            unlink(filePath.c_str());
-            unlink(outFileCgiPath.c_str());
-            throw std::runtime_error(STATUS_413);
-        }
-        checkUnprocessedData(clientIt->header_buffer, request_body_size, clientIt->response.outFile,
-                             clientIt->response.request_read);
-        delete[] clientIt->header_buffer;
-        clientIt->header_buffer = NULL;
+        checkUnprocessedData(clientIt);
         this->filePathParsed = true;
     }
     else

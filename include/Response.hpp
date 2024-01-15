@@ -83,9 +83,12 @@ class Response
     void   getUnprocessedHeaders(CLIENTIT &);
     char **setCgiEnv(CLIENTIT &);
     void   handleRequestBody(CLIENTIT &);
+    void   recvRequestBody(CLIENTIT &);
+    void   recvChunkedRequest(CLIENTIT &);
 
-    bool unprocessedHeadersDone;
-    bool firstBuffer;
+    std::streamsize chunk_size;
+    bool            unprocessedHeadersDone;
+    bool            firstBuffer;
 };
 int remove_all(const char *path, int &ecode);
 #endif

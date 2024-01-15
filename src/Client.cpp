@@ -118,6 +118,11 @@ void Client::setContentLength(std::string &content_length)
         find_if(content_length.begin(), content_length.end(), not_digit) != content_length.end())
         throw RequestParsingException(STATUS_400);
     fields.insert(std::make_pair("Content-Length", content_length));
+    std::stringstream ss;
+    ss << content_length;
+    ss >> response.request_body_size;
+    if (response.request_body_size > serverIt->client_max_body_size)
+        throw RequestParsingException(STATUS_413);
     /*
      Content-Length = 1*DIGIT
     */
