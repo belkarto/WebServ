@@ -16,21 +16,12 @@ const char *Multiplexer::defErrorPagesStrings[NUM_DEF_ERROR] = {
     STATUS_501, STATUS_502, STATUS_503, STATUS_504, STATUS_505};
 
 const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {
-	"host",
-	"content-type",
-	"content-length",
-	"connection",
-	"transfer-encoding",
-	"cookie",
+    "host", "content-type", "content-length", "connection", "transfer-encoding", "cookie",
 };
 
 void (Client::*Multiplexer::fields_setters[HEADERS_FIELDS_SIZE])(std::string &field) = {
-	&Client::setHost,
-	&Client::setContentType,
-	&Client::setContentLength,
-	&Client::setConnection,
-	&Client::setTransferEncoding,
-    &Client::setCookie,
+    &Client::setHost,       &Client::setContentType,      &Client::setContentLength,
+    &Client::setConnection, &Client::setTransferEncoding, &Client::setCookie,
 };
 
 Multiplexer::Multiplexer(SERVVECT &servers, char **env) : servers(servers)
@@ -95,6 +86,7 @@ void Multiplexer::registerClient(SERVIT &serverIt)
 
 void Multiplexer::dropClient(CLIENTIT &clientIt)
 {
+    std::cout << __func__ << std::endl;
     if (clientIt->response.fileContent)
     {
         if (clientIt->response.fileContent->is_open())
@@ -113,6 +105,12 @@ void Multiplexer::dropClient(CLIENTIT &clientIt)
         clientIt->response.outFile = NULL;
         unlink(clientIt->response.outFileCgiPath.c_str());
     }
+    if (clientIt->response.cgi)
+    {
+        kill(clientIt->response.pid, SIGKILL);
+        waitpid(clientIt->response.pid, NULL, 0);
+        unlink(clientIt->response.CgiFilePath.c_str());
+    }
     close(clientIt->connect_socket);
     clients.erase(clientIt);
 }
@@ -127,7 +125,7 @@ void Multiplexer::connectionListener()
     {
         if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 1)
             continue;
-        try 
+        try
         {
             i = -1;
             while (++i < num_events)
@@ -141,12 +139,13 @@ void Multiplexer::connectionListener()
                         clientIt->getBuffer();
                         if (clientIt->response.request_read < 1)
                         {
+                            std::cout << "to drop" << std::endl;
                             delete[] clientIt->header_buffer;
                             dropClient(clientIt);
-                            continue ;
+                            continue;
                         }
                         if (!clientIt->request_all_processed)
-                                getClientRequest(clientIt);
+                            getClientRequest(clientIt);
                     }
                     if (ConnectionTimedOut(clientIt))
                         dropClient(clientIt);
@@ -158,7 +157,7 @@ void Multiplexer::connectionListener()
                             clientIt->resetState();
                     }
                     else if ((events[i].events & EPOLLOUT))
-                        handleResponse(clientIt); 
+                        handleResponse(clientIt);
                 }
             }
         }
@@ -245,8 +244,8 @@ bool Multiplexer::ConnectionTimedOut(CLIENTIT &clientIt)
 
     if (!clientIt->request_all_processed && elapsed >= CLIENT_SEND_TIMEOUT)
         return true;
-    if (clientIt->request_all_processed && clientIt->fields["method"] == "POST"
-        && !clientIt->request_body_received && elapsed >= CLIENT_SEND_TIMEOUT)
+    if (clientIt->request_all_processed && clientIt->fields["method"] == "POST" && !clientIt->request_body_received &&
+        elapsed >= CLIENT_SEND_TIMEOUT)
         return true;
     return false;
 }
@@ -257,19 +256,19 @@ void Multiplexer::loadMimeTypes()
     std::stringstream ss;
     std::ifstream     infile(MIMETYPE_PATH);
 
-	if (!infile.is_open())
-		return;
-	while (getline(infile, line))
-	{
-		ss << line;
-		ss >> key;
-		ss >> value;
-		mime_types[key] = value;
+    if (!infile.is_open())
+        return;
+    while (getline(infile, line))
+    {
+        ss << line;
+        ss >> key;
+        ss >> value;
+        mime_types[key] = value;
         key.clear();
         value.clear();
         ss.clear();
-		ss.str("");
-	}
+        ss.str("");
+    }
     infile.close();
 }
 

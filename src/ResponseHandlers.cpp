@@ -243,7 +243,7 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
     if (wpid < 0)
     {
         kill(pid, SIGKILL);
-        wait(NULL);
+        waitpid(pid, NULL, 0);
         unlink(CgiFilePath.c_str());
         resetState();
         status = STATUS_500;
@@ -266,7 +266,7 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
     else if ((time(NULL) - counter) >= CGI_TIMEOUT)
     {
         kill(pid, SIGKILL);
-        wait(NULL);
+        waitpid(pid, NULL, 0);
         unlink(CgiFilePath.c_str());
         resetState();
         status = STATUS_408;
