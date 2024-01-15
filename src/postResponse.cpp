@@ -139,7 +139,7 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
             clientIt->response.outFile->close();
             delete clientIt->response.outFile;
             clientIt->response.outFile = NULL;
-            unlink(outFilePath.c_str());
+            unlink(outFileCgiPath.c_str());
             unlink(filePath.c_str());
             throw std::runtime_error(STATUS_500);
         }
@@ -151,7 +151,7 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
             delete clientIt->response.outFile;
             clientIt->response.outFile = NULL;
             unlink(filePath.c_str());
-            unlink(outFilePath.c_str());
+            unlink(outFileCgiPath.c_str());
             throw std::runtime_error(STATUS_413);
         }
         checkUnprocessedData(clientIt->header_buffer, request_body_size, clientIt->response.outFile,
@@ -178,8 +178,8 @@ void Response::processResourceRequest(CLIENTIT &clientIt)
         this->handleResourceFile(clientIt);
     else
         this->handleResourceDire(clientIt);
-    outFilePath = "/tmp" + clientIt->generateFileName(clientIt->fields["Content-Type"]);
-    clientIt->response.outFile = new std::ofstream(outFilePath.c_str());
+    outFileCgiPath = "/tmp" + clientIt->generateFileName(clientIt->fields["Content-Type"]);
+    clientIt->response.outFile = new std::ofstream(outFileCgiPath.c_str());
 }
 
 char **Response::setCgiEnv(CLIENTIT &clientIt)

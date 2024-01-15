@@ -111,7 +111,7 @@ void Multiplexer::dropClient(CLIENTIT &clientIt)
             clientIt->response.outFile->close();
         delete clientIt->response.outFile;
         clientIt->response.outFile = NULL;
-        unlink(clientIt->response.outFilePath.c_str());
+        unlink(clientIt->response.outFileCgiPath.c_str());
     }
     close(clientIt->connect_socket);
     clients.erase(clientIt);

@@ -67,7 +67,7 @@ class Response
 
     // post
     bool        postCgi;
-    std::string outFilePath;
+    std::string outFileCgiPath;
     std::string fileLocation;
     bool        filePathParsed;
     char       *cgiEnv[10];

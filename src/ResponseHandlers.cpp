@@ -220,7 +220,7 @@ void Response::handleCgi(CLIENTIT &clientIt)
             Multiplexer::env = setCgiEnv(clientIt);
             if (clientIt->fields["method"] == "POST")
             {
-                std::freopen(outFilePath.c_str(), "r", stdin);
+                std::freopen(outFileCgiPath.c_str(), "r", stdin);
             }
             std::freopen(CgiFilePath.c_str(), "w+", stdout);
             std::freopen(CgiFilePath.c_str(), "w+", stderr);
