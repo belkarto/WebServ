@@ -1,4 +1,6 @@
 #include "../include/Multiplexer.hpp"
+#include <ios>
+#include <unistd.h>
 
 void Response::setPostResponse(CLIENTIT &clientIt)
 {
@@ -19,11 +21,12 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     }
     else
     {
-        if (request_size == 0)
+        if (request_size <= 0)
         {
             clientIt->response.outFile->close();
             delete clientIt->response.outFile;
             clientIt->response.outFile = NULL;
+            clientIt->request_body_received = true;
             if (postCgi)
             {
                 cgiExecutable = clientIt->serverIt->findCgi(clientIt, filePath);
@@ -50,18 +53,31 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         }
         else
         {
-            if (!clientIt->header_buffer)
-                return;
+            std::string boundary;
+            std::size_t found = std::string::npos;
+
             if (!clientIt->fields["boundary"].empty())
             {
-                // function to handle boundary
-                this->prossesBoundaryBuffer(clientIt);
+                boundary = "--" + clientIt->fields["boundary"] + "--";
+                std::string tmp(clientIt->header_buffer, clientIt->response.request_read);
+                found = tmp.find(boundary);
+                if (found != std::string::npos)
+                {
+                    tmp = tmp.substr(0, found);
+                    clientIt->response.request_read = tmp.size();
+                }
             }
-            else
+            if (clientIt->header_buffer != NULL)
             {
-                clientIt->response.outFile->write(clientIt->header_buffer, clientIt->response.request_read);
+                if (request_size < request_read)
+                    outFile->write(clientIt->header_buffer, request_size);
+                else
+                    clientIt->response.outFile->write(clientIt->header_buffer, clientIt->response.request_read);
                 clientIt->response.outFile->flush();
-                request_size -= request_read;
+                if (found != std::string::npos)
+                    request_size = 0;
+                else
+                    request_size -= request_read;
                 delete[] clientIt->header_buffer;
                 clientIt->header_buffer = NULL;
             }
@@ -69,71 +85,21 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     }
 }
 
-static void checkUnprocessedData(CLIENTIT &cliIt)
+static void checkUnprocessedData(char *buffer, std::streamsize &size, std::ostream *outFile, std::streamsize readed)
 {
     char           *startPos;
     std::streamsize leftDataLen;
-    std::string     tmp_str;
 
-    if (!cliIt->header_buffer)
+    startPos = std::strstr(buffer, "\r\n\r\n");
+    if (startPos == NULL || (std::streamsize)((startPos + 4) - buffer) == readed)
         return;
-    startPos = std::strstr(cliIt->header_buffer, "\r\n\r\n");
-    if (startPos == NULL || (std::streamsize)((startPos + 4) - cliIt->header_buffer) == cliIt->response.request_read)
-    {
-        std::cout << RED << "no boundary found" << RESET << std::endl;
-        cliIt->response.request_size -= cliIt->response.request_read;
-        cliIt->response.filePathParsed = true;
-        delete[] cliIt->header_buffer;
-        cliIt->header_buffer = NULL;
-        return;
-    }
     startPos += 4;
-    leftDataLen = cliIt->response.request_read - (startPos - cliIt->header_buffer);
-    if (!cliIt->fields["boundary"].empty())
-    {
-        tmp_str.assign(startPos, leftDataLen);
-        std::string boundary = "--" + cliIt->fields["boundary"];
-        std::size_t found = tmp_str.find(boundary);
-        if (found != std::string::npos)
-        {
-            if (found != tmp_str.find(boundary + "--"))
-            {
-                /* 
-                 * if boundary is found but not the last one
-                 */
-                cliIt->response.outFile->write(startPos, found - 2);
-                cliIt->response.outFile->flush();
-                cliIt->response.outFile->close();
-                char *holder = new char[cliIt->response.request_read];
-                cliIt->response.request_size -= (found + cliIt->fields["boundary"].size() + 4);
-                cliIt->response.request_read -= found;
-                std::memcpy(holder, startPos + found, cliIt->response.request_read);
-                std::memset(cliIt->header_buffer, 0, CLIENT_HEADER_BUFFER_SIZE);
-                std::memcpy(cliIt->header_buffer, holder, cliIt->response.request_read);
-                delete[] holder;
-                delete cliIt->response.outFile;
-                return;
-            }
-            else
-            {
-                cliIt->response.outFile->write(startPos, found - 2);
-                cliIt->response.outFile->flush();
-                cliIt->response.request_size -= (found + cliIt->fields["boundary"].size() + 4);
-                std::cout << GREEN <<  cliIt->response.request_size << RESET << std::endl;
-                cliIt->response.request_size = 0;
-                cliIt->response.filePathParsed = true;
-                delete[] cliIt->header_buffer;
-                cliIt->header_buffer = NULL;
-                return;
-            }
-        }
-    }
-    cliIt->response.outFile->write(startPos, leftDataLen);
-    cliIt->response.outFile->flush();
-    cliIt->response.request_size -= leftDataLen;
-    cliIt->response.filePathParsed = true;
-    delete[] cliIt->header_buffer;
-    cliIt->header_buffer = NULL;
+    leftDataLen = readed - (startPos - buffer);
+    if (size < leftDataLen)
+        outFile->write(startPos, size);
+    else
+        outFile->write(startPos, leftDataLen);
+    size -= leftDataLen;
 }
 
 void Response::postParseFilePath(CLIENTIT &clientIt)
@@ -177,6 +143,8 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
             unlink(filePath.c_str());
             throw std::runtime_error(STATUS_500);
         }
+        ss << clientIt->fields["Content-Length"];
+        ss >> request_size;
         if (request_size >= clientIt->serverIt->client_max_body_size)
         {
             clientIt->response.outFile->close();
@@ -186,7 +154,11 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
             unlink(outFilePath.c_str());
             throw std::runtime_error(STATUS_413);
         }
-        checkUnprocessedData(clientIt);
+        checkUnprocessedData(clientIt->header_buffer, request_size, clientIt->response.outFile,
+                             clientIt->response.request_read);
+        delete[] clientIt->header_buffer;
+        clientIt->header_buffer = NULL;
+        this->filePathParsed = true;
     }
     else
         throw std::runtime_error(STATUS_405);
@@ -220,7 +192,6 @@ char **Response::setCgiEnv(CLIENTIT &clientIt)
     cgiEnv[5] = strdup(("REQUEST_METHOD=" + clientIt->fields["method"]).c_str());
     cgiEnv[6] = strdup(("REDIRECT_STATUS=" + status).c_str());
     cgiEnv[7] = strdup(("SCRIPT_FILENAME=" + clientIt->response.filePath).c_str());
-    cgiEnv[8] = strdup(("PATH_INFO=" + filePath).c_str());
-    cgiEnv[9] = NULL;
+    cgiEnv[8] = NULL;
     return cgiEnv;
 }

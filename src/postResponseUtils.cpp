@@ -88,7 +88,6 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
         startPos = std::strstr(clientIt->header_buffer, "\r\n\r\n");
         if (startPos == NULL || (startPos + 4) - clientIt->header_buffer == request_read)
         {
-            request_size -= request_read;
             delete[] clientIt->header_buffer;
             clientIt->header_buffer = NULL;
             firstBuffer = false;
@@ -99,11 +98,6 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
         if (leftData > 0)
         {
             request_read = leftData;
-            /*
-             * copy the unprocessed data to the header_buffer
-             * and delete the old header_buffer
-             */
-            // request_size -= leftData;
             tmp = new char[leftData + 1];
             std::memcpy(tmp, startPos, leftData);
             std::memcpy(clientIt->header_buffer, tmp, leftData);
@@ -112,7 +106,6 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
         tmp = std::strstr(clientIt->header_buffer, "\r\n\r\n");
         if (tmp == NULL)
         {
-            request_size -= leftData;
             delete[] clientIt->header_buffer;
             clientIt->header_buffer = NULL;
         }
@@ -120,111 +113,25 @@ void Response::getUnprocessedHeaders(CLIENTIT &clientIt)
     }
     else
     {
-        char                                        *tmp = NULL;
-        std::stringstream                            ss;
-        std::string                                  line;
-        std::map<std::string, std::string>::iterator it = clientIt->fields.find("Content-Type");
+        char *tmp = NULL;
 
-        if (!clientIt->header_buffer)
-            return;
-        tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
-        /*
-         * check if the header_buffer contains the Content-Type header
-         * if not, then the header_buffer contains only the body
-         * so we need to read more data from the socket
-         */
+        if (clientIt->header_buffer)
+            tmp = std::strstr(clientIt->header_buffer, "Content-Type:");
         if (tmp == NULL)
         {
-            std::cerr << YELLOW << "REQ " << request_size << " " << request_read << RESET << std::endl;
-            // std::cout.write(clientIt->header_buffer, request_read) << std::endl << std::endl;
-            // exit(22);
-            if (std::strstr(clientIt->header_buffer, "\r\n\r\n"))
-            {
-                if (it != clientIt->fields.end())
-                    clientIt->fields.erase(it);
-                clientIt->setContentType(line);
-                unprocessedHeadersDone = true;
-            }
-            else
-            {
-                request_size -= std::strlen(clientIt->header_buffer);
-                delete[] clientIt->header_buffer;
-                clientIt->header_buffer = NULL;
-                unprocessedHeadersDone = false;
-            }
+            delete[] clientIt->header_buffer;
+            clientIt->header_buffer = NULL;
         }
         else
         {
-            char *crlf;
-            ss << tmp;
+            std::stringstream ss(tmp);
+            std::string       line;
             ss >> line >> line;
-            std::cout << request_size << " " << request_read << std::endl;
+            std::map<std::string, std::string>::iterator it = clientIt->fields.find("Content-Type");
             if (it != clientIt->fields.end())
                 clientIt->fields.erase(it);
             clientIt->setContentType(line);
-            crlf = std::strstr(clientIt->header_buffer, "\r\n\r\n");
-            if (crlf == NULL)
-            {
-                request_size -= request_read;
-                std::cout << ORANGE << "req read " << request_read << " heade len " << std::strlen(clientIt->header_buffer) << RESET << std::endl;
-                delete[] clientIt->header_buffer;
-                clientIt->header_buffer = NULL;
-            }
-            else
-            {
-                std::cout << ORANGE << "B " << request_size << " " << request_read << RESET << std::endl;
-                request_size -= (crlf + 4) - clientIt->header_buffer;
-                std::cout << ORANGE << "A " << request_size << " " << request_read << RESET << std::endl;
-            }
             unprocessedHeadersDone = true;
         }
-    }
-}
-
-void Response::prossesBoundaryBuffer(CLIENTIT &clientIT)
-{
-    std::string boundary = "--" + clientIT->fields["boundary"];
-    std::string tmp_str;
-    std::size_t found;
-
-    tmp_str.assign(clientIT->header_buffer, request_read);
-    found = tmp_str.find(boundary);
-    if (found != std::string::npos)
-    {
-        if (found != tmp_str.find(boundary + "--"))
-        {
-            outFile->write(clientIT->header_buffer, found - 2);
-            outFile->flush();
-            request_size -= (found + clientIT->fields["boundary"].size() + 2);
-            request_read -= found;
-            char *holder = new char[request_read];
-            std::memcpy(holder, clientIT->header_buffer + found, request_read);
-            std::memset(clientIT->header_buffer, 0, CLIENT_HEADER_BUFFER_SIZE);
-            std::memcpy(clientIT->header_buffer, holder, request_read);
-            delete[] holder;
-            outFile->close();
-            delete outFile;
-            outFile = NULL;
-            filePathParsed = false;
-            return;
-        }
-        else
-        {
-            outFile->write(clientIT->header_buffer, found - 2);
-            outFile->flush();
-            request_size -= (found + clientIT->fields["boundary"].size() + 4);
-            request_size = 0;
-            delete[] clientIT->header_buffer;
-            clientIT->header_buffer = NULL;
-            return;
-        }
-    }
-    else
-    {
-        outFile->write(clientIT->header_buffer, request_read);
-        outFile->flush();
-        request_size -= request_read;
-        delete[] clientIT->header_buffer;
-        clientIT->header_buffer = NULL;
     }
 }

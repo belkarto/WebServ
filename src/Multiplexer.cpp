@@ -16,12 +16,21 @@ const char *Multiplexer::defErrorPagesStrings[NUM_DEF_ERROR] = {
     STATUS_501, STATUS_502, STATUS_503, STATUS_504, STATUS_505};
 
 const char *Multiplexer::fields[HEADERS_FIELDS_SIZE] = {
-    "host", "content-type", "content-length", "connection", "transfer-encoding", "cookie",
+	"host",
+	"content-type",
+	"content-length",
+	"connection",
+	"transfer-encoding",
+	"cookie",
 };
 
 void (Client::*Multiplexer::fields_setters[HEADERS_FIELDS_SIZE])(std::string &field) = {
-    &Client::setHost,       &Client::setContentType,      &Client::setContentLength,
-    &Client::setConnection, &Client::setTransferEncoding, &Client::setCookie,
+	&Client::setHost,
+	&Client::setContentType,
+	&Client::setContentLength,
+	&Client::setConnection,
+	&Client::setTransferEncoding,
+    &Client::setCookie,
 };
 
 Multiplexer::Multiplexer(SERVVECT &servers, char **env) : servers(servers)
@@ -118,46 +127,44 @@ void Multiplexer::connectionListener()
     {
         if ((num_events = epoll_wait(epfd, events, MAX_EVENTS, -1)) < 1)
             continue;
-        i = -1;
-        while (++i < num_events)
+        try 
         {
-            if ((serverIt = this->findListenSocket(events[i].data.fd, servers)) != servers.end())
-                registerClient(serverIt);
-            if ((clientIt = this->findConnectSocket(events[i].data.fd, clients)) != clients.end())
+            i = -1;
+            while (++i < num_events)
             {
-                if ((events[i].events & EPOLLIN))
+                if ((serverIt = this->findListenSocket(events[i].data.fd, servers)) != servers.end())
+                    registerClient(serverIt);
+                if ((clientIt = this->findConnectSocket(events[i].data.fd, clients)) != clients.end())
                 {
-                    clientIt->getBuffer();
-                    if (clientIt->response.request_read < 1)
+                    if ((events[i].events & EPOLLIN))
                     {
-                        delete[] clientIt->header_buffer;
-                        dropClient(clientIt);
-                        continue;
+                        clientIt->getBuffer();
+                        if (clientIt->response.request_read < 1)
+                        {
+                            delete[] clientIt->header_buffer;
+                            dropClient(clientIt);
+                            continue ;
+                        }
+                        if (!clientIt->request_all_processed)
+                                getClientRequest(clientIt);
                     }
-                    if (!clientIt->request_all_processed)
-                        getClientRequest(clientIt);
-                }
-                if (ConnectionTimedOut(clientIt))
-                    dropClient(clientIt);
-                else if (clientIt->response_all_sent)
-                {
-                    if (clientIt->response.connection == "close")
+                    if (ConnectionTimedOut(clientIt))
                         dropClient(clientIt);
-                    else
-                        clientIt->resetState();
-                }
-                else if ((events[i].events & EPOLLOUT))
-                {
-                    try
+                    else if (clientIt->response_all_sent)
                     {
-                        handleResponse(clientIt);
+                        if (clientIt->response.connection == "close")
+                            dropClient(clientIt);
+                        else
+                            clientIt->resetState();
                     }
-                    catch (ResponseSendingException &e)
-                    {
-                        dropClient(clientIt);
-                    }
+                    else if ((events[i].events & EPOLLOUT))
+                        handleResponse(clientIt); 
                 }
             }
+        }
+        catch (std::exception &e)
+        {
+            dropClient(clientIt);
         }
     }
 }
@@ -184,7 +191,6 @@ void Multiplexer::handleResponse(CLIENTIT &clientIt)
         }
         else
             clientIt->response.sendResponseBuffer(clientIt);
-        clientIt->last_activity = time(NULL);
     }
 }
 
@@ -217,7 +223,7 @@ void Multiplexer::getClientRequest(CLIENTIT &clientIt)
             parseRequestLine(clientIt);
         if (!clientIt->headers.empty())
             parseRequestHeaders(clientIt);
-        if (clientIt->fields["method"] != "POST")
+        if (!clientIt->request_all_processed || clientIt->fields["method"] != "POST")
         {
             delete[] clientIt->header_buffer;
             clientIt->header_buffer = NULL;
@@ -236,7 +242,13 @@ void Multiplexer::getClientRequest(CLIENTIT &clientIt)
 bool Multiplexer::ConnectionTimedOut(CLIENTIT &clientIt)
 {
     time_t elapsed = time(NULL) - clientIt->last_activity;
-    return (elapsed >= CLIENT_SEND_TIMEOUT);
+
+    if (!clientIt->request_all_processed && elapsed >= CLIENT_SEND_TIMEOUT)
+        return true;
+    if (clientIt->request_all_processed && clientIt->fields["method"] == "POST"
+        && !clientIt->request_body_received && elapsed >= CLIENT_SEND_TIMEOUT)
+        return true;
+    return false;
 }
 
 void Multiplexer::loadMimeTypes()
@@ -245,19 +257,19 @@ void Multiplexer::loadMimeTypes()
     std::stringstream ss;
     std::ifstream     infile(MIMETYPE_PATH);
 
-    if (!infile.is_open())
-        return;
-    while (getline(infile, line))
-    {
-        ss << line;
-        ss >> key;
-        ss >> value;
-        mime_types[key] = value;
+	if (!infile.is_open())
+		return;
+	while (getline(infile, line))
+	{
+		ss << line;
+		ss >> key;
+		ss >> value;
+		mime_types[key] = value;
         key.clear();
         value.clear();
         ss.clear();
-        ss.str("");
-    }
+		ss.str("");
+	}
     infile.close();
 }
 

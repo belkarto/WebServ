@@ -27,7 +27,7 @@ void	webServManager(const char *config_path, char **env)
 		ConfigParser	parser(config_path, servers);
 		Multiplexer		multiplexer(servers, env);
 	}
-	catch (std::exception &e)
+	catch (ConfigFileParsingException &e)
 	{
 		std::cerr << "Error: " << e.what() << std::endl;
 	}

@@ -4,6 +4,7 @@ Client::Client()
 {
     headers = "";
     request_line_received = false;
+    request_body_received = false;
     request_all_processed = false;
     start_responding = false;
     response_all_sent = false;
@@ -17,6 +18,7 @@ void Client::resetState()
 {
     headers = "";
     request_line_received = false;
+    request_body_received = false;
     request_all_processed = false;
     response_all_sent = false;
     start_responding = false;
@@ -30,7 +32,6 @@ void Client::resetState()
 
 void Client::setCookie(std::string &cookie)
 {
-    std::transform(cookie.begin(), cookie.end(), cookie.begin(), tolower);
     fields.insert(std::make_pair("Cookie", cookie));
 }
 
@@ -64,11 +65,18 @@ void Client::setContentType(std::string &content_type)
         getline(ss, fields["boundary"], ';');
     }
     std::transform(content_type.begin(), content_type.end(), content_type.begin(), tolower);
+    // it = Multiplexer::mime_types.begin();
+    // ite = Multiplexer::mime_types.end();
+    // while (it != ite)
+    // {
+    //     if (it->second == content_type)
+    //         break;
+    //     it++;
+    // }
+    // if (it == ite)
+    //     fields.insert(std::make_pair("Content-Type", "application/octet-stream"));
+    // else
     fields.insert(std::make_pair("Content-Type", content_type));
-    /*
-        in case Content-Type wasnt specified
-        the media is defaulted to application/octet-stream
-    */
 }
 
 void Client::setHost(std::string &host)
@@ -110,10 +118,6 @@ void Client::setContentLength(std::string &content_length)
         find_if(content_length.begin(), content_length.end(), not_digit) != content_length.end())
         throw RequestParsingException(STATUS_400);
     fields.insert(std::make_pair("Content-Length", content_length));
-    std::stringstream ss;
-    ss << content_length;
-    ss >> response.request_size;
-    std::cout << GREEN << "request size ==> " << response.request_size << RESET << std::endl;
     /*
      Content-Length = 1*DIGIT
     */
@@ -225,10 +229,8 @@ void Client::getBuffer()
 {
     if (header_buffer == NULL)
     {
-        // sleep(1);
         header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
         response.request_read = recv(connect_socket, header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
-        // std::cout.write(header_buffer, response.request_read);
         if (response.request_read >= 0)
         {
             last_activity = time(NULL);

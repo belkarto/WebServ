@@ -4,9 +4,9 @@ void Multiplexer::parseRequestHeaders(CLIENTIT &clientIt)
 {
     size_t                             pos, offset, sep;
     std::string                        header, key, value;
-    std::stringstream                  ss;
     std::vector<std::string>::iterator it;
     std::string::iterator              last;
+    std::stringstream                  ss;
 
     offset = 0;
     while ((pos = clientIt->headers.find("\r\n", offset)) != std::string::npos)
@@ -62,13 +62,10 @@ void Multiplexer::parseRequestLine(CLIENTIT &clientIt)
 
 void Multiplexer::reviewHeaders(CLIENTIT &clientIt)
 {
-    if (clientIt->fields.find("Host") == clientIt->fields.end())
+    if ((clientIt->fields["method"] == "GET" || clientIt->fields["method"] == "DELETE") 
+        && (clientIt->fields.find("Content-Length") != clientIt->fields.end() || clientIt->fields.find("Transfer-Encoding") != clientIt->fields.end()))
         throw RequestParsingException(STATUS_400);
-    if (clientIt->fields.find("Content-Length") != clientIt->fields.end() &&
-        clientIt->fields.find("Transfer-Encoding") != clientIt->fields.end())
-        throw RequestParsingException(STATUS_400);
-    if (clientIt->fields["method"] == "POST" && clientIt->fields.find("Content-Length") == clientIt->fields.end() &&
-        clientIt->fields.find("Transfer-Encoding") == clientIt->fields.end())
+    if (clientIt->fields["method"] == "POST" && clientIt->fields.find("Content-Length") == clientIt->fields.end())
         throw RequestParsingException(STATUS_400);
     if (clientIt->fields.find("Connection") == clientIt->fields.end())
         clientIt->fields["Connection"] = "keep-alive";

@@ -103,7 +103,6 @@ void    Response::setGetResponse(CLIENTIT& clientIt)
 	}
 	filePath = root + uri;
 	parseFilePath(clientIt);
-    clientIt->last_activity = time(NULL);
 }
 
 
@@ -163,5 +162,4 @@ void Response::setDeleteResponse(CLIENTIT &clientIt)
 	}
 	filePath = root + uri;
 	handleDelete(clientIt);
-    clientIt->last_activity = time(NULL);
 }

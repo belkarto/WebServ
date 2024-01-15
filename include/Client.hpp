@@ -15,6 +15,7 @@ public:
 	time_t                              last_activity;
 	time_t                              header_timeout;
 	bool                                request_line_received;
+	bool                                request_body_received;
 	bool                                request_all_processed;
     bool                                start_responding;
 	bool                                response_all_sent;
