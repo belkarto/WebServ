@@ -25,7 +25,10 @@ void Response::recvRequestBody(CLIENTIT &clientIt)
 {
     if (clientIt->header_buffer != NULL)
     {
-        clientIt->response.outFile->write(clientIt->header_buffer, clientIt->response.request_read);
+        if (request_read > request_body_size)
+            clientIt->response.outFile->write(clientIt->header_buffer, request_body_size);
+        else
+            clientIt->response.outFile->write(clientIt->header_buffer, clientIt->response.request_read);
         clientIt->response.outFile->flush();
         request_body_size -= request_read;
         delete[] clientIt->header_buffer;
@@ -57,14 +60,14 @@ static void checkUnprocessedData(CLIENTIT &clientIt)
     char *startPos;
 
     startPos = std::strstr(clientIt->header_buffer, "\r\n\r\n");
-    if (startPos == NULL ||
-        (std::streamsize)((startPos + 4) - clientIt->header_buffer) == clientIt->response.request_read)
+    if (startPos == NULL)
     {
         return;
     }
     startPos += 4;
     clientIt->response.request_read -= (startPos - clientIt->header_buffer);
 
+    std::cout << clientIt->response.request_read << std::endl;
     std::memmove(clientIt->header_buffer, startPos, clientIt->response.request_read);
     clientIt->header_buffer[clientIt->response.request_read] = '\0';
 }
