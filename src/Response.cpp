@@ -28,9 +28,6 @@ Response::Response(void)
     filePathParsed  = false;
     
     postCgi         = false;
-    firstBuffer     = true;
-    unprocessedHeadersDone = false;
-    chunk_size = 0;
 }
 
 void	Response::resetState()
@@ -61,9 +58,6 @@ void	Response::resetState()
     filePathParsed  = false;
     
     postCgi         = false;
-    firstBuffer     = true;
-    unprocessedHeadersDone = false;
-    chunk_size = 0;
 }
 
 Response::~Response()

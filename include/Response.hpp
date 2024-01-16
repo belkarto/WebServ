@@ -80,15 +80,9 @@ class Response
     void   handleResourceFile(CLIENTIT &);
     void   handleResourceDire(CLIENTIT &);
     void   parsePostFilePath(CLIENTIT &);
-    void   getUnprocessedHeaders(CLIENTIT &);
+    // void   getUnprocessedHeaders(CLIENTIT &);
     char **setCgiEnv(CLIENTIT &);
-    void   handleRequestBody(CLIENTIT &);
     void   recvRequestBody(CLIENTIT &);
-    void   recvChunkedRequest(CLIENTIT &);
-
-    std::streamsize chunk_size;
-    bool            unprocessedHeadersDone;
-    bool            firstBuffer;
 };
 int remove_all(const char *path, int &ecode);
 #endif

@@ -9,7 +9,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     {
         if (!this->filePathParsed)
             this->postParseFilePath(clientIt);
-        handleRequestBody(clientIt);
+        recvRequestBody(clientIt);
     }
     catch (std::exception &e)
     {
@@ -18,49 +18,6 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         status = e.what();
         this->setErrorResponse(clientIt);
         return;
-    }
-}
-
-void Response::recvChunkedRequest(CLIENTIT &clientIt)
-{
-    if (chunk_size == 0)
-    {
-        char             *startOfChunck;
-        std::stringstream ss(clientIt->header_buffer);
-        startOfChunck = std::strstr(clientIt->header_buffer, "\r\n");
-        if (startOfChunck == NULL)
-        {
-            clientIt->response.outFile->close();
-            delete clientIt->response.outFile;
-            clientIt->response.outFile = NULL;
-            unlink(outFileCgiPath.c_str());
-            unlink(filePath.c_str());
-            std::cout.write(clientIt->header_buffer, 100);
-            throw std::runtime_error(STATUS_400);
-        }
-        startOfChunck += 2;
-        request_read -= startOfChunck - clientIt->header_buffer;
-        std::memmove(clientIt->header_buffer, startOfChunck, request_read);
-        ss >> std::hex >> chunk_size;
-        std::cout << GREEN << chunk_size << RESET << std::endl;
-        if (chunk_size == 0)
-            throw std::runtime_error(STATUS_201);
-    }
-    if (request_read < chunk_size)
-    {
-        outFile->write(clientIt->header_buffer, request_read);
-        outFile->flush();
-        chunk_size -= request_read;
-        delete[] clientIt->header_buffer;
-        clientIt->header_buffer = NULL;
-    }
-    else
-    {
-        outFile->write(clientIt->header_buffer, chunk_size);
-        outFile->flush();
-        request_read -= (chunk_size + 2);
-        std::memmove(clientIt->header_buffer, clientIt->header_buffer + chunk_size + 2, request_read);
-        chunk_size = 0;
     }
 }
 
@@ -93,14 +50,6 @@ void Response::recvRequestBody(CLIENTIT &clientIt)
                 throw std::runtime_error(STATUS_201);
         }
     }
-}
-
-void Response::handleRequestBody(CLIENTIT &clientIt)
-{
-    if (clientIt->fields["Transfer-Encoding"] == "chunked")
-        recvChunkedRequest(clientIt);
-    else
-        recvRequestBody(clientIt);
 }
 
 static void checkUnprocessedData(CLIENTIT &clientIt)
