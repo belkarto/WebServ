@@ -86,7 +86,6 @@ void Multiplexer::registerClient(SERVIT &serverIt)
 
 void Multiplexer::dropClient(CLIENTIT &clientIt)
 {
-    std::cout << __func__ << std::endl;
     if (clientIt->response.fileContent)
     {
         if (clientIt->response.fileContent->is_open())
@@ -109,6 +108,8 @@ void Multiplexer::dropClient(CLIENTIT &clientIt)
     {
         kill(clientIt->response.pid, SIGKILL);
         waitpid(clientIt->response.pid, NULL, 0);
+        if (!clientIt->response.outFileCgiPath.empty())
+            unlink(clientIt->response.outFileCgiPath.c_str());
         unlink(clientIt->response.CgiFilePath.c_str());
     }
     close(clientIt->connect_socket);
@@ -139,7 +140,6 @@ void Multiplexer::connectionListener()
                         clientIt->getBuffer();
                         if (clientIt->response.request_read < 1)
                         {
-                            std::cout << "to drop" << std::endl;
                             delete[] clientIt->header_buffer;
                             dropClient(clientIt);
                             continue;

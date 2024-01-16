@@ -54,9 +54,10 @@ void	ConfigParser::parseListen()
 {
 	std::string	host, port;
 
+	freeaddrinfo(_servers.back().bind_addr);
+	_servers.back().bind_addr = NULL;
 	if (directive_components.size() > 1)
 		throw ConfigFileParsingException("invalid number of arguments in listen directive");
-	freeaddrinfo(_servers.back().bind_addr);
 	std::stringstream	ss(directive_components[0]);
 	std::getline(ss, host, ':');
 	ss >> port;

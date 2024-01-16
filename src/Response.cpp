@@ -28,6 +28,7 @@ Response::Response(void)
     filePathParsed  = false;
     
     postCgi         = false;
+    outFileCgiPath  = "";
 }
 
 void	Response::resetState()
@@ -58,6 +59,7 @@ void	Response::resetState()
     filePathParsed  = false;
     
     postCgi         = false;
+    outFileCgiPath  = "";
 }
 
 Response::~Response()

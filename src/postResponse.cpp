@@ -67,7 +67,6 @@ static void checkUnprocessedData(CLIENTIT &clientIt)
     startPos += 4;
     clientIt->response.request_read -= (startPos - clientIt->header_buffer);
 
-    std::cout << clientIt->response.request_read << std::endl;
     std::memmove(clientIt->header_buffer, startPos, clientIt->response.request_read);
     clientIt->header_buffer[clientIt->response.request_read] = '\0';
 }

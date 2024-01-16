@@ -41,6 +41,7 @@ void	freeServers(std::vector<Server> &servers)
 	it = servers.begin();
 	ite = servers.end();
 	for (; it != ite; it++)
-		freeaddrinfo(it->bind_addr);
+		if (it->bind_addr)
+			freeaddrinfo(it->bind_addr);
 
 }
