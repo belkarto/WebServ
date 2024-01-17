@@ -143,6 +143,7 @@ char **Response::setCgiEnv(CLIENTIT &clientIt)
     cgiEnv[5] = strdup(("REQUEST_METHOD=" + clientIt->fields["method"]).c_str());
     cgiEnv[6] = strdup(("REDIRECT_STATUS=" + status).c_str());
     cgiEnv[7] = strdup(("SCRIPT_FILENAME=" + clientIt->response.filePath).c_str());
-    cgiEnv[8] = NULL;
+    cgiEnv[8] = strdup(("PATH_INFO=" + clientIt->response.filePath).c_str());
+    cgiEnv[9] = NULL;
     return cgiEnv;
 }

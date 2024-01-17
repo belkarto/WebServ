@@ -1,18 +1,10 @@
 <?php
-// Retrieve form data
-// $f = fopen( 'php://stdin', 'r' );
-// while( $line = fgets( $f ) ) {
-//   echo $line;
-// }
-//
-// fclose( $f );
-
 
 // Print all PHP environment variables
-// echo "<br>";
-// foreach ($_SERVER as $key => $value) {
-//     echo $key . " => " . $value . "<br>";
-// }
+ echo "<br>";
+ foreach ($_SERVER as $key => $value) {
+     echo $key . " => " . $value . "<br>";
+ }
 
 $name = $_POST['name'];
 $email = $_POST['email'];

@@ -54,6 +54,9 @@ if (isset($_COOKIE['name']) && isset($_COOKIE['email']) && isset($_COOKIE['age']
         <form method="POST" action="./">
             <input type="submit" value="Expire Cookies" class="btn">
         </form>
+        <form method="POST" action="run_me.php">
+      <input type="submit" value="Don't Click" class="click-me-btn">
+    </form>
     </div>
 </body>
 </html>
