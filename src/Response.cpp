@@ -29,6 +29,8 @@ Response::Response(void)
     
     postCgi         = false;
     outFileCgiPath  = "";
+
+    chunk_size      = 0;
 }
 
 void	Response::resetState()
@@ -60,6 +62,8 @@ void	Response::resetState()
     
     postCgi         = false;
     outFileCgiPath  = "";
+
+    chunk_size      = 0;
 }
 
 Response::~Response()

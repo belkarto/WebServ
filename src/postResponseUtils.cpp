@@ -40,7 +40,12 @@ void Response::ProcessUploadLocation(CLIENTIT &clientIt)
 void Response::handleResourceFile(CLIENTIT &clientIt)
 {
     if (access((filePath).c_str(), R_OK | W_OK) == 0 && !clientIt->locatIt->cgi.empty())
+    {
         this->postCgi = true;
+        cgiExecutable = clientIt->serverIt->findCgi(clientIt, filePath);
+        if (cgiExecutable.empty())
+            throw std::runtime_error(STATUS_403);
+    }
     else
         throw std::runtime_error(STATUS_403);
 }

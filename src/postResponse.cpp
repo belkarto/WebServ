@@ -1,7 +1,4 @@
 #include "../include/Multiplexer.hpp"
-#include <ios>
-#include <stdexcept>
-#include <unistd.h>
 
 void Response::setPostResponse(CLIENTIT &clientIt)
 {
@@ -9,7 +6,8 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     {
         if (!this->filePathParsed)
             this->postParseFilePath(clientIt);
-        recvRequestBody(clientIt);
+        else
+            handleRequestBody(clientIt);
     }
     catch (std::exception &e)
     {
@@ -19,6 +17,28 @@ void Response::setPostResponse(CLIENTIT &clientIt)
         this->setErrorResponse(clientIt);
         return;
     }
+}
+
+void Response::handleRequestBody(CLIENTIT &clientIt)
+{
+    if (clientIt->fields["Transfer-Encoding"] == "chunked")
+        recvChunkedBody(clientIt);
+    else
+        recvRequestBody(clientIt);
+}
+
+void Response::handlePostResponse(CLIENTIT &clientIt)
+{
+    clientIt->response.outFile->close();
+    delete clientIt->response.outFile;
+    clientIt->response.outFile = NULL;
+    if (postCgi)
+    {
+        cgi = true;
+        handleCgi(clientIt);
+    }
+    else
+        throw std::runtime_error(STATUS_201);
 }
 
 void Response::recvRequestBody(CLIENTIT &clientIt)
@@ -34,24 +54,7 @@ void Response::recvRequestBody(CLIENTIT &clientIt)
         delete[] clientIt->header_buffer;
         clientIt->header_buffer = NULL;
         if (request_body_size <= 0)
-        {
-            clientIt->response.outFile->close();
-            delete clientIt->response.outFile;
-            clientIt->response.outFile = NULL;
-            if (postCgi)
-            {
-                cgiExecutable = clientIt->serverIt->findCgi(clientIt, filePath);
-                if (!cgiExecutable.empty())
-                {
-                    cgi = true;
-                    handleCgi(clientIt);
-                }
-                else
-                    throw std::runtime_error(STATUS_403);
-            }
-            else
-                throw std::runtime_error(STATUS_201);
-        }
+            handlePostResponse(clientIt);
     }
 }
 

@@ -66,7 +66,8 @@ void Multiplexer::reviewHeaders(CLIENTIT &clientIt)
         (clientIt->fields.find("Content-Length") != clientIt->fields.end() ||
          clientIt->fields.find("Transfer-Encoding") != clientIt->fields.end()))
         throw RequestParsingException(STATUS_400);
-    if (clientIt->fields["method"] == "POST" && clientIt->fields.find("Content-Length") == clientIt->fields.end())
+    if (clientIt->fields["method"] == "POST" && clientIt->fields.find("Content-Length") == clientIt->fields.end()
+            && clientIt->fields.find("Transfer-Encoding") == clientIt->fields.end())
         throw RequestParsingException(STATUS_400);
 
     if (clientIt->fields.find("Connection") == clientIt->fields.end())

@@ -1,6 +1,6 @@
 #================================= Files to compile ===================================
 SRC_FILES	= main Client Server ConfigParser ServerParser LocationParser Multiplexer  Exception RequestParser \
- 			  Response ResponseHandlers ResponseGenerators postResponse postResponseUtils
+ 			  Response ResponseHandlers ResponseGenerators postResponse postResponseUtils chunkedRequest
 LIB_FILES 	= signal split trim  addr_resolver ft_stoll ft_stoi socket_addr_ntop epoll_add \
 			  getFileSize	is_directory log
 INC_FILES	= Client define Multiplexer Server ConfigParser \
@@ -34,8 +34,7 @@ CC			= c++
 
 OBJF		= .cache_exists
 
-FLAGS		=  -Wall -Wextra -Werror -std=c++98 -Iinclude -g 
-#-fsanitize=address
+FLAGS		=  -Wall -Wextra -Werror -std=c++98 -Iinclude -g -fsanitize=address
 
 # #======================================================================================
 
