@@ -16,6 +16,11 @@
 #define DEFAULT_CLIENT_MAX_BODY_SIZE 1048576 // 1M
 #define MAX_REQUEST_SIZE             107374182400 //  10GB --> 107374182400B // 5GB --> 5368709120 // 1GB --> 1073741824 // 9223372036GB --> MAX LONG LONG 9223372036854775807
 
+
+#define KB                           1024
+#define MB                           1048576
+#define GB                           1073741824
+
 /*                  ConfigParser                                */
 #define NUM_SERV_DIREC  8
 #define NUM_LOCAT_DIREC 7

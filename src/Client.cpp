@@ -65,17 +65,6 @@ void Client::setContentType(std::string &content_type)
         getline(ss, fields["boundary"], ';');
     }
     std::transform(content_type.begin(), content_type.end(), content_type.begin(), tolower);
-    // it = Multiplexer::mime_types.begin();
-    // ite = Multiplexer::mime_types.end();
-    // while (it != ite)
-    // {
-    //     if (it->second == content_type)
-    //         break;
-    //     it++;
-    // }
-    // if (it == ite)
-    //     fields.insert(std::make_pair("Content-Type", "application/octet-stream"));
-    // else
     fields.insert(std::make_pair("Content-Type", content_type));
 }
 
@@ -232,10 +221,11 @@ void Client::setUri(std::string &uri)
 
 void Client::getBuffer()
 {
+    std::streamsize read = CLIENT_HEADER_BUFFER_SIZE;
     if (header_buffer == NULL)
     {
-        header_buffer = new char[CLIENT_HEADER_BUFFER_SIZE + 1];
-        response.request_read = recv(connect_socket, header_buffer, CLIENT_HEADER_BUFFER_SIZE, 0);
+        header_buffer = new char[read + 1];
+        response.request_read = recv(connect_socket, header_buffer, read, 0);
         if (response.request_read >= 0)
         {
             last_activity = time(NULL);

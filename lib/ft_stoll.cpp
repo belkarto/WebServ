@@ -41,13 +41,6 @@ long long	converttobytes(long long size, char unit)
 			safeConvert(size, 1024);
 			// fallthrough
 	}
-	// using if else
-	// if (unit == 'g')
-	// 	safeConvert(size, 1073741824);
-	// else if (unit == 'm')
-	// 	safeConvert(size, 1048576);
-	// else if (unit == 'k')
-	// 	safeConvert(size, 1024);
 	return size;
 }
 

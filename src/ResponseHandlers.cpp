@@ -82,7 +82,7 @@ bool Response::handleIndexPages(CLIENTIT &clientIt)
 void Response::handleFile(CLIENTIT &clientIt)
 {
     if (status.empty())
-		status = STATUS_200;
+        status = STATUS_200;
     if (cgi)
         fileContent = new std::ifstream(CgiFilePath.c_str());
     else
@@ -151,7 +151,7 @@ void Response::handleDefaultErrorPage(CLIENTIT &clientIt)
     contentLength = toString(special_response.length());
     sendHeaders(clientIt);
     if (send(clientIt->connect_socket, &special_response[0], special_response.length(), 0) < 1)
-         throw ResponseSendingException("ResponseSendingException");
+        throw ResponseSendingException("ResponseSendingException");
     clientIt->response_all_sent = true;
 }
 
@@ -187,7 +187,7 @@ void Response::parsePostFilePath(CLIENTIT &clientIt)
 void Response::handleCgi(CLIENTIT &clientIt)
 {
     std::string content_type;
-    char        *cmds[3];
+    char       *cmds[3];
 
     cmds[0] = const_cast<char *>(cgiExecutable.c_str());
     cmds[1] = const_cast<char *>(filePath.c_str());
@@ -243,6 +243,7 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
     if (wpid < 0)
     {
         kill(pid, SIGKILL);
+        // in belkarto branch, it was ==> wait(NULL);
         waitpid(pid, NULL, 0);
         unlink(CgiFilePath.c_str());
         resetState();
@@ -266,6 +267,7 @@ void Response::checkCgiTimeout(CLIENTIT &clientIt)
     else if ((time(NULL) - counter) >= CGI_TIMEOUT)
     {
         kill(pid, SIGKILL);
+        // in belkarto branch, it was ==> wait(NULL);
         waitpid(pid, NULL, 0);
         unlink(CgiFilePath.c_str());
         resetState();
@@ -278,26 +280,37 @@ void Response::handleDelete(CLIENTIT &clientIt)
 {
     int ecode;
 
-    if (remove_all(filePath.c_str(), ecode) < 0)
+    if (access(filePath.c_str(), F_OK)) // file not found
     {
-        if (ecode == ENOENT)
-            status = STATUS_404;
-        else if (ecode == EACCES || ecode == ENOTEMPTY || ecode == EISDIR)
-            status = STATUS_403;
-        else if (ecode == EBUSY)
-            status = STATUS_409;
-        else
-            status = STATUS_500;
-        setErrorResponse(clientIt);
+        if (status == STATUS_404)
+            return (handleDefaultErrorPage(clientIt));
+        this->resetState();
+        status = STATUS_404;
+        this->setErrorResponse(clientIt);
     }
     else
     {
-        status = STATUS_204;
-        contentLength = contentType = "";
-        sendHeaders(clientIt);
-        if (send(clientIt->connect_socket, &special_response[0], special_response.length(), 0) < 1)
-            throw ResponseSendingException("ResponseSendingException");
-        clientIt->response_all_sent = true;
+        if (remove_all(filePath.c_str(), ecode) < 0)
+        {
+            if (ecode == ENOENT)
+                status = STATUS_404;
+            else if (ecode == EACCES || ecode == ENOTEMPTY || ecode == EISDIR)
+                status = STATUS_403;
+            else if (ecode == EBUSY)
+                status = STATUS_409;
+            else
+                status = STATUS_500;
+            setErrorResponse(clientIt);
+        }
+        else
+        {
+            status = STATUS_204;
+            contentLength = contentType = "";
+            sendHeaders(clientIt);
+            if (send(clientIt->connect_socket, &special_response[0], special_response.length(), 0) < 1)
+                throw ResponseSendingException("ResponseSendingException");
+            clientIt->response_all_sent = true;
+        }
     }
 }
 

@@ -87,6 +87,9 @@ class Response
     void   handlePostResponse(CLIENTIT &);
 
     std::streamsize chunk_size;
+    bool leftOver;
+    char *leftOverBuffer;
+    std::streamsize leftOverSize;
 };
 int remove_all(const char *path, int &ecode);
 #endif

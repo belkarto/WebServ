@@ -70,10 +70,6 @@ void	ConfigParser::parseMethod()
 	{
 		if (std::find(methods.begin(), methods.end(), *it) == methods.end())
 			throw ConfigFileParsingException("invalid value in method directive");
-		// not allowing multiple occurrences of a method
-		// int cnt;
-		// if ((cnt = std::count(directive_components.begin(), directive_components.end(), *it)) > 1)
-		// 	throw ConfigFileParsingException("multiple occurences of a value in method directive");
 	}
 	// remove multiple ocuurences
 	std::sort(directive_components.begin(), directive_components.end());

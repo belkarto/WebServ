@@ -31,6 +31,9 @@ Response::Response(void)
     outFileCgiPath  = "";
 
     chunk_size      = 0;
+    leftOver        = false;
+    leftOverBuffer  = NULL;
+    leftOverSize    = 0;
 }
 
 void	Response::resetState()
@@ -64,6 +67,9 @@ void	Response::resetState()
     outFileCgiPath  = "";
 
     chunk_size      = 0;
+    leftOver        = false;
+    leftOverBuffer  = NULL;
+    leftOverSize    = 0;
 }
 
 Response::~Response()

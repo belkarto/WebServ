@@ -12,6 +12,7 @@ void Response::setPostResponse(CLIENTIT &clientIt)
     catch (std::exception &e)
     {
         delete[] clientIt->header_buffer;
+        clientIt->header_buffer = NULL;
         this->resetState();
         status = e.what();
         this->setErrorResponse(clientIt);
@@ -113,6 +114,11 @@ void Response::postParseFilePath(CLIENTIT &clientIt)
         }
         checkUnprocessedData(clientIt);
         this->filePathParsed = true;
+        if (request_read == 0)
+        {
+            delete[] clientIt->header_buffer;
+            clientIt->header_buffer = NULL;
+        }
     }
     else
         throw std::runtime_error(STATUS_405);
