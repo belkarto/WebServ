@@ -1,6 +1,0 @@
--directives that are defined inside server context:
-    listen
-    server_name
-    client_max_body_size
-    error_page
-    (root / index but not pecified in the subject)
