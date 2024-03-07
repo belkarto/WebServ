@@ -11,30 +11,50 @@
 ![github-header-image(1)](https://github.com/ilhamsalhi/WebServ/assets/118683350/4d3083f4-f952-42f5-82b2-b7ec18161b31)
 
 ## Description ✨🌐
+A web service is a software program that offers specific functionalities over the internet, like a self-service machine accessible by other programs.
+### Functionality
+Acts as an intermediary between clients and web server
 
+Listens for incoming HTTP requests from clients, interprets them, and takes appropriate actions.
 
 ## Features ✨
+**Network and Protocol Support 🌐**
 
+* 💬🔗 TCP/IP: Ensures reliable communication across networks.
+* 🔄🔀 epoll (or similar): Enables efficient handling of multiple concurrent connections, improving scalability and performance.
 
-## Screenshots 📸
+**HTTP Methods 📡**
+
+* 📨 GET: Retrieves resources from the server.
+* 📝 POST: Submits data to the server for creation or updates.
+* 🗑️ DELETE: Requests removal of resources from the server.
+
+**Dynamic Content Generation 💡**
+
+*⚙️ CGI: Integrates with external programs for dynamic content generation, providing flexibility for interactive web pages.
+
+**Static Content Serving📦**
+
+*✔️ Delivers static resources (HTML, images, CSS, JavaScript) efficiently.
 
 
 ## Setup 🛠️
-### Installation  💻
-### Dependencies needed 📦
-
 ### Usage 🚀
-
+Run the following to make the project
+```
+make
+```
+After making the project you can then run the program as follow
+```
+./webserv <optional config file>
+```
 
 ## Project layout 📁
     ├─ Makefile    			
-    ├─ includes/
-    ├─ libs/
-    ├─ scenes/      	
-    ├─ srcs/
-    │  ├─ parsing/
-    │  ├─ randring/
-    |  ├─ utils/
+    ├─ include/
+    ├─ lib/
+    ├─ config/      	
+    ├─ src/
     └─ LICESNE
 
 ## Resources 📚
