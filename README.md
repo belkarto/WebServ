@@ -58,15 +58,15 @@ After making the project you can then run the program as follow
     └─ LICESNE
 
 ## Resources 📚
-[🔗 ]()
+[🔗 Simple http server](https://medium.com/from-the-scratch/http-server-what-do-you-need-to-know-to-build-a-simple-http-server-from-scratch-d1ef8945e4fa)
 
-[🔗 ]()
+[🔗 Simple server using C++](https://ncona.com/2019/04/building-a-simple-server-with-cpp/)
 
-[🔗 ]()
+[🔗 Web programing](https://www.tutorialspoint.com/cplusplus/cpp_web_programming.htm)
 
-[🔗 ]()
+[🔗 None bloking I/O](https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select)
 
-[🔗 ]()
+[🔗 Nginx http core conf](https://nginx.org/en/docs/http/ngx_http_core_module.html?&_ga=2.231087193.711261974.1697311162-1584719497.1696689803#error_page)
 
 ## License 📃
 
