@@ -1,4 +1,4 @@
-# Ray_Tracer [![GitHub stars](https://img.shields.io/github/stars/belkarto/WebServ?label=Star%20Project&style=social)](https://github.com/belkarto/WebServ/stargazers)
+# WebServ [![GitHub stars](https://img.shields.io/github/stars/belkarto/WebServ?label=Star%20Project&style=social)](https://github.com/belkarto/WebServ/stargazers)
 
 <p align="center">
 	<img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/belkarto/WebServ?color=lightblue" />
